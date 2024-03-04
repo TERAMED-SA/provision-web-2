@@ -1,0 +1,69 @@
+/* Modal Overlay (fundo cinza transparente) */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1;
+  }
+  
+  /* Conteúdo da Modal */
+  .modal-content {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.3);
+    position: relative;
+    width: 400px; /* Largura da modal */
+    max-width: 100%;
+  }
+  
+  /* Botão Fechar */
+  .modal-close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    cursor: pointer;
+    font-size: 24px;
+    color: #333;
+  }
+  
+  /* Estilos para o cabeçalho da modal */
+  .modal-header {
+    text-align: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #ccc;
+  }
+  
+  /* Estilos para o conteúdo da modal */
+  .modal-body {
+    padding: 20px 0;
+  }
+  
+  /* Estilos para o rodapé da modal */
+  .modal-footer {
+    text-align: center;
+    padding: 10px 0;
+    border-top: 1px solid #ccc;
+  }
+  
+  /* Estilos para botões na modal (por exemplo, botões de ação) */
+  .modal-button {
+    background-color: #007BFF;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    margin-right: 10px;
+    cursor: pointer;
+  }
+  
+  .modal-button:last-child {
+    margin-right: 0;
+  }
+  

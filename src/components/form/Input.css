@@ -1,0 +1,81 @@
+.form_control{
+    display: flex;
+    flex-direction: column;
+    margin-top: 1em;
+    margin-bottom: 1em;
+    
+}
+
+.form_control_lg{
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 1em;
+    
+}
+
+.form_control_xl{
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 1em;
+    
+}
+
+.form_control label{
+    margin-bottom: .6em;
+    font-weight: bold;
+}
+
+.form_control input{
+    /*width: 100%;*/
+    padding: .7em;
+    border-radius: 0;
+    border: solid 1px #727374;   
+}
+
+.form_control_lg input{
+    
+    padding: .7em;
+    height: 50px;
+    border-radius: 0;
+    border: solid 1px #727374;
+}
+
+.form_control_xl input{
+    
+    padding: .7em;
+    /*width: 200px;*/
+    border-radius: 0;
+    border: solid 1px #727374;
+}
+
+.form_control input::placeholder{
+    color: #a5aaad;
+}
+
+.form_control select{
+    width: 100%;
+    padding: .7em;
+    border-radius: 0;
+    border: solid 1px #727374;
+}
+
+.form_control textarea{
+    padding: .7em;
+    border-radius: 0;
+    border: solid 1px #727374;
+}
+
+.button{
+    background-color: #ffc100;
+    padding: 0.7em 1.2em;
+    text-decoration: none;
+    transition: .5s;
+    cursor: pointer;
+    border: none;
+    border-radius: 5px;
+}
+
+.button:hover {
+    color: #727374;
+    border: solid 1px #727374;
+}

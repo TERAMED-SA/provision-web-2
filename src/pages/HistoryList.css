@@ -1,0 +1,71 @@
+.container {
+    margin-top: 50px;
+  }
+  
+  h2 {
+    margin-bottom: 30px;
+    color: #602f81;
+  }
+  
+  .table {
+    width: 100%;
+    margin-bottom: 1rem;
+    color: #602f81;
+  }
+  
+  .table th,
+  .table td {
+    padding: 0.75rem;
+    vertical-align: top;
+    border-top: 1px solid #602f81;
+  }
+  
+  .table thead th {
+    vertical-align: bottom;
+    border-bottom: 2px solid #602f81;
+  }
+  
+  .table tbody + tbody {
+    border-top: 2px solid #602f81;
+  }
+  
+  .table .table {
+    background-color: #602f81;
+  }
+  
+  .table-striped tbody tr:nth-of-type(odd) {
+    background-color: rgba(96, 47, 129, 0.1);
+  }
+  
+  .pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+  }
+  
+  .pagination button {
+    color: #602f81;
+    border: 1px solid #602f81;
+    padding: 5px 10px;
+    margin: 0 5px;
+    background-color: transparent;
+    cursor: pointer;
+  }
+  
+  .pagination button.active,
+  .pagination button:active {
+    color: #fff;
+    background-color: #602f81;
+    border-color: #602f81;
+  }
+  
+  .pagination button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  
+  .pagination button:disabled:hover {
+    background-color: transparent;
+    color: #602f81;
+  }
+  

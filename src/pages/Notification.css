@@ -1,0 +1,27 @@
+.general {
+ color:black;
+ max-height: 800px;
+  overflow-y: auto;
+  margin: 30px;
+}
+.notification-content{
+    padding: 10px;
+    background-color: rgba(185, 181, 181, 0.654);
+    border-bottom: 1px solid black;
+    border-radius: 6px;
+}
+.notification-content:hover{
+    background-color: #1d09b2;
+    color: white;
+    cursor: pointer;
+    transition: all 0.4s ease;
+}
+h4{
+    color: brown;
+}
+.estado{
+    color: brown;
+}
+span{
+font-size: larger;
+}

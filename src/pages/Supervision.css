@@ -1,0 +1,12 @@
+/* styles.css */
+.react-calendar {
+    font-family: Arial, sans-serif;
+  }
+  
+  .react-calendar__tile--now {
+    background-color: #f20000;
+    color: #333;
+  }
+  
+  /* Adicione mais estilos conforme necessário */
+  

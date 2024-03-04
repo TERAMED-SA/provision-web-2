@@ -1,0 +1,8 @@
+
+.form_search input{
+    width: 100%;
+    padding: .7em;
+    border-radius: 25px 0px 0px 25px; 
+    border: solid 1px #727374;
+    margin-left: 10px; 
+}

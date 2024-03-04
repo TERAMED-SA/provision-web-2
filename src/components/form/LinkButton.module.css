@@ -1,0 +1,38 @@
+.btn{
+    background-color: #222;
+    color: #fff;
+    padding: 0.7em 1.2em;
+    height: 1.5rem;
+    width: 6rem;
+    text-align: center;
+    text-decoration: none;
+    transition: 0.5s;
+    cursor: pointer;
+    border: none;
+    display: flex;
+    align-items: center;
+    margin-left: 86%;
+    
+}
+.btn:hover{
+    color: #ffbb33;
+}
+
+@media screen and (max-width:768px) {
+    .btn{
+        background-color: #222;
+        color: #fff;
+        padding: 0.7em 1.2em;
+        height: 1.5rem;
+        width: 6rem;
+        text-align: center;
+        text-decoration: none;
+        transition: 0.5s;
+        cursor: pointer;
+        border: none;
+        display: flex;
+        align-items: center;
+        margin-left: 70%;   
+    }
+  }
+/*responsividade*/

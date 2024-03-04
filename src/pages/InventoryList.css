@@ -1,0 +1,72 @@
+/* InventoryList.css */
+.container {
+    margin-top: 50px;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  h2 {
+    text-align: center;
+    margin-bottom: 30px;
+  }
+  
+  .table {
+    border: 2px solid #ddd;
+  }
+  
+  .table th,
+  .table td {
+    border: 2px solid #ddd;
+  }
+  
+  .table th {
+    background-color: #f4f4f4;
+    text-transform: uppercase;
+  }
+  
+  .table tr:hover {
+    background-color: #f9f9f9;
+    cursor: pointer;
+  }
+  
+  .modal-content {
+    background-color: #f8f9fa;
+  }
+  
+  .modal-header {
+    background-color: #007bff;
+    color: #fff;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  .modal-body {
+    padding: 20px;
+  }
+  
+  .form-group {
+    margin-bottom: 20px;
+  }
+  
+  button {
+    margin-top: 20px;
+  }
+  
+  /* Adicione cores para diferentes condições */
+  .good-condition {
+    color: #155724;
+  }
+  
+  .regular-condition {
+    color: #856404;
+  }
+  
+  .excellent-condition {
+    color: #0c5460;
+  }
+  
+  .poor-condition {
+    color: #721c24;
+  }
+  

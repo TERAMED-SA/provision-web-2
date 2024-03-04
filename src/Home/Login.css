@@ -1,0 +1,109 @@
+/* Estilos gerais */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  text-decoration: none;
+}
+
+html,
+body {
+  font-family: "inter", sans-serif;
+}
+
+.container-wrapper {
+  /* Estilo da caixinha */
+  border: 1px solid #000;
+  padding: 20px; /* Ajuste conforme necessário */
+
+  /* Estilo do conteúdo interno (se desejar) */
+
+}
+
+
+.container2 {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  background-size: cover;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.container2 .register-heading {
+  font-size: 1.5rem;
+  margin: 20px 0;
+}
+
+.container2 .register-form {
+  width: 100%;
+  max-width: 500px;
+}
+
+.container2 .form-group {
+  margin-bottom: 20px;
+}
+
+.container2 .btn-primary {
+  width: 100%;
+  max-width: 200px;
+  margin-top: 20px;
+}
+
+@media screen and (max-width: 768px) {
+  .container2 .register-heading {
+    font-size: 1.2rem;
+  }
+}
+
+.container .header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 40px;
+}
+
+.form-container {
+  width: 30%;
+}
+
+.InputContainer {
+  display: flex;
+  align-items: flex-start;
+  flex-direction: column;
+}
+
+.InputContainer label {
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 19px;
+  margin-bottom: 8px;
+}
+
+/* Estilos para o campo "Cargo" */
+.button-container {
+  width: 100%;
+}
+.button {
+  border: none;
+  width: 150px;
+  height: 40px;
+  background: #0d10c5;
+  border-radius: 12px;
+  font-size: 18px;
+  line-height: 22px;
+  color: #f1f1f5;
+}
+
+.button:hover {
+  background: #051c66; /* ou qualquer outra cor de sua preferência */
+}
+
+.recovery {
+  color: #fff;
+}
+
+
+.white-text {
+  color: white;
+}

@@ -1,0 +1,28 @@
+/* Adiciona estilos à tabela */
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+/* Estiliza as células da tabela */
+td, th {
+  padding: 8px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+/* Estilo padrão para linhas da tabela */
+tr {
+  transition: background-color 0.3s ease;
+}
+
+/* Efeito hover para linhas da tabela */
+tr:hover {
+  background-color: rgb(24, 35, 182);
+  border-radius: 8px;
+  margin: 10px;
+  padding: 5px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  color: white; /* Muda a cor do texto para branco */
+  cursor: pointer;
+}

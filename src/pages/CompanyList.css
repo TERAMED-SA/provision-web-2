@@ -1,0 +1,72 @@
+/* CompanyList.css */
+
+/* Estilo para o modal */
+.custom-modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+    max-width: 400px;
+    width: 100%;
+    text-align: center;
+  }
+  
+  /* Estilo para o overlay do modal */
+  .custom-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+  }
+  
+  /* Estilo para a tabela de empresas */
+  .table {
+    margin-top: 20px;
+  }
+  
+  /* Estilo para o botão Adicionar Empresas */
+  .btn-primary {
+    margin-top: 20px;
+  }
+
+/* Estilo para o botão Adicionar Empresas */
+.btn.add-company {
+    font-size: 14px; /* Tamanho da fonte reduzido */
+    padding: 8px 16px; /* Preenchimento (espaçamento interno) */
+    border-radius: 40px; /* Borda arredondada */
+    position: absolute; /* Posicionamento absoluto */
+    top: -10px; /* Ajuste a altura superior conforme necessário */
+    left: 10; /* Alinhe com a esquerda */
+    margin-top: 10px; /* Espaço entre os botões */
+}
+
+  
+  /* Estilo para os botões de ação (Editar e Excluir) na tabela */
+  .btn-warning,
+  .btn-danger {
+    margin-right: 5px;
+  }
+
+  .space{
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .text-modal{
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    
+
+  }

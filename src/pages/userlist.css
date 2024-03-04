@@ -1,0 +1,144 @@
+.container {
+  margin: 20px;
+}
+
+/* styles.css */
+
+.container4 {
+  width: 100%; /* Ajuste a largura conforme necessário */
+  margin: 0 auto; /* Centraliza horizontalmente */
+  padding: 20px; /* Adiciona algum espaço interno */
+  border: 1px solid #ddd; /* Adiciona uma borda para visualização */
+  box-sizing: border-box;
+}
+
+/* Se desejar ajustar a altura, você pode adicionar uma altura máxima, por exemplo: */
+.container4 {
+  max-height: 1000px; /* Ajuste a altura conforme necessário */
+  overflow-y: auto; /* Adiciona uma barra de rolagem vertical, se necessário */
+}
+
+.central {
+  text-align: center; /* Centraliza os ícones horizontalmente */
+  line-height: 100px; /* Centraliza verticalmente, ajuste conforme necessário */
+  margin-bottom: 22px;
+}
+
+.space {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.btn-add-company {
+  margin-left: 20px;
+}
+
+.custom-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.custom-table th,
+.custom-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+
+.custom-table th {
+  background-color: #f2f2f2;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  list-style: none;
+  padding: 10px;
+}
+
+.pagination__link {
+  padding: 5px;
+  margin: 0 5px;
+  cursor: pointer;
+}
+
+.pagination__link--disabled {
+  color: #aaa;
+  pointer-events: none;
+}
+
+.pagination__link--active {
+  color: #007bff;
+}
+
+.custom-modal {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+}
+
+.custom-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.3);
+}
+
+.text-modal {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.btn-add-user-modal {
+  margin-top: 10px;
+}
+
+.modal-title {
+  margin-bottom: 10px;
+}
+
+.pagination-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.pagination {
+  display: flex;
+  padding: 10px;
+  margin: 0;
+  list-style: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.pagination li {
+  margin-right: 10px;
+}
+
+.pagination li a {
+  color: #007bff;
+  text-decoration: none;
+}
+
+.pagination li:hover a {
+  text-decoration: underline;
+}
+
+.pagination .active a {
+  color: #fff;
+  background-color: #007bff;
+  border-radius: 5px;
+  padding: 5px 10px;
+}
+
+/* Add your additional styles here */
