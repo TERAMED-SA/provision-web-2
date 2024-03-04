@@ -5,22 +5,30 @@
 /* styles.css */
 
 .container4 {
-  width: 100%; /* Ajuste a largura conforme necessário */
-  margin: 0 auto; /* Centraliza horizontalmente */
-  padding: 20px; /* Adiciona algum espaço interno */
-  border: 1px solid #ddd; /* Adiciona uma borda para visualização */
+  width: 100%;
+  /* Ajuste a largura conforme necessário */
+  margin: 0 auto;
+  /* Centraliza horizontalmente */
+  padding: 20px;
+  /* Adiciona algum espaço interno */
+  border: 1px solid #ddd;
+  /* Adiciona uma borda para visualização */
   box-sizing: border-box;
 }
 
 /* Se desejar ajustar a altura, você pode adicionar uma altura máxima, por exemplo: */
 .container4 {
-  max-height: 1000px; /* Ajuste a altura conforme necessário */
-  overflow-y: auto; /* Adiciona uma barra de rolagem vertical, se necessário */
+  max-height: 1000px;
+  /* Ajuste a altura conforme necessário */
+  overflow-y: auto;
+  /* Adiciona uma barra de rolagem vertical, se necessário */
 }
 
 .central {
-  text-align: center; /* Centraliza os ícones horizontalmente */
-  line-height: 100px; /* Centraliza verticalmente, ajuste conforme necessário */
+  text-align: center;
+  /* Centraliza os ícones horizontalmente */
+  line-height: 100px;
+  /* Centraliza verticalmente, ajuste conforme necessário */
   margin-bottom: 22px;
 }
 
@@ -82,6 +90,7 @@
   background-color: white;
   padding: 20px;
   border-radius: 8px;
+  width: 100%;
 }
 
 .custom-modal-overlay {

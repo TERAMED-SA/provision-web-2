@@ -13,6 +13,8 @@ import axios from "axios";
 import CircularProgress from "@mui/material/CircularProgress";
 import { DataGrid } from "@mui/x-data-grid";
 import { Pagination } from "react-bootstrap";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const UserList = () => {
   // eslint-disable-next-line no-unused-vars
@@ -25,9 +27,7 @@ const UserList = () => {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [password, setPassword] = useState("");
   const [employeeId, setEmployeeId] = useState("");
-  const [createdAt, setCreatedAt] = useState("");
-  const [updatedAt, setUpdatedAt] = useState("");
-  const [deletedAt, setDeletedAt] = useState("");
+
   const [users, setUsers] = useState([]);
   const [type, setType] = useState("");
   // eslint-disable-next-line no-unused-vars
@@ -47,48 +47,18 @@ const UserList = () => {
 
   async function fetchUsers() {
     try {
+      const userCoord = localStorage.getItem("userId");
       setIsLoading(true);
       const response = await axios.get(
-        `${process.env.REACT_APP_API_URL}user/?size=50`
+        `${process.env.REACT_APP_API_URL}user/findBelongsToMe/${userCoord}?size=50`
       );
-      if (
-        response.data &&
-        response.data.data &&
-        Array.isArray(response.data.data.data)
-      ) {
-        const updatedUsers = await Promise.all(
-          response.data.data.data.map(async (item) => {
-            const resultado = await validateType(`${item.type}`);
-            return { ...item, type: resultado };
-          })
-        );
-        const mec = localStorage.getItem("userId");
-        const filterUsers = updatedUsers.filter(
-          (user) => user.mecCoordinator === mec
-        );
-        console.log(filterUsers);
-        setUsers(filterUsers);
+      if (response.data && Array.isArray(response.data.data)) {
+        setUsers(response.data.data);
       }
-
       setIsLoading(false);
     } catch (error) {
       console.error("Erro:", error.message);
       setIsLoading(false);
-    }
-  }
-
-  async function validateType(id) {
-    try {
-      const response = await axios.get(
-        `${process.env.REACT_APP_API_URL}userAuth/checkType/${id}`
-      );
-      return response.data.data;
-    } catch (error) {
-      if (error.response && error.response.status === 404) {
-        console.error("Recurso não encontrado. Nao existe este cargo.");
-      } else {
-        console.error("Erro desconhecido:", error.message);
-      }
     }
   }
 
@@ -102,7 +72,7 @@ const UserList = () => {
     setUsersPerPage(selectedUsersPerPage);
     setPageNumber(0);
   };
-
+  Modal.setAppElement('#root');
   const openModal = () => {
     setIsModalOpen(true);
   };
@@ -114,39 +84,40 @@ const UserList = () => {
     setAddress("");
     setGender("");
     setEmail("");
-    setPassword("");
     setEmployeeId("");
     setType("");
-    setCreatedAt("");
-    setUpdatedAt("");
-    setDeletedAt("");
   };
 
   const handleAddUser = async () => {
     try {
-      const newUser = {
-        name,
-        email,
-        address,
-        gender,
-        phoneNumber,
-        password,
-        employeeId,
-        type,
-        createdAt,
-        updatedAt,
-        deletedAt,
-      };
-
+      const user = localStorage.getItem("userId")
       const response = await axios.post(
-        `${process.env.REACT_APP_API_URL}userAuth/signUp`,
-        newUser
+        `${process.env.REACT_APP_API_URL}userAuth/signUp?roler=3`,
+        {
+          name,
+          email,
+          address,
+          gender,
+          phoneNumber,
+          password: "12345678",
+          employeeId,
+          codeEstablishment: "LA",
+          admissionDate: "2000-01-01",
+          situation: "efectivo",
+          departmentCode: "0009999",
+          mecCoordinator: user
+        }
       );
+      if (response.data.data.status === 201) {
+        toast.success("Utilizador cadastrado com sucesso");
+        setTimeout(() => {
+          window.location.reload()
+        }, 3000);
+      }
 
-      setUsers([...users, response.data.data]);
-      closeModal();
     } catch (error) {
-      console.error("Erro ao adicionar usuário:", error.message);
+      toast.error("Algo correu mal por favor tente novamente, ou consulte um administrador")
+      console.error("Erro ao adicionar usuário:", error);
     }
   };
 
@@ -225,37 +196,21 @@ const UserList = () => {
                 rows={
                   Array.isArray(users)
                     ? users
-                        .slice(pagesVisited, pagesVisited + usersPerPage)
-                        .map((user, index) => ({
-                          id: index,
-                          avatar: (
-                            <Avatar
-                              name={`${user.name}`}
-                              size="40"
-                              round={true}
-                            />
-                          ),
-                          name: user.name || "",
-                          email: user.email || "",
-                          address: user.address || "",
-                          gender: user.gender || "",
-                          cargo: (() => {
-                            switch (user.type) {
-                              case 0:
-                                return "Admin";
-                              case 1:
-                                return "Gestor unidade";
-                              case 2:
-                                return "Coordenador";
-                              case 3:
-                                return "Supervisor";
-                              default:
-                                return "Cargo Padrão";
-                            }
-                          })(),
-                          phoneNumber: user.phoneNumber || "",
-                          idUser: user._id,
-                        }))
+                      .slice(pagesVisited, pagesVisited + usersPerPage)
+                      .map((user, index) => ({
+                        id: index,
+                        avatar: (
+                          <Avatar
+                            name={`${user.name}`}
+                            size="40"
+                            round={true}
+                          />
+                        ),
+                        name: user.name || "",
+                        cargo: user.type || "",
+                        phoneNumber: user.phoneNumber,
+                        idUser: user._id,
+                      }))
                     : []
                 }
                 columns={[
@@ -323,10 +278,22 @@ const UserList = () => {
                 onRequestClose={closeModal}
                 contentLabel="Adicionar Usuário"
                 className="custom-modal"
+                style={{
+                  overlay: {
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center'
+                  },
+                  content: {
+                    width: '80%',
+                    maxWidth: '500px' // Defina o tamanho máximo desejado aqui
+                  }
+                }}
                 overlayClassName="custom-modal-overlay"
               >
+                <h2>Cadastrar utilizador</h2>
                 <div className="row">
-                  <div className="col-md-6">
+                  <div className="col-md-12">
                     <div className="form-group">
                       <label htmlFor="name" className="text-modal text-black">
                         Nome
@@ -342,7 +309,7 @@ const UserList = () => {
                     </div>
                   </div>
 
-                  <div className="col-md-6">
+                  <div className="col-md-12">
                     <div className="form-group">
                       <label htmlFor="email" className="text-modal text-black">
                         Email
@@ -354,6 +321,22 @@ const UserList = () => {
                         placeholder="Email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="col-md-6">
+                    <div className="form-group">
+                      <label htmlFor="phone" className="text-modal text-black">
+                        Número de Telefone
+                      </label>
+                      <input
+                        type="tel"
+                        id="phone"
+                        className="form-control"
+                        placeholder="Número de Telefone"
+                        value={phoneNumber}
+                        onChange={(e) => setPhoneNumber(e.target.value)}
                       />
                     </div>
                   </div>
@@ -379,6 +362,22 @@ const UserList = () => {
 
                   <div className="col-md-6">
                     <div className="form-group">
+                      <label htmlFor="phone" className="text-modal text-black">
+                        Nª Mec
+                      </label>
+                      <input
+                        type="number"
+                        id="mec"
+                        className="form-control"
+                        placeholder="Digite o número mec"
+                        value={employeeId}
+                        onChange={(e) => setEmployeeId(e.target.value)}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="col-md-6">
+                    <div className="form-group">
                       <label htmlFor="gender" className="text-modal text-black">
                         Gênero
                       </label>
@@ -388,56 +387,32 @@ const UserList = () => {
                         value={gender}
                         onChange={(e) => setGender(e.target.value)}
                       >
+                        <option value="">Selecione um género</option>
                         <option value="Masculino">Masculino</option>
                         <option value="Feminino">Feminino</option>
                       </select>
                     </div>
                   </div>
 
-                  <div className="col-md-6">
-                    <div className="form-group">
-                      <label htmlFor="phone" className="text-modal text-black">
-                        Número de Telefone
-                      </label>
-                      <input
-                        type="tel"
-                        id="phone"
-                        className="form-control"
-                        placeholder="Número de Telefone"
-                        value={phoneNumber}
-                        onChange={(e) => setPhoneNumber(e.target.value)}
-                      />
-                    </div>
-                  </div>
 
-                  <div className="col-md-6">
-                    <div className="form-group">
-                      <label htmlFor="type" className="text-modal text-black">
-                        Cargo
-                      </label>
-                      <select
-                        id="type"
-                        className="form-control"
-                        value={type}
-                        onChange={(e) => setType(e.target.value)}
-                      >
-                        <option value="Gestor">Gestor</option>
-                        <option value="Coordenador">Coordenador</option>
-                        <option value="Supervisor">Supervisor</option>
-                      </select>
+                </div>
+
+                <div className="form-group text-center"> {/* Adicionando a classe "text-center" para alinhar o conteúdo no centro */}
+                  <div className="row">
+                    <div className="col-md-6">
+                      <button className="btn btn-success form-control" onClick={handleAddUser}>
+                        Adicionar
+                      </button>
+                    </div>
+
+                    <div className="col-md-6">
+                      <button className="btn btn-danger form-control" onClick={closeModal}>
+                        Fechar
+                      </button>
                     </div>
                   </div>
                 </div>
 
-                <div className="form-group">
-                  <button className="btn btn-primary" onClick={handleAddUser}>
-                    Adicionar
-                  </button>
-
-                  <button className="btn btn-danger" onClick={closeModal}>
-                    Fechar
-                  </button>
-                </div>
               </Modal>
 
               <Modal
@@ -588,6 +563,7 @@ const UserList = () => {
           )}
         </div>
       </div>
+      <ToastContainer />
     </div>
   );
 };
