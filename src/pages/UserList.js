@@ -17,7 +17,6 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const UserList = () => {
-  // eslint-disable-next-line no-unused-vars
   const [selectedUserId, setSelectedUserId] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [name, setName] = useState("");
@@ -30,7 +29,6 @@ const UserList = () => {
 
   const [users, setUsers] = useState([]);
   const [type, setType] = useState("");
-  // eslint-disable-next-line no-unused-vars
   const [editingUserId, setEditingUserId] = useState(null);
   const [editedUser, setEditedUser] = useState({});
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -66,7 +64,6 @@ const UserList = () => {
     setPageNumber(selected);
   };
 
-  // eslint-disable-next-line no-unused-vars
   const handleUsersPerPageChange = (e) => {
     const selectedUsersPerPage = parseInt(e.target.value, 10);
     setUsersPerPage(selectedUsersPerPage);
@@ -114,7 +111,6 @@ const UserList = () => {
           window.location.reload()
         }, 3000);
       }
-
     } catch (error) {
       toast.error("Algo correu mal por favor tente novamente, ou consulte um administrador")
       console.error("Erro ao adicionar usuário:", error);
@@ -129,25 +125,22 @@ const UserList = () => {
 
   async function updateUser() {
     try {
-      if (!editedUser || !editedUser._id) {
-        console.error("Erro ao salvar usuário: Usuário não encontrado.");
-        return;
-      }
-
-      const data = {
-        name: editedUser.name,
-        email: editedUser.email,
-        address: editedUser.address,
-        gender: editedUser.gender,
-      };
-
       // eslint-disable-next-line no-unused-vars
       const response = await axios.put(
         `${process.env.REACT_APP_API_URL}user/updateMe/${editedUser._id}`,
-        data
+        {
+          name: editedUser.name,
+          email: editedUser.email,
+          address: editedUser.address,
+          gender: editedUser.gender,
+          phoneNumber: editedUser.phoneNumber,
+        }
       );
 
-      window.location.reload();
+      toast.info("Utilizador actualizado com sucesso");
+      setTimeout(() => {
+        window.location.reload()
+      }, 3000);
     } catch (error) {
       console.error("Erro ao salvar usuário:", error.message);
     }
@@ -155,12 +148,13 @@ const UserList = () => {
 
   const handleDeleteUser = async (userId) => {
     try {
-      await axios.delete(
-        `${process.env.REACT_APP_API_URL}user/deleteMe/${userId}`
-      );
-      const updatedUsers = users.filter((user) => user.id !== userId);
-      setUsers(updatedUsers);
-      setSelectedUserId(null);
+      // await axios.delete(
+      //   `${process.env.REACT_APP_API_URL}user/deleteMe/${userId}`
+      // );
+      // const updatedUsers = users.filter((user) => user.id !== userId);
+      // setUsers(updatedUsers);
+      // setSelectedUserId(null);
+      toast.warning("Nao podes eliminar um utilizador de momento.")
     } catch (error) {
       console.error("Erro ao excluir usuário:", error.message);
     }
@@ -207,8 +201,8 @@ const UserList = () => {
                           />
                         ),
                         name: user.name || "",
-                        cargo: user.type || "",
-                        phoneNumber: user.phoneNumber,
+
+                        phoneNumber: user.phoneNumber || "",
                         idUser: user._id,
                       }))
                     : []
@@ -221,8 +215,6 @@ const UserList = () => {
                     renderCell: (params) => params.value,
                   },
                   { field: "name", headerName: "Nome", width: 395 },
-
-                  { field: "cargo", headerName: "Cargo", width: 260 },
                   { field: "phoneNumber", headerName: "Telefone", width: 260 },
                   {
                     field: "actions",
@@ -420,10 +412,22 @@ const UserList = () => {
                 onRequestClose={() => setIsEditModalOpen(false)}
                 contentLabel="Editar Usuário"
                 className="custom-modal"
+                style={{
+                  overlay: {
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center'
+                  },
+                  content: {
+                    width: '80%',
+                    maxWidth: '500px' // Defina o tamanho máximo desejado aqui
+                  }
+                }}
                 overlayClassName="custom-modal-overlay"
               >
+                <h2>Actualiza utilizador</h2>
                 <div className="row">
-                  <div className="col-md-6">
+                  <div className="col-md-12">
                     <div className="form-group">
                       <label htmlFor="name" className="text-modal text-black">
                         Nome
@@ -441,7 +445,7 @@ const UserList = () => {
                     </div>
                   </div>
 
-                  <div className="col-md-6">
+                  <div className="col-md-12">
                     <div className="form-group">
                       <label htmlFor="email" className="text-modal text-black">
                         Email
@@ -461,26 +465,22 @@ const UserList = () => {
                       />
                     </div>
                   </div>
-
                   <div className="col-md-6">
                     <div className="form-group">
                       <label
-                        htmlFor="address"
+                        htmlFor="phoneNumber"
                         className="text-modal text-black"
                       >
-                        Endereço
+                        Número de Telefone
                       </label>
                       <input
-                        type="text"
-                        id="address"
+                        type="tel"
+                        id="phoneNumber"
                         className="form-control"
-                        placeholder="Endereço"
-                        value={editedUser.address || ""}
+                        placeholder="Número de Telefone"
+                        value={editedUser.phoneNumber || ""}
                         onChange={(e) =>
-                          setEditedUser({
-                            ...editedUser,
-                            address: e.target.value,
-                          })
+                          setEditedUser({ ...editedUser, phoneNumber: e.target.value })
                         }
                       />
                     </div>
@@ -507,57 +507,25 @@ const UserList = () => {
                       </select>
                     </div>
                   </div>
-
+                </div>
+                <div className="row">
                   <div className="col-md-6">
                     <div className="form-group">
-                      <label
-                        htmlFor="phoneNumber"
-                        className="text-modal text-black"
-                      >
-                        Número de Telefone
-                      </label>
-                      <input
-                        type="tel"
-                        id="phoneNumber"
-                        className="form-control"
-                        placeholder="Número de Telefone"
-                        value={editedUser.phoneNumber || ""}
-                        onChange={(e) => setPhoneNumber(e.target.value)}
-                      />
+                      <button className="btn btn-primary form-control" onClick={updateUser}>
+                        <FontAwesomeIcon icon={faSave} className="" /> Salvar
+                      </button>
                     </div>
                   </div>
-
                   <div className="col-md-6">
                     <div className="form-group">
-                      <label htmlFor="type" className="text-modal text-black">
-                        Cargo
-                      </label>
-                      <select
-                        id="type"
-                        className="form-control"
-                        value={type}
-                        onChange={(e) => setType(e.target.value)}
-                      >
-                        <option value="Gestor">Gestor</option>
-                        <option value="Coordenador">Coordenador</option>
-                        <option value="Supervisor">Supervisor</option>
-                      </select>
+                      <button className="btn btn-danger form-control" onClick={() => setIsEditModalOpen(false)}>
+                        <FontAwesomeIcon icon={faTimes} className=" " /> Fechar
+                      </button>
                     </div>
                   </div>
                 </div>
 
-                <div className="form-group">
-                  <button className="btn btn-primary" onClick={updateUser}>
-                    <FontAwesomeIcon icon={faSave} className="" /> Salvar
-                  </button>
 
-                  <button
-                    className="btn btn-danger"
-                    onClick={() => setIsEditModalOpen(false)}
-                  >
-                    <FontAwesomeIcon icon={faTimes} className=" " /> Fechar
-                  </button>
-                </div>
               </Modal>
             </>
           )}

@@ -59,7 +59,7 @@ function Login({ setIsAuthenticated }) {
       {/* Aplica o estilo inline com a imagem de fundo */}
       <div
         className="container col-mb-3  "
-        style={{ border: "none", maxWidth: "600px" }}
+        style={{ border: "none", background: "#ffffffed", maxWidth: "600px" }}
       >
         <div className="d-flex flex-column justify-content-center align-items-center col-lg-12 col-md-12 col-sm-12 col-xs-12 mb-4">
           <div className="mb-4">
@@ -99,9 +99,9 @@ function Login({ setIsAuthenticated }) {
                 onChange={(e) => setPassword(e.target.value)}
               />
             </div>
-            <div className="col-12 d-flex flex-column align-items-center justify-content-center">
+            <div className="col-md-12 d-flex flex-column align-items-center justify-content-center">
               <button
-                className="btn button mb-3 "
+                className="btn btn-primary mb-3"
                 type="button"
                 onClick={handleLogin}
               >

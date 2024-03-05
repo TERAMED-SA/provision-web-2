@@ -28,6 +28,7 @@ body {
   background-size: cover;
   justify-content: center;
   flex-direction: column;
+ 
 }
 
 .container2 .register-heading {
@@ -84,26 +85,12 @@ body {
 .button-container {
   width: 100%;
 }
-.button {
-  border: none;
-  width: 150px;
-  height: 40px;
-  background: #0d10c5;
-  border-radius: 12px;
-  font-size: 18px;
-  line-height: 22px;
-  color: #f1f1f5;
-}
-
-.button:hover {
-  background: #051c66; /* ou qualquer outra cor de sua preferência */
-}
 
 .recovery {
-  color: #fff;
+  color: #000;
 }
 
 
 .white-text {
-  color: white;
+  color: #000000;
 }
