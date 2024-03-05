@@ -30,6 +30,7 @@
     "leaflet-realtime": "^2.2.0",
     "pdfmake": "^0.2.9",
     "prop-types": "^15.8.1",
+    "pusher-js": "^8.4.0-rc2",
     "react": "^18.2.0",
     "react-avatar": "^5.0.3",
     "react-bootstrap": "^2.9.0",
