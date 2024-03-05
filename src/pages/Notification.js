@@ -9,7 +9,6 @@ import { margin, padding, textAlign } from "@mui/system";
 import pdfMake from 'pdfmake/build/pdfmake';
 import pdfFonts from 'pdfmake/build/vfs_fonts';
 import logo from "../assets/logo.png"
-import Pusher from "pusher-js";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -21,26 +20,6 @@ const NotificationList = () => {
 
   useEffect(() => {
     fetchNotifications();
-
-    // Configuração do Pusher
-    const pusher = new Pusher(`${process.env.REACT_APP_KEY}`, {
-      cluster: `${process.env.REACT_APP_CLUSTER}`,
-      encrypted: true,
-    });
-
-    // Subscreva-se ao canal "my-channel"
-    const channel = pusher.subscribe("my-channel");
-
-    // Lida com eventos recebidos do canal
-    channel.bind("my-event", (data) => {
-      console.log("Evento recebido:", data);
-    });
-
-    // Retorne uma função de limpeza para remover o listener do Pusher quando o componente for desmontado
-    return () => {
-      pusher.unsubscribe("my-channel");
-    };
-
   }, []);
 
   async function fetchNotifications() {
