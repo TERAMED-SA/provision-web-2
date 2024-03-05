@@ -51,8 +51,8 @@ const ManagementList = () => {
     },
     {
       id: 6, // Adicionado: ID para Empresas
-      title: "Inventário", // Adicionado: Título para Empresas
-      content: "Inventários.", // Adicionado: Conteúdo para Empresas
+      title: "Ocorrência", // Adicionado: Título para Empresas
+      content: "Ocorrência Atuais.", // Adicionado: Conteúdo para Empresas
       icon: faClipboardCheck, // Adicionado: Ícone para Empresas
       link: "/InventoryList", // Adicionado: Link para Empresas
     },

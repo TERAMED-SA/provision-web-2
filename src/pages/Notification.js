@@ -4,6 +4,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import { DataGrid } from "@mui/x-data-grid";
 import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
+import { format } from "date-fns";
 
 const NotificationList = () => {
   const [notifications, setNotifications] = useState([]);
@@ -21,7 +22,11 @@ const NotificationList = () => {
       const response = await axios.get(
         `${process.env.REACT_APP_API_URL}notification/11835?size=500`
       );
-      setNotifications(response.data.data);
+      const formattedNotifications = response.data.data.map((notification) => ({
+        ...notification,
+        createdAt: format(new Date(notification.createdAt), "dd/MM/yyyy"),
+      }));
+      setNotifications(formattedNotifications);
       setIsLoading(false);
     } catch (error) {
       console.error("Error fetching notifications:", error.message);
@@ -61,6 +66,7 @@ const NotificationList = () => {
             <DataGrid
               rows={notifications.map((notification, index) => ({
                 id: index,
+                data: notification.createdAt,
                 evento: notification.information,
                 supervisor: notification.supervisor,
                 site: notification.site,
@@ -69,6 +75,7 @@ const NotificationList = () => {
                 link: notification.actionLocationId,
               }))}
               columns={[
+                { field: "data", headerName: "Data", width: 150 },
                 { field: "evento", headerName: "Evento", width: 400 },
                 { field: "supervisor", headerName: "Supervisor", width: 200 },
                 { field: "site", headerName: "Site", width: 200 },

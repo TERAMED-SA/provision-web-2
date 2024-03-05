@@ -1,12 +1,12 @@
-/* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from "react";
+import axios from "axios";
 import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
 import { DataGrid } from "@mui/x-data-grid";
-import axios from "axios";
 import CircularProgress from "@mui/material/CircularProgress";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus, faEdit, faTrash } from "@fortawesome/free-solid-svg-icons";
+import { format } from "date-fns";
 
 function EquipmentList() {
   const [equipmentList, setEquipmentList] = useState([]);
@@ -15,7 +15,7 @@ function EquipmentList() {
   const [selectedEquipment, setSelectedEquipment] = useState(null);
   const [isEditEquipmentModalOpen, setIsEditEquipmentModalOpen] =
     useState(false);
-  const [isAddEquipmentModalOpen, setIsAddEquipmentModalOpen] = useState(false); // Fixed state variable name
+  const [isAddEquipmentModalOpen, setIsAddEquipmentModalOpen] = useState(false);
   const [editingEquipmentData, setEditingEquipmentData] = useState({
     name: "",
     quantity: 0,
@@ -59,13 +59,13 @@ function EquipmentList() {
   };
 
   const handleOpenAddEquipmentModal = () => {
-    // Renamed function to be more descriptive
     setIsAddEquipmentModalOpen(true);
   };
 
   const handleCloseAddEquipmentModal = () => {
     setIsAddEquipmentModalOpen(false);
   };
+
   const handleInputChange = (event) => {
     const { name, value } = event.target;
     setEquipmentData((prevData) => ({
@@ -76,22 +76,18 @@ function EquipmentList() {
 
   const handleAddEquipment = async () => {
     try {
-      const companyId = process.env.REACT_APP_COMPANY_ID; // Replace with the correct environment variable name
       const response = await axios.post(
         `${process.env.REACT_APP_API_URL}equipment`,
         {
-          companyId: companyId,
           name: equipmentData.name,
           quantity: equipmentData.quantity,
           // Add other fields as needed
         }
       );
-
       fetchEquipment();
     } catch (error) {
       console.error("Error adding equipment:", error.message);
     } finally {
-      // Close the modal, regardless of the request result
       handleCloseAddEquipmentModal();
     }
   };
@@ -99,62 +95,36 @@ function EquipmentList() {
   async function fetchEquipment() {
     try {
       setIsLoading(true);
+      console.log(response.data);
       const response = await axios.get(
-        `${process.env.REACT_APP_API_URL}equipment?size=50`
+        `${process.env.REACT_APP_API_URL}equipment`
       );
-      const filterCompany = localStorage.getItem("selectedCompany");
-      const filteredEquipmentList = await Promise.all(
-        response.data.data.data.map(async (item) => {
-          const result = await validateSite(`${item.costCenter}`);
-          if (result.clientCode === filterCompany) {
-            item.siteCode = result.name;
-            return item;
-          }
-          return null;
+      const formattedEquipmentList = response.data.data.data.map(
+        (equipment) => ({
+          ...equipment,
+          createdAt: format(new Date(equipment.createdAt), "dd/MM/yyyy"),
+          updatedAt: format(new Date(equipment.updatedAt), "dd/MM/yyyy"),
+          deletedAt: format(new Date(equipment.deletedAt), "dd/MM/yyyy"),
         })
       );
-
-      setEquipmentList(filteredEquipmentList.filter(Boolean));
+      setEquipmentList(formattedEquipmentList);
     } catch (error) {
-      if (error.response && error.response.status === 404) {
-        console.error("Resource not found. This position does not exist.");
-      } else {
-        console.error("Unknown error:", error.message);
-      }
+      console.error("Error :", error.message);
     } finally {
       setIsLoading(false);
     }
   }
 
-  async function validateSite(costCenter) {
-    try {
-      const response = await axios.get(
-        `${process.env.REACT_APP_API_URL}companySite/${costCenter}`
-      );
-      return {
-        name: response.data.data.name,
-        clientCode: response.data.data.clientCode,
-      };
-    } catch (error) {
-      if (error.response && error.response.status === 404) {
-        console.error("Resource not found.");
-      } else {
-        console.error("Unknown error:", error.message);
-      }
-    }
-  }
-
   useEffect(() => {
     fetchEquipment();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const columns = [
-    { field: "id", headerName: "ID", width: 60 },
+    { field: "createdAt", headerName: "Criado em", width: 200 },
     { field: "name", headerName: "Nome", width: 200 },
+    { field: "quantity", headerName: "Quantidade", width: 200 },
+    { field: "serialNumber", headerName: "Número de série", width: 200 },
     { field: "state", headerName: "Estado", width: 200 },
-    { field: "serialNumber", headerName: "Serial number", width: 200 },
-    { field: "site", headerName: "Site", width: 200 },
     {
       field: "actions",
       headerName: "Ações",
@@ -183,7 +153,7 @@ function EquipmentList() {
       <div className="container-fluid">
         <div className="space">
           <div className="col-12 d-flex justify-content-between align-items-center">
-            <h1> </h1>
+            <h1>Equipamentos</h1>
             <button
               className="btn btn-primary mb-3 btn-add-equipment"
               onClick={handleOpenAddEquipmentModal}
@@ -210,7 +180,7 @@ function EquipmentList() {
             <div
               style={{ textAlign: "center", color: "black", padding: "20px" }}
             >
-              No data available, this client does not have any equipment.
+              Sem dados disponíveis, este cliente não possui nenhum equipamento.
             </div>
           )}
           {!isLoading && equipmentList.length > 0 && (
@@ -223,11 +193,7 @@ function EquipmentList() {
                   )
                   .map((equipment, index) => ({
                     id: index + 1,
-                    name: equipment.name || "",
-                    state: equipment.state,
-                    site: equipment.siteCode,
-                    serialNumber: equipment.serialNumber,
-                    idSite: equipment._id, // Certifique-se de incluir o identificador exclusivo do equipamento
+                    ...equipment,
                   }))}
                 columns={columns}
                 pageSize={equipmentPerPage}
@@ -242,7 +208,7 @@ function EquipmentList() {
                 onHide={handleCloseAddEquipmentModal}
               >
                 <Modal.Header closeButton>
-                  <Modal.Title>Adicionar novo equipamento</Modal.Title>{" "}
+                  <Modal.Title>Adicionar novo equipamento</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                   <form>
@@ -256,7 +222,7 @@ function EquipmentList() {
                         id="equipmentName"
                         name="name"
                         value={equipmentData.name}
-                        onChange={handleInputChange} // Assuming there's an undefined handleInputChange function
+                        onChange={handleInputChange}
                       />
                     </div>
                     <div className="form-group">
