@@ -1,16 +1,74 @@
 import "./Home.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
-
-// your JSX code here
-
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import { FaUser } from "react-icons/fa";
 import { TiGroup } from "react-icons/ti";
-
 import LineChart from "../components/charts/LineChart";
 import PieChart from "../components/charts/PieChart";
 
 const Home = () => {
+  const [equipmentCount, setEquipmentCount] = useState(0);
+  const [userCount, setUserCount] = useState(0);
+  const [companyCount, setCompanyCount] = useState(0);
+  const [notificationCount, setNotificationCount] = useState(0);
+
+  useEffect(() => {
+    const fetchEquipmentCount = async () => {
+      try {
+        const response = await axios.get(
+          "https://provision-07c1.onrender.com/api/v1/equipment/"
+        );
+        const data = response.data.data.data;
+        setEquipmentCount(data.length);
+      } catch (error) {
+        console.error("Error fetching equipment count:", error.message);
+      }
+    };
+
+    const fetchUserCount = async () => {
+      try {
+        const response = await axios.get(
+          "https://provision-07c1.onrender.com/api/v1/user"
+        );
+        const data = response.data.data.data;
+        setUserCount(data.length);
+      } catch (error) {
+        console.error("Error fetching user count:", error.message);
+      }
+    };
+
+    const fetchCompanyCount = async () => {
+      try {
+        const response = await axios.get(
+          "https://provision-07c1.onrender.com/api/v1/companySite/"
+        );
+        const data = response.data.data.data;
+        setCompanyCount(data.length);
+      } catch (error) {
+        console.error("Error fetching company count:", error.message);
+      }
+    };
+
+    const fetchNotificationCount = async () => {
+      try {
+        const response = await axios.get(
+          "https://provision-07c1.onrender.com/api/v1/notification/11835"
+        );
+        const data = response.data.data;
+        setNotificationCount(data.length);
+      } catch (error) {
+        console.error("Error fetching notification count:", error.message);
+      }
+    };
+
+    fetchEquipmentCount();
+    fetchUserCount();
+    fetchCompanyCount();
+    fetchNotificationCount();
+  }, []);
+
   return (
     <div className="p-3 bg-light">
       <div className="container-fluid">
@@ -22,7 +80,7 @@ const Home = () => {
               </i>
               <div>
                 <span className="size">Utilizadores</span>
-                <h2 className="text-white">230</h2>
+                <h2 className="text-white">{userCount}</h2>
               </div>
             </div>
           </div>
@@ -33,7 +91,7 @@ const Home = () => {
               </i>
               <div>
                 <span className="size">Empresas</span>
-                <h2 className="text-white">220</h2>
+                <h2 className="text-white">{companyCount}</h2>
               </div>
             </div>
           </div>
@@ -44,7 +102,7 @@ const Home = () => {
               </i>
               <div>
                 <span className="size">Equipamentos</span>
-                <h2 className="text-white">200</h2>
+                <h2 className="text-white">{equipmentCount}</h2>
               </div>
             </div>
           </div>
@@ -54,8 +112,8 @@ const Home = () => {
                 <TiGroup />
               </i>
               <div>
-                <span className="size">Materiais</span>
-                <h2 className="text-white">180</h2>
+                <span className="size">Notificações</span>
+                <h2 className="text-white">{notificationCount}</h2>
               </div>
             </div>
           </div>

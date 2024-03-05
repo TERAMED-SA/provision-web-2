@@ -8,6 +8,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEdit, faTrash, faPlus } from "@fortawesome/free-solid-svg-icons";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import "./ScheduleList.css";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   head: {
@@ -164,8 +166,10 @@ function ScheduleList() {
         }
       );
       if (save.data.status === 201) {
-        alert("Salvo com sucesso");
-        window.location.reload();
+        toast.success("Tarefa agendada com sucesso");
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000)
       }
     } catch (error) {
       console.error(error);
@@ -336,6 +340,7 @@ function ScheduleList() {
           </Modal>
         </div>
       </div>
+      <ToastContainer />
     </div>
   );
 }

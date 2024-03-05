@@ -1,4 +1,3 @@
-/* eslint-disable react/style-prop-object */
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import CircularProgress from "@mui/material/CircularProgress";
@@ -19,7 +18,6 @@ function SiteList() {
   const [isAddSiteModalOpen, setIsAddSiteModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [newSite, setNewSite] = useState({
-    supervisorId: "",
     clientCode: "",
     name: "",
     address: "",
@@ -28,7 +26,10 @@ function SiteList() {
     ctClient: "",
   });
   const [editingSite, setEditingSite] = useState(null);
+  const [equipmentList, setEquipmentList] = useState([]);
+  const [selectedSite, setSelectedSite] = useState(null);
   const sitePerPage = 5;
+  const [selectedEquipment, setSelectedEquipment] = useState(null);
 
   const handlePageChange = ({ selected }) => {
     setPageNumber(selected);
@@ -69,12 +70,10 @@ function SiteList() {
   const handleAddSite = async () => {
     try {
       const clientCode = localStorage.getItem("selectedCompany");
-      const supervisorId = localStorage.getItem("supervisorId");
 
       const response = await axios.post(
         `${process.env.REACT_APP_API_URL}companySite`,
         {
-          supervisorId: supervisorId,
           clientCode: clientCode,
           name: newSite.name,
           address: newSite.address,
@@ -90,7 +89,6 @@ function SiteList() {
     } finally {
       setIsAddSiteModalOpen(false);
       setNewSite({
-        supervisorId: "",
         clientCode: "",
         name: "",
         address: "",
@@ -130,6 +128,20 @@ function SiteList() {
     } catch (error) {
       console.error("Error deleting site:", error.message);
     }
+  };
+
+  const handleSiteClick = async (site) => {
+    try {
+      window.location.href = `/equipmentList?costCenter=${site.costCenter}`; // Redirecionar para EquipmentList com o costCenter na URL
+    } catch (error) {
+      console.error("Error redirecting:", error.message);
+    }
+  };
+
+  const handleEquipmentClick = (equipment) => {
+    setSelectedEquipment(equipment);
+    document.getElementById("equipmentModal").classList.add("show");
+    document.getElementById("equipmentModal").style.display = "block";
   };
 
   async function fetchSites() {
@@ -192,7 +204,9 @@ function SiteList() {
                 id: index + 1,
                 name: site.name || "",
                 address: site.address || "",
+                mec: site.mec || "",
                 ctClient: site.ctClient || "",
+                costCenter: site.costCenter || "", // Adicionando a coluna costCenter
                 idSite: site.costCenter,
               }))}
             columns={[
@@ -201,23 +215,32 @@ function SiteList() {
               { field: "address", headerName: "Endereço", width: 200 },
               { field: "mec", headerName: "MEC", width: 150 },
               { field: "ctClient", headerName: "CT Client", width: 150 },
+              { field: "costCenter", headerName: "Cost Center", width: 150 }, // Definindo a coluna Cost Center
               {
                 field: "actions",
                 headerName: "Ações",
-                width: 150,
+                width: 250,
                 renderCell: (params) => (
                   <div>
                     <button
-                      className="btn btn-primary btn-sm mr-2 mb-4"
+                      className="btn btn-primary btn-sm mr-2 mb-2"
                       onClick={() => handleOpenEditModal(params.row)}
                     >
                       <FontAwesomeIcon icon={faEdit} />
                     </button>
                     <button
-                      className="btn btn-danger btn-sm mb-4"
+                      className="btn btn-danger btn-sm mr-2 mb-2"
                       onClick={() => handleDelete(params.row.idSite)}
                     >
                       <FontAwesomeIcon icon={faTrash} />
+                    </button>
+                    <button className="btn btn-success btn-sm mr-2 mb-2">
+                      <a
+                        href={`/equipmentList?costCenter=${params.row.idSite}`}
+                        style={{ color: "white" }}
+                      >
+                        Ver
+                      </a>
                     </button>
                   </div>
                 ),
@@ -229,236 +252,63 @@ function SiteList() {
             onPageChange={handlePageChange}
           />
 
-          <div
-            className={`modal fade ${isAddSiteModalOpen ? "show" : ""}`}
-            style={{ display: isAddSiteModalOpen ? "block" : "none" }}
-            tabIndex="-1"
-            role="dialog"
-            aria-labelledby="addSiteModal"
-            aria-hidden={!isAddSiteModalOpen}
-          >
-            <div className="modal-dialog" role="document">
+          <div className="modal fade" id="equipmentModal" tabIndex="-1">
+            <div className="modal-dialog">
               <div className="modal-content">
                 <div className="modal-header">
-                  <h5 className="modal-title" id="addSiteModal">
-                    <FontAwesomeIcon icon={faPlus} /> Adicionar Novo Site
+                  <h5 className="modal-title">
+                    Detalhes do Equipamento:{" "}
+                    {selectedEquipment && selectedEquipment.name}
                   </h5>
                   <button
                     type="button"
-                    className="btn btn-close"
-                    onClick={handleCloseAddSiteModal}
-                    aria-label="Fechar"
-                  >
-                    <span aria-hidden="true">&times;</span>
-                  </button>
+                    className="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Close"
+                    onClick={() => {
+                      document
+                        .getElementById("equipmentModal")
+                        .classList.remove("show");
+                      document.getElementById("equipmentModal").style.display =
+                        "none";
+                      setSelectedEquipment(null);
+                    }}
+                  ></button>
                 </div>
                 <div className="modal-body">
-                  <form>
-                    <div className="form-group">
-                      <label className="text-black" htmlFor="siteName">
-                        <FontAwesomeIcon icon={faEdit} /> Nome:
-                      </label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        id="siteName"
-                        name="name"
-                        value={newSite.name}
-                        onChange={handleInputChange}
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label className="text-black" htmlFor="siteAddress">
-                        <FontAwesomeIcon icon={faEdit} /> Endereço:
-                      </label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        id="siteAddress"
-                        name="address"
-                        value={newSite.address}
-                        onChange={handleInputChange}
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label className="text-black" htmlFor="siteMec">
-                        <FontAwesomeIcon icon={faEdit} /> MEC:
-                      </label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        id="siteMec"
-                        name="mec"
-                        value={newSite.mec}
-                        onChange={handleInputChange}
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label className="text-black" htmlFor="siteCtClient">
-                        <FontAwesomeIcon icon={faEdit} /> CT Client:
-                      </label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        id="siteCtClient"
-                        name="ctClient"
-                        value={newSite.ctClient}
-                        onChange={handleInputChange}
-                      />
-                    </div>
-                  </form>
+                  <p>
+                    <strong>Nome:</strong>{" "}
+                    {selectedEquipment && selectedEquipment.name}
+                  </p>
+                  <p>
+                    <strong>Número de Série:</strong>{" "}
+                    {selectedEquipment && selectedEquipment.serialNumber}
+                  </p>
+                  <p>
+                    <strong>Data de Criação:</strong>{" "}
+                    {selectedEquipment && selectedEquipment.createdAt}
+                  </p>
                 </div>
-
                 <div className="modal-footer">
-                  <div className="d-flex">
-                    <button
-                      type="button"
-                      className="btn btn-primary mr-2"
-                      onClick={handleAddSite}
-                    >
-                      <FontAwesomeIcon icon={faSave} /> Adicionar
-                    </button>
-                    <button
-                      type="button"
-                      className="btn btn-danger"
-                      onClick={handleCloseAddSiteModal}
-                    >
-                      <FontAwesomeIcon icon={faTimes} /> Cancelar
-                    </button>
-                  </div>
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    data-bs-dismiss="modal"
+                    onClick={() => {
+                      document
+                        .getElementById("equipmentModal")
+                        .classList.remove("show");
+                      document.getElementById("equipmentModal").style.display =
+                        "none";
+                      setSelectedEquipment(null);
+                    }}
+                  >
+                    Fechar
+                  </button>
                 </div>
               </div>
             </div>
           </div>
-
-          {isAddSiteModalOpen && (
-            <div
-              className="modal-backdrop fade show"
-              style={{ zIndex: "1050" }}
-            ></div>
-          )}
-
-          {isEditModalOpen && (
-            <div
-              className={`modal fade ${isEditModalOpen ? "show" : ""}`}
-              style={{ display: isEditModalOpen ? "block" : "none" }}
-              tabIndex="-1"
-              role="dialog"
-              aria-labelledby="editSiteModal"
-              aria-hidden={!isEditModalOpen}
-            >
-              <div className="modal-dialog" role="document">
-                <div className="modal-content">
-                  <div className="modal-header">
-                    <h5 className="modal-title" id="editSiteModal">
-                      <FontAwesomeIcon icon={faEdit} /> Editar Site
-                    </h5>
-                    <button
-                      type="button"
-                      className="btn btn-close"
-                      onClick={handleCloseEditModal}
-                      aria-label="Fechar"
-                    >
-                      <span aria-hidden="true">&times;</span>
-                    </button>
-                  </div>
-                  <div className="modal-body">
-                    <form>
-                      <div className="form-group">
-                        <label className="text-black" htmlFor="editSiteName">
-                          <FontAwesomeIcon icon={faEdit} /> Nome:
-                        </label>
-                        <input
-                          type="text"
-                          className="form-control"
-                          id="editSiteName"
-                          name="name"
-                          value={editingSite.name}
-                          onChange={(e) =>
-                            handleEditInputChange(e, editingSite._id)
-                          }
-                        />
-                      </div>
-                      <div className="form-group">
-                        <label className="text-black" htmlFor="editSiteAddress">
-                          <FontAwesomeIcon icon={faEdit} /> Endereço:
-                        </label>
-                        <input
-                          type="text"
-                          className="form-control"
-                          id="editSiteAddress"
-                          name="address"
-                          value={editingSite.address}
-                          onChange={(e) =>
-                            handleEditInputChange(e, editingSite._id)
-                          }
-                        />
-                      </div>
-                      <div className="form-group">
-                        <label className="text-black" htmlFor="editSiteMec">
-                          <FontAwesomeIcon icon={faEdit} /> MEC:
-                        </label>
-                        <input
-                          type="text"
-                          className="form-control"
-                          id="editSiteMec"
-                          name="mec"
-                          value={editingSite.mec}
-                          onChange={(e) =>
-                            handleEditInputChange(e, editingSite._id)
-                          }
-                        />
-                      </div>
-                      <div className="form-group">
-                        <label
-                          className="text-black"
-                          htmlFor="editSiteCtClient"
-                        >
-                          <FontAwesomeIcon icon={faEdit} /> CT Client:
-                        </label>
-                        <input
-                          type="text"
-                          className="form-control"
-                          id="editSiteCtClient"
-                          name="ctClient"
-                          value={editingSite.ctClient}
-                          onChange={(e) =>
-                            handleEditInputChange(e, editingSite._id)
-                          }
-                        />
-                      </div>
-                    </form>
-                  </div>
-
-                  <div className="modal-footer">
-                    <div className="d-flex">
-                      <button
-                        type="button"
-                        className="btn btn-primary mr-2"
-                        onClick={handleEditSite}
-                      >
-                        <FontAwesomeIcon icon={faSave} /> Salvar
-                      </button>
-                      <button
-                        type="button"
-                        className="btn btn-danger"
-                        onClick={handleCloseEditModal}
-                      >
-                        <FontAwesomeIcon icon={faTimes} /> Cancelar
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {isEditModalOpen && (
-            <div
-              className="modal-backdrop fade show"
-              style={{ zIndex: "1050" }}
-            ></div>
-          )}
         </>
       )}
     </div>

@@ -28,13 +28,7 @@ const ManagementList = () => {
       icon: faBuildingUser,
       link: "/SiteList",
     },
-    {
-      id: 3,
-      title: "Equipamentos e Máquinas",
-      content: "Equipamentos Cadastrados.",
-      icon: faWrench,
-      link: "/EquipmentList",
-    },
+
     {
       id: 4,
       title: "Históricos",
