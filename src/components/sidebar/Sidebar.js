@@ -7,8 +7,7 @@ import { IoMdLogOut } from "react-icons/io";
 import { IoMdChatboxes } from "react-icons/io";
 import { FaUser } from "react-icons/fa";
 import axios from "axios";
-import Pusher from "pusher-js";
-import { ToastContainer, toast } from "react-toastify";
+
 import "react-toastify/dist/ReactToastify.css";
 //import React from 'react';
 import "./Sidebar.css";
@@ -33,23 +32,6 @@ const Sidebar = ({ sidebarOpen, closeSidebar }) => {
   }
   useEffect(() => {
     findNotification();
-
-    const pusher = new Pusher(`${process.env.REACT_APP_KEY}`, {
-      cluster: `${process.env.REACT_APP_CLUSTER}`,
-      encrypted: true,
-    });
-
-
-    const channel = pusher.subscribe("my-channel");
-
-    channel.bind("newSupervision", (data) => {
-      toast.info("Recebeu uma nova notifição, por favor actualize a pagina")
-    });
-
-
-    return () => {
-      pusher.unsubscribe("my-channel");
-    };
   }, []);
 
   return (
@@ -125,7 +107,7 @@ const Sidebar = ({ sidebarOpen, closeSidebar }) => {
             </i>
             <span className="fs-6">
               Notificações{" "}
-              <span style={{ fontWeight: "bold", marginLeft: "3px" }}>
+              <span style={{ fontWeight: "bold", background: "red", borderRadius: "10px", padding: "5px", marginLeft: "3px" }}>
                 {notificationNumber}
               </span>
             </span>
@@ -152,7 +134,6 @@ const Sidebar = ({ sidebarOpen, closeSidebar }) => {
             <span className="fs-6">Sair</span>
           </Link>
         </li>
-        <ToastContainer />
       </ul>
     </div>
   );

@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Routes, Route, useLocation, useNavigate } from "react-router-dom";
 import Home from "./pages/Home";
 import Login from "./Home/Login";
@@ -19,6 +19,8 @@ import HistoryList from "./pages/HistoryList";
 import Chat from "./chat/Chat";
 import Companies from "./pages/Companies";
 import Notification from "./pages/Notification";
+import Pusher from "pusher-js";
+import { ToastContainer, toast } from "react-toastify";
 
 import "./App.css";
 import "./Style.css";
@@ -29,6 +31,23 @@ function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
+  useEffect(() => {
+    const pusher = new Pusher(`${process.env.REACT_APP_KEY}`, {
+      cluster: `${process.env.REACT_APP_CLUSTER}`,
+      encrypted: true,
+    });
+
+    const channel = pusher.subscribe("my-channel");
+
+    channel.bind("newSupervision", (data) => {
+      toast.info("Recebeu uma nova notifição, por favor actualize a pagina")
+    });
+
+
+    return () => {
+      pusher.unsubscribe("my-channel");
+    };
+  }, [])
 
   const openSidebar = () => {
     setSidebarOpen(!sidebarOpen);
@@ -83,6 +102,7 @@ function App() {
           </Routes>
         </div>
       </div>
+      <ToastContainer />
     </div>
   );
 }
