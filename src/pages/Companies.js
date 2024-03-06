@@ -6,6 +6,10 @@ import { css } from "@emotion/react";
 import { ClipLoader } from "react-spinners";
 import "./Companies.css";
 import "./ManagementList.css";
+import Modal from "react-bootstrap/Modal";
+import Button from "react-bootstrap/Button";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faUserPlus } from "@fortawesome/free-solid-svg-icons"; // Importa ícones
 
 // CSS override for spinner
 const override = css`
@@ -21,6 +25,11 @@ const Companies = () => {
   const [sortAsc, setSortAsc] = useState(true); // Estado para controlar a ordem
   const [numClients, setNumClients] = useState(0); // Adicionado para armazenar o número de clientes
   const [viewMode, setViewMode] = useState("list"); // Modo de visualização: lista ou mosaico
+  const [showModal, setShowModal] = useState(false); // Estado para controlar a exibição da modal
+  const [searchTerm, setSearchTerm] = useState(""); // Termo de pesquisa
+  const [searchResults, setSearchResults] = useState([]); // Resultados da pesquisa
+  const [name, setName] = useState(""); // Nome do cliente
+  const [nif, setNif] = useState(""); // NIF do cliente
 
   useEffect(() => {
     async function fetchCompanies() {
@@ -62,12 +71,62 @@ const Companies = () => {
     setViewMode(viewMode === "list" ? "mosaic" : "list");
   };
 
+  // Função para abrir a modal
+  const handleAddCompanyClick = () => {
+    setShowModal(true);
+  };
+
+  // Função para fechar a modal
+  const handleCloseModal = () => {
+    setShowModal(false);
+  };
+
+  // Função para prosseguir ao adicionar cliente
+  const handleConfirmAddClient = () => {
+    // Aqui você pode adicionar a lógica para adicionar o cliente
+    console.log("Cliente adicionado com sucesso!");
+    setShowModal(false);
+  };
+
+  // Função para lidar com a pesquisa de clientes
+  const handleSearch = async (e) => {
+    const value = e.target.value;
+    setSearchTerm(value);
+    try {
+      let results = companyList;
+      if (value) {
+        results = companyList.filter(
+          (company) =>
+            company.name.toLowerCase().includes(value.toLowerCase()) ||
+            company.clientCode.toLowerCase().includes(value.toLowerCase())
+        );
+      }
+      setSearchResults(results);
+    } catch (error) {
+      console.error("Erro ao pesquisar clientes:", error.message);
+    }
+  };
+
   return (
     <div className="container4 mr-2" style={{ height: "89vh" }}>
       <h2 style={{ fontSize: "50px" }}>
         CLIENTES <span className="badge badge-secondary">{numClients}</span>
       </h2>
       <div className="container-fluid">
+        <div className="space">
+          <div className=""></div>
+          <div className="">
+            <div className="input-group mb-3">
+              <input
+                type="text"
+                className="form-control"
+                placeholder="Nome ou código cliente"
+                value={searchTerm}
+                onChange={handleSearch}
+              />
+            </div>
+          </div>
+        </div>
         <div className="container4">
           {loading ? (
             // Display spinner when loading
@@ -88,68 +147,167 @@ const Companies = () => {
                   className="btn btn-primary me-2"
                   onClick={toggleSortOrder}
                 >
-                  <i class="bi bi-arrow-repeat"></i>
+                  <i className="bi bi-arrow-repeat"></i>
                   &nbsp; Inverter Ordem
                 </button>
                 <button className="btn btn-success" onClick={toggleViewMode}>
-                  <i class="bi bi-eye"></i> &nbsp;
+                  <i className="bi bi-eye"></i> &nbsp;
                   {viewMode === "list" ? "Mosaico" : "Lista"}
                 </button>
+                <button
+                  className="btn btn-primary ms-2"
+                  onClick={handleAddCompanyClick}
+                >
+                  <FontAwesomeIcon icon={faUserPlus} />
+                  &nbsp; Adicionar Cliente
+                </button>
               </div>
+
               {/* Renderização condicional com base no modo de visualização */}
-              {viewMode === "list" ? (
-                <table>
-                  <tbody>
-                    {companyList.map((company, index) => (
-                      <tr
-                        key={index}
-                        onClick={() => handleItemClick(company.clientCode)}
-                        style={{ cursor: "pointer" }}
-                      >
-                        <td className="company-name">
-                          {/* Utiliza o componente Avatar para mostrar as iniciais do nome da empresa */}
-                          <Avatar
-                            className="justify-content-center align-items-center"
-                            name={company.name}
-                            size="50"
-                            round={true}
-                          />
-                          {company.name}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              ) : (
-                <div className="row row-cols-1 row-cols-md-4 g-4">
-                  {companyList.map((company, index) => (
-                    <div
-                      key={index}
-                      className="col"
-                      onClick={() => handleItemClick(company.clientCode)}
-                      style={{ cursor: "pointer" }}
-                    >
-                      <div
-                        className="cards h-100 bg-white text-center d-flex flex-column justify-content-center align-items-center"
-                        style={{ color: "black" }}
-                      >
-                        {/* Adiciona o avatar apenas no modo de mosaico */}
-                        <Avatar
-                          className="mb-3"
-                          name={company.name}
-                          size="100"
-                          round={true}
-                        />
-                        <h5 className="card-title">{company.name}</h5>
+              <div>
+                {searchTerm && searchResults.length > 0 ? (
+                  <div>
+                    {viewMode === "list" ? (
+                      <table>
+                        <tbody>
+                          {searchResults.map((company, index) => (
+                            <tr
+                              key={index}
+                              onClick={() =>
+                                handleItemClick(company.clientCode)
+                              }
+                              style={{ cursor: "pointer" }}
+                            >
+                              <td className="company-name">
+                                {/* Utiliza o componente Avatar para mostrar as iniciais do nome da empresa */}
+                                <Avatar
+                                  className="justify-content-center align-items-center"
+                                  name={company.name}
+                                  size="50"
+                                  round={true}
+                                />
+                                {company.name}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    ) : (
+                      <div className="row row-cols-1 row-cols-md-4 g-4">
+                        {searchResults.map((company, index) => (
+                          <div
+                            key={index}
+                            className="col"
+                            onClick={() => handleItemClick(company.clientCode)}
+                            style={{ cursor: "pointer" }}
+                          >
+                            <div className="cards h-100 bg-white text-center d-flex flex-column justify-content-center align-items-center">
+                              {/* Adiciona o avatar apenas no modo de mosaico */}
+                              <Avatar
+                                className="mb-3"
+                                name={company.name}
+                                size="100"
+                                round={true}
+                              />
+                              <h5 className="card-title">{company.name}</h5>
+                            </div>
+                          </div>
+                        ))}
                       </div>
-                    </div>
-                  ))}
-                </div>
-              )}
+                    )}
+                  </div>
+                ) : (
+                  <div>
+                    {viewMode === "list" ? (
+                      <table>
+                        <tbody>
+                          {companyList.map((company, index) => (
+                            <tr
+                              key={index}
+                              onClick={() =>
+                                handleItemClick(company.clientCode)
+                              }
+                              style={{ cursor: "pointer" }}
+                            >
+                              <td className="company-name">
+                                {/* Utiliza o componente Avatar para mostrar as iniciais do nome da empresa */}
+                                <Avatar
+                                  className="justify-content-center align-items-center"
+                                  name={company.name}
+                                  size="50"
+                                  round={true}
+                                />
+                                {company.name}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    ) : (
+                      <div className="row row-cols-1 row-cols-md-4 g-4">
+                        {companyList.map((company, index) => (
+                          <div
+                            key={index}
+                            className="col"
+                            onClick={() => handleItemClick(company.clientCode)}
+                            style={{ cursor: "pointer" }}
+                          >
+                            <div className="cards h-100 bg-white text-center d-flex flex-column justify-content-center align-items-center">
+                              {/* Adiciona o avatar apenas no modo de mosaico */}
+                              <Avatar
+                                className="mb-3"
+                                name={company.name}
+                                size="100"
+                                round={true}
+                              />
+                              <h5 className="card-title">{company.name}</h5>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
           )}
         </div>
       </div>
+      <Modal show={showModal} onHide={handleCloseModal}>
+        <Modal.Header closeButton>
+          <Modal.Title>Adicionar Cliente</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <div className="form-group">
+            <label htmlFor="name">Nome:</label>
+            <input
+              type="text"
+              className="form-control"
+              id="name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="nif">NIF:</label>
+            <input
+              type="text"
+              className="form-control"
+              id="nif"
+              value={nif}
+              onChange={(e) => setNif(e.target.value)}
+            />
+          </div>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleCloseModal}>
+            Fechar
+          </Button>
+          <Button variant="primary" onClick={handleConfirmAddClient}>
+            Adicionar
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 };

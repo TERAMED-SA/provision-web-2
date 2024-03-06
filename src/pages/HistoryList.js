@@ -186,6 +186,7 @@ function HistoryList() {
 
     return (
         <>
+            <h1 style={{ textAlign: "center" }}>Histórico</h1>
             {isLoading && (
                 <div
                     style={{

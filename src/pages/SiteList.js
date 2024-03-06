@@ -10,6 +10,8 @@ import {
   faTimes,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import Modal from "react-bootstrap/Modal";
+import Button from "react-bootstrap/Button";
 
 function SiteList() {
   const [siteList, setSiteList] = useState([]);
@@ -168,6 +170,7 @@ function SiteList() {
 
   return (
     <div className="container4">
+      <h1 style={{ textAlign: "center" }}>Lista dos sites</h1>
       <div className="space">
         <div className=""></div>
         <div className="">
@@ -252,63 +255,93 @@ function SiteList() {
             onPageChange={handlePageChange}
           />
 
-          <div className="modal fade" id="equipmentModal" tabIndex="-1">
-            <div className="modal-dialog">
-              <div className="modal-content">
-                <div className="modal-header">
-                  <h5 className="modal-title">
-                    Detalhes do Equipamento:{" "}
-                    {selectedEquipment && selectedEquipment.name}
-                  </h5>
-                  <button
-                    type="button"
-                    className="btn-close"
-                    data-bs-dismiss="modal"
-                    aria-label="Close"
-                    onClick={() => {
-                      document
-                        .getElementById("equipmentModal")
-                        .classList.remove("show");
-                      document.getElementById("equipmentModal").style.display =
-                        "none";
-                      setSelectedEquipment(null);
-                    }}
-                  ></button>
-                </div>
-                <div className="modal-body">
-                  <p>
-                    <strong>Nome:</strong>{" "}
-                    {selectedEquipment && selectedEquipment.name}
-                  </p>
-                  <p>
-                    <strong>Número de Série:</strong>{" "}
-                    {selectedEquipment && selectedEquipment.serialNumber}
-                  </p>
-                  <p>
-                    <strong>Data de Criação:</strong>{" "}
-                    {selectedEquipment && selectedEquipment.createdAt}
-                  </p>
-                </div>
-                <div className="modal-footer">
-                  <button
-                    type="button"
-                    className="btn btn-secondary"
-                    data-bs-dismiss="modal"
-                    onClick={() => {
-                      document
-                        .getElementById("equipmentModal")
-                        .classList.remove("show");
-                      document.getElementById("equipmentModal").style.display =
-                        "none";
-                      setSelectedEquipment(null);
-                    }}
-                  >
-                    Fechar
-                  </button>
-                </div>
+          <Modal show={isAddSiteModalOpen} onHide={handleCloseAddSiteModal}>
+            <Modal.Header closeButton>
+              <Modal.Title>Adicionar Site</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              <div className="form-group">
+                <label htmlFor="name">Nome:</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  id="name"
+                  value={newSite.name}
+                  onChange={handleInputChange}
+                />
               </div>
-            </div>
-          </div>
+              <div className="form-group">
+                <label htmlFor="address">Endereço:</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  id="address"
+                  value={newSite.address}
+                  onChange={handleInputChange}
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="mec">MEC:</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  id="mec"
+                  value={newSite.mec}
+                  onChange={handleInputChange}
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="ctClient">CT Client:</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  id="ctClient"
+                  value={newSite.ctClient}
+                  onChange={handleInputChange}
+                />
+              </div>
+            </Modal.Body>
+            <Modal.Footer>
+              <Button variant="secondary" onClick={handleCloseAddSiteModal}>
+                Fechar
+              </Button>
+              <Button variant="primary" onClick={handleAddSite}>
+                Adicionar
+              </Button>
+            </Modal.Footer>
+          </Modal>
+
+          {/* Equipment Modal */}
+          <Modal
+            show={selectedEquipment !== null}
+            onHide={() => setSelectedEquipment(null)}
+          >
+            <Modal.Header closeButton>
+              <Modal.Title>Detalhes do Equipamento</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              <p>
+                <strong>Nome:</strong>{" "}
+                {selectedEquipment && selectedEquipment.name}
+              </p>
+              <p>
+                <strong>Número de Série:</strong>{" "}
+                {selectedEquipment && selectedEquipment.serialNumber}
+              </p>
+              <p>
+                <strong>Data de Criação:</strong>{" "}
+                {selectedEquipment && selectedEquipment.createdAt}
+              </p>
+            </Modal.Body>
+            <Modal.Footer>
+              <Button
+                variant="secondary"
+                onClick={() => setSelectedEquipment(null)}
+              >
+                Fechar
+              </Button>
+            </Modal.Footer>
+          </Modal>
         </>
       )}
     </div>

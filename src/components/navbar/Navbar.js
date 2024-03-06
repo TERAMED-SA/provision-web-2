@@ -6,7 +6,9 @@ import "./Navbar.css";
 import React from "react";
 
 const Navbar = ({ sidebarOpen, openSidebar }) => {
-  {/*Toggle*/ }
+  {
+    /*Toggle*/
+  }
   return (
     <nav className="navbar navbar-expand-lg ">
       <div className="container-fluid">
@@ -19,19 +21,15 @@ const Navbar = ({ sidebarOpen, openSidebar }) => {
         <div className="collapse navbar-collapse" id="navbarSupportedContent">
           <ul className="navbar-nav ms-auto mb-2 mb-lg-0">
             <li className="nav-item">
-              <div style={{ display: 'flex', flexDirection: "row" }}>
-                {/*<ImSearch />*/}
+              {/*  <div style={{ display: 'flex', flexDirection: "row" }}>
+              
                 <input placeholder="Pesquisar..." className="form-control" style={{ borderRadius: '40px' }} />
-              </div>
-
-
+              </div>*/}
             </li>
           </ul>
         </div>
       </div>
     </nav>
   );
-
-
-}
+};
 export default Navbar;

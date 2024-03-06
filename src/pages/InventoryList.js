@@ -1,34 +1,31 @@
-import React, { useState } from "react";
-import { Button, Modal, Form, Badge, Pagination } from "react-bootstrap";
+import React, { useState, useEffect } from "react";
+import { Button, Modal, Form, Pagination } from "react-bootstrap";
 import { DataGrid } from "@mui/x-data-grid";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faShoppingCart } from "@fortawesome/free-solid-svg-icons";
+import axios from "axios";
 
 import "./InventoryList.css";
 
 const InventoryList = () => {
-  const generateRandomRating = () => {
-    const ratings = ["Excelente", "Bom", "Regular", "Ruim"];
-    const randomIndex = Math.floor(Math.random() * ratings.length);
-    return ratings[randomIndex];
-  };
-
-  const generateRandomMaterial = (id) => {
-    return {
-      id,
-      name: `Material ${String.fromCharCode(
-        65 + Math.floor(Math.random() * 26)
-      )}`,
-      quantity: Math.floor(Math.random() * 20) + 1,
-      condition: generateRandomRating(),
-    };
-  };
-
-  const [inventory] = useState(
-    Array.from({ length: 50 }, (_, index) => generateRandomMaterial(index + 1))
-  );
-
+  const [occurrences, setOccurrences] = useState([]);
   const [showModal, setShowModal] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+
+  useEffect(() => {
+    async function fetchOccurrences() {
+      try {
+        const response = await axios.get(
+          "https://provision-07c1.onrender.com/api/v1/occurrence/"
+        );
+        setOccurrences(response.data.data.data);
+      } catch (error) {
+        console.error("Erro ao buscar ocorrências:", error.message);
+      }
+    }
+    fetchOccurrences();
+  }, []);
+
   const handleModalClose = () => setShowModal(false);
   const handleModalShow = () => setShowModal(true);
 
@@ -38,60 +35,26 @@ const InventoryList = () => {
   };
 
   const itemsPerPage = 5;
-  const [currentPage, setCurrentPage] = useState(1);
-
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = inventory.slice(indexOfFirstItem, indexOfLastItem);
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   const columns = [
-    { field: "name", headerName: "Nome do Item", width: 200 },
-    { field: "quantity", headerName: "Quantidade", width: 150 },
-    {
-      field: "condition",
-      headerName: "Estado",
-      width: 150,
-      renderCell: (params) => (
-        <Badge className={getBadgeColor(params.value)}>{params.value}</Badge>
-      ),
-    },
+    { field: "_id", headerName: "ID", width: 150 },
+    { field: "name", headerName: "Nome", width: 200 },
+    { field: "createdAt", headerName: "Data de Criação", width: 200 },
+    { field: "details", headerName: "Detalhes", width: 400 },
   ];
-
-  const getBadgeColor = (condition) => {
-    switch (condition) {
-      case "Bom":
-        return "bg-success";
-      case "Regular":
-        return "bg-warning";
-      case "Excelente":
-        return "bg-primary";
-      case "Ruim":
-        return "bg-danger";
-      // Adicione mais casos conforme necessário
-      default:
-        return "bg-secondary";
-    }
-  };
 
   return (
     <div className="container4">
+      <div className="container-fluid">
+        <h2 style={{ fontSize: "45px" }}> Ocorrências </h2>
+      </div>
       <div className="space">
-        <div className="col-12 d-flex justify-content-between align-items-center">
-          <h1> </h1>
-          <div className="mt-4">
-            <button
-              className="btn btn-primary"
-              onClick={handleModalShow}
-            >
-              <FontAwesomeIcon icon={faShoppingCart} /> Solicitar Item
-            </button>
-          </div>
-        </div>
+        <div className="col-12 d-flex justify-content-between align-items-center"></div>
       </div>
       <DataGrid
-        rows={currentItems}
+        rows={occurrences}
         columns={columns}
         pageSize={itemsPerPage}
         pagination
@@ -99,6 +62,7 @@ const InventoryList = () => {
         components={{
           Pagination: CustomPagination,
         }}
+        getRowId={(row) => row._id}
       />
 
       <Modal

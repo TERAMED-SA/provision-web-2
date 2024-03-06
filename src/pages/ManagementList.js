@@ -7,11 +7,14 @@ import {
   faWrench,
   faBuildingUser,
   faClipboardCheck,
+  faExclamationCircle
 } from "@fortawesome/free-solid-svg-icons";
 import logo from "../assets/logo.png"
 import axios from "axios";
 import pdfMake from 'pdfmake/build/pdfmake';
 import pdfFonts from 'pdfmake/build/vfs_fonts';
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const ManagementList = () => {
   const [data] = useState([
@@ -31,14 +34,14 @@ const ManagementList = () => {
     },
     {
       id: 4,
-      title: "Históricos",
+      title: "Histórico",
       content: "Lista de Histórico.",
       icon: faHistory,
       link: "/HistoryList",
     },
     {
       id: 5,
-      title: "Agendamentos",
+      title: "Agendamento",
       content: "Lista de Agendamentos.",
       icon: faCalendar,
       link: "/ScheduleList",
@@ -47,7 +50,7 @@ const ManagementList = () => {
       id: 6,
       title: "Ocorrência",
       content: "Ocorrência Atuais.",
-      icon: "",
+      icon: faExclamationCircle,
       link: "/InventoryList",
     },
     {
@@ -58,6 +61,7 @@ const ManagementList = () => {
       onClick: () => {
         // Adicione sua lógica de função aqui
         // generatePDF();
+        toast.error("Funcionalidade ainda não implementada")
       },
     },
   ]);
@@ -225,6 +229,7 @@ const ManagementList = () => {
           </div>
         </div>
       )}
+      <ToastContainer />
     </div>
   );
 };

@@ -1,63 +1,57 @@
-/* eslint-disable no-unused-vars */
-import React, { useState, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Button, Modal, Form } from "react-bootstrap";
 import { Trash } from "react-bootstrap-icons";
 import { DataGrid } from "@mui/x-data-grid";
-
-
-const generateRandomId = () => Math.floor(Math.random() * 1000);
-
-const generateRandomEmployee = () => {
-  const firstNames = [
-    "John",
-    "Jane",
-    "Michael",
-    "Emily",
-    "Daniel",
-    "Olivia",
-    "William",
-    "Ava",
-    "James",
-    "Sophia",
-  ];
-  const lastNames = [
-    "Doe",
-    "Smith",
-    "Johnson",
-    "Williams",
-    "Brown",
-    "Jones",
-    "Garcia",
-    "Martinez",
-    "Rodriguez",
-    "Hernandez",
-  ];
-  const positions = ["Manager", "Supervisor", "Associate", "Assistant"];
-  return {
-    id: generateRandomId(),
-    firstName: firstNames[Math.floor(Math.random() * firstNames.length)],
-    lastName: lastNames[Math.floor(Math.random() * lastNames.length)],
-    address: `${Math.floor(Math.random() * 1000) + 1} Street, City, State`,
-    position: positions[Math.floor(Math.random() * positions.length)],
-  };
-};
+import axios from "axios";
 
 const EmployeeList = () => {
-  const [employees, setEmployees] = useState(
-    Array(20).fill(null).map(generateRandomEmployee)
-  );
+  const [employees, setEmployees] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const employeesPerPage = 5;
   const [showModal, setShowModal] = useState(false);
-  const [selectedEmployee, setSelectedEmployee] = useState("");
   const inputRef = useRef(null);
+  const [formData, setFormData] = useState({
+    name: "",
+    phoneNumber: "",
+    address: "",
+    email: "",
+    position: "",
+  });
+
+  useEffect(() => {
+    async function fetchEmployees() {
+      try {
+        const response = await axios.get(
+          "https://provision-07c1.onrender.com/api/v1/user"
+        );
+        const employeeData = response.data.data.data.map((employee) => ({
+          id: employee._id,
+          name: employee.name,
+          phoneNumber: employee.phoneNumber,
+          address: employee.address,
+          email: employee.email,
+          position: employee.type,
+        }));
+        setEmployees(employeeData);
+      } catch (error) {
+        console.error("Erro ao buscar funcionários:", error.message);
+      }
+    }
+    fetchEmployees();
+  }, []);
 
   const handleModalClose = () => {
     setShowModal(false);
-    setSelectedEmployee("");
-    inputRef.current.value = "";
+    setFormData({
+      name: "",
+      phoneNumber: "",
+      address: "",
+      email: "",
+      position: "",
+    });
   };
+
   const handleModalShow = () => {
     setShowModal(true);
   };
@@ -65,12 +59,29 @@ const EmployeeList = () => {
   const addEmployee = () => {
     handleModalShow();
   };
-  const removeEmployee = (index) => {
-    setEmployees(employees.filter((employee, i) => i !== index));
+
+  const removeEmployee = (id) => {
+    setEmployees(employees.filter((employee) => employee.id !== id));
   };
+
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
   };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
+  };
+
+  const handleAddEmployee = () => {
+    // Aqui você pode adicionar a lógica para adicionar o funcionário
+    console.log("Dados do novo funcionário:", formData);
+    handleModalClose();
+  };
+
   const indexOfLastEmployee = currentPage * employeesPerPage;
   const indexOfFirstEmployee = indexOfLastEmployee - employeesPerPage;
   const currentEmployees = employees.slice(
@@ -81,6 +92,7 @@ const EmployeeList = () => {
   return (
     <div className="container4">
       <div className="container-fluid"></div>
+      <h2 style={{ fontSize: "45px" }}> Funcionários </h2>
       <div className="space">
         <div className="d-flex justify-content-between align-items-center"></div>
         <div className=" mb-2">
@@ -94,22 +106,21 @@ const EmployeeList = () => {
         </div>
       </div>
       <DataGrid
-        rows={currentEmployees.map((employee, index) => ({
-          id: index,
-          name: `${employee.firstName} ${employee.lastName}`,
-          address: employee.address,
-          position: employee.position,
+        rows={currentEmployees.map((employee) => ({
+          ...employee,
           actions: (
             <Trash
-              onClick={() => removeEmployee(index)}
+              onClick={() => removeEmployee(employee.id)}
               style={{ cursor: "pointer" }}
             />
           ),
         }))}
         columns={[
           { field: "name", headerName: "Nome", width: 200 },
+          { field: "phoneNumber", headerName: "Telefone", width: 150 },
           { field: "address", headerName: "Endereço", width: 300 },
-          { field: "position", headerName: "Cargo", width: 150 },
+          { field: "email", headerName: "E-mail", width: 200 },
+          { field: "positions", headerName: "Cargo", width: 150 },
           {
             field: "actions",
             headerName: "Ações",
@@ -136,17 +147,59 @@ const EmployeeList = () => {
         <Modal.Body>
           <Form>
             <Form.Group controlId="formEmployeeName">
-              <Form.Label style={{ color: "black" }}>
-                Nome do Funcionário
-              </Form.Label>
-              <div></div>
+              <Form.Label style={{ color: "black" }}>Nome</Form.Label>
+              <Form.Control
+                type="text"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+              />
+            </Form.Group>
+            <Form.Group controlId="formEmployeePhoneNumber">
+              <Form.Label style={{ color: "black" }}>Telefone</Form.Label>
+              <Form.Control
+                type="text"
+                name="phoneNumber"
+                value={formData.phoneNumber}
+                onChange={handleChange}
+              />
+            </Form.Group>
+            <Form.Group controlId="formEmployeeAddress">
+              <Form.Label style={{ color: "black" }}>Endereço</Form.Label>
+              <Form.Control
+                type="text"
+                name="address"
+                value={formData.address}
+                onChange={handleChange}
+              />
+            </Form.Group>
+            <Form.Group controlId="formEmployeeEmail">
+              <Form.Label style={{ color: "black" }}>E-mail</Form.Label>
+              <Form.Control
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+              />
+            </Form.Group>
+            <Form.Group controlId="formEmployeePosition">
+              <Form.Label style={{ color: "black" }}>Cargo</Form.Label>
+              <Form.Control
+                type="text"
+                name="position"
+                value={formData.position}
+                onChange={handleChange}
+              />
             </Form.Group>
             <Button
               variant="primary"
-              onClick={handleModalClose}
+              onClick={handleAddEmployee}
               style={{ background: "#1d09b2;", border: "1px solid" }}
             >
               Adicionar
+            </Button>{" "}
+            <Button variant="secondary" onClick={handleModalClose}>
+              Cancelar
             </Button>
           </Form>
         </Modal.Body>

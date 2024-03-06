@@ -15,58 +15,37 @@ const Home = () => {
   const [notificationCount, setNotificationCount] = useState(0);
 
   useEffect(() => {
-    const fetchEquipmentCount = async () => {
+    const fetchData = async () => {
       try {
-        const response = await axios.get(
+        // Fetching equipment count
+        const equipmentResponse = await axios.get(
           "https://provision-07c1.onrender.com/api/v1/equipment/"
         );
-        const data = response.data.data.data;
-        setEquipmentCount(data.length);
-      } catch (error) {
-        console.error("Error fetching equipment count:", error.message);
-      }
-    };
+        setEquipmentCount(equipmentResponse.data.data.data.length);
 
-    const fetchUserCount = async () => {
-      try {
-        const response = await axios.get(
+        // Fetching user count
+        const userResponse = await axios.get(
           "https://provision-07c1.onrender.com/api/v1/user"
         );
-        const data = response.data.data.data;
-        setUserCount(data.length);
-      } catch (error) {
-        console.error("Error fetching user count:", error.message);
-      }
-    };
+        setUserCount(userResponse.data.data.data.length);
 
-    const fetchCompanyCount = async () => {
-      try {
-        const response = await axios.get(
-          "https://provision-07c1.onrender.com/api/v1/companySite/"
+        // Fetching company count
+        const companyResponse = await axios.get(
+          "https://provision-07c1.onrender.com/api/v1/company?size=100"
         );
-        const data = response.data.data.data;
-        setCompanyCount(data.length);
-      } catch (error) {
-        console.error("Error fetching company count:", error.message);
-      }
-    };
+        setCompanyCount(companyResponse.data.size);
 
-    const fetchNotificationCount = async () => {
-      try {
-        const response = await axios.get(
+        // Fetching notification count
+        const notificationResponse = await axios.get(
           "https://provision-07c1.onrender.com/api/v1/notification/11835"
         );
-        const data = response.data.data;
-        setNotificationCount(data.length);
+        setNotificationCount(notificationResponse.data.data.length);
       } catch (error) {
-        console.error("Error fetching notification count:", error.message);
+        console.error("Error fetching data:", error.message);
       }
     };
 
-    fetchEquipmentCount();
-    fetchUserCount();
-    fetchCompanyCount();
-    fetchNotificationCount();
+    fetchData();
   }, []);
 
   return (
@@ -76,7 +55,7 @@ const Home = () => {
           <div className="col-12 col-sm-6 col-md-4 col-lg-3 p-3">
             <div className="d-flex rounded justify-content-between p-4 align-items-center bg-button text-white border border-secondary shadow-sm">
               <i className="fs-1">
-                <FaUser />
+                <i className="bi bi-person-check-fill"></i>
               </i>
               <div>
                 <span className="size">Utilizadores</span>
@@ -87,7 +66,7 @@ const Home = () => {
           <div className="col-12 col-sm-6 col-md-4 col-lg-3 p-3">
             <div className="d-flex rounded justify-content-between p-4 align-items-center bg-button text-white border border-secondary shadow-sm">
               <i className="fs-1">
-                <TiGroup />
+                <i className="bi bi-building-check"></i>
               </i>
               <div>
                 <span className="size">Empresas</span>
@@ -98,7 +77,7 @@ const Home = () => {
           <div className="col-12 col-sm-6 col-md-4 col-lg-3 p-3">
             <div className="d-flex rounded justify-content-between p-4 align-items-center bg-button text-white border border-secondary shadow-sm">
               <i className="fs-1">
-                <TiGroup />
+                <i className="bi bi-gear-wide-connected"></i>
               </i>
               <div>
                 <span className="size">Equipamentos</span>
@@ -109,7 +88,7 @@ const Home = () => {
           <div className="col-12 col-sm-6 col-md-4 col-lg-3 p-3">
             <div className="d-flex rounded justify-content-between p-4 align-items-center bg-button text-white border border-secondary shadow-sm">
               <i className="fs-1">
-                <TiGroup />
+                <i className="bi bi-bell-fill"></i>
               </i>
               <div>
                 <span className="size">Notificações</span>
@@ -119,11 +98,8 @@ const Home = () => {
           </div>
         </div>
         <div className="row">
-          <div className="col-12 col-md-8 p-3">
+          <div className="col-12 col-md-12 p-3">
             <LineChart />
-          </div>
-          <div className="col-12 col-md-4 p-3">
-            <PieChart />
           </div>
         </div>
       </div>
