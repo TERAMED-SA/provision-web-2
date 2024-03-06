@@ -59,7 +59,7 @@ const LineChart = () => {
   }, []);
 
   return (
-    <div className="bg-white border border-secondary">
+    <div className="bg-white border border-secondary" style={{ maxHeight: "550px" }}>
       <Line data={notificationData} />
     </div>
   );
