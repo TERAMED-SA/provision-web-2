@@ -10,6 +10,8 @@ import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUserPlus } from "@fortawesome/free-solid-svg-icons"; // Importa ícones
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 // CSS override for spinner
 const override = css`
@@ -84,8 +86,8 @@ const Companies = () => {
   // Função para prosseguir ao adicionar cliente
   const handleConfirmAddClient = () => {
     // Aqui você pode adicionar a lógica para adicionar o cliente
-    console.log("Cliente adicionado com sucesso!");
     setShowModal(false);
+    toast.warning("Funcionalidade ainda não foi implementada")
   };
 
   // Função para lidar com a pesquisa de clientes
@@ -308,6 +310,7 @@ const Companies = () => {
           </Button>
         </Modal.Footer>
       </Modal>
+      <ToastContainer />
     </div>
   );
 };

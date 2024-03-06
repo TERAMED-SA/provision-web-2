@@ -12,6 +12,8 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function SiteList() {
   const [siteList, setSiteList] = useState([]);
@@ -70,6 +72,8 @@ function SiteList() {
   };
 
   const handleAddSite = async () => {
+    setIsAddSiteModalOpen(false);
+    return toast.warning("Funcionalidade ainda não foi implementada")
     try {
       const clientCode = localStorage.getItem("selectedCompany");
 
@@ -122,6 +126,8 @@ function SiteList() {
   };
 
   const handleDelete = async (siteId) => {
+    return toast.error(
+      "Você não tem permissão para excluir.")
     try {
       await axios.delete(
         `${process.env.REACT_APP_API_URL}companySite/${siteId}`
@@ -344,6 +350,7 @@ function SiteList() {
           </Modal>
         </>
       )}
+      <ToastContainer />
     </div>
   );
 }
