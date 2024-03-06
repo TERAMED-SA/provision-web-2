@@ -173,8 +173,10 @@ function ScheduleList() {
       }
     } catch (error) {
       console.error(error);
-      alert("Este site ja possui uma tarefa pendente");
-      window.location.reload();
+      toast.error("Este site ja possui uma tarefa pendente");
+      setTimeout(() => {
+        window.location.reload();
+      }, 2000)
     }
   };
 
@@ -221,8 +223,11 @@ function ScheduleList() {
                       pageNumber * schedulePerPage + schedulePerPage
                     )
                     .map((schedule, index) => ({
-                      ...schedule,
-                      id: `${schedule.name}_${schedule.supervisorCode}_${schedule.state}_${index}`,
+                      id: index + 1,
+                      name: schedule.name,
+                      costCenter: schedule.costCenter,
+                      supervisorCode: schedule.supervisorCode,
+                      state: schedule.state === 0 ? "Pendente" : schedule.state === 1 ? "Feito" : ""
                     }))}
                   columns={[
                     { field: "id", headerName: "ID", width: 60 },
@@ -272,6 +277,7 @@ function ScheduleList() {
                     setSelectedSchedule(newSelection[0]);
                   }}
                 />
+
               </div>
             </>
           )}

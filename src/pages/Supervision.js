@@ -105,7 +105,7 @@ const Supervision = () => {
     });
 
     const infoWindow = new window.google.maps.InfoWindow({
-      content: `<div><h3>${title}</h3><p>${title}</p></div>`,
+      content: `<div><h3>chrisalberto</h3><p>${title}</p></div>`,
     });
 
     marker.addListener("click", () => {

@@ -40,9 +40,13 @@ function App() {
     const channel = pusher.subscribe("my-channel");
 
     channel.bind("newSupervision", (data) => {
-      toast.info("Recebeu uma nova notifição, por favor actualize a pagina")
+      toast.info("Recebeu uma nova supervisão. Por favor, consulte as notificações.")
     });
 
+
+    channel.bind("newOccurrence", (data) => {
+      toast.info("Recebeu uma nova ocorrência, por favor actualize consultar as notificações")
+    });
 
     return () => {
       pusher.unsubscribe("my-channel");
