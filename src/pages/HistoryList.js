@@ -35,8 +35,6 @@ function HistoryList() {
                 ...history,
                 createdAt: format(new Date(history.createdAt), "dd/MM/yyyy"),
             }));
-
-
             const filteredHistoryList = formattedHistoryList.filter((history) => {
                 return filterSite.some((site) => site.costCenter === history.costCenter);
             });
