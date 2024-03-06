@@ -54,10 +54,22 @@ const NotificationList = () => {
     setSelectedNotification(notification);
     // setModalShow(true);
   };
+  const getOcorrenceByIdNot = async (id) => {
+    try {
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}occurrence/getOcorByNotification/${id}`)
+      return response.data.data
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  }
+  const openModal = async (info) => {
+    const occorence = await getOcorrenceByIdNot(info._id)
+    setSelectedNotification(occorence);
+    setModalShow(true);
+  }
 
   const handleApproval = () => {
-    // Lógica para aprovar a notificação
-    setModalShow(false);
+    toast.warning("Ainda não foi realizado o tratamento adequado desta informação.")
   };
 
   const handleRejection = () => {
@@ -219,18 +231,30 @@ const NotificationList = () => {
                   width: 250,
                   renderCell: (params) => (
                     <div className="d-flex justify-content-center">
-                      <button
-                        className="btn btn-success btn-sm m-1"
-                        onClick={() => approve(params.row.costCenter, params.row._id)}
-                      >
-                        Aprovar
-                      </button>
-                      <button
-                        className="btn btn-warning btn-sm m-1"
-                        onClick={() => generatePDF(params.row._id, params.row.supervisor)}
-                      >
-                        Gerar PDF
-                      </button>
+                      {params.row.evento !== "Ocorrência" && (
+                        <button
+                          className="btn btn-success btn-sm m-1"
+                          onClick={() => approve(params.row.costCenter, params.row._id)}
+                        >
+                          Aprovar
+                        </button>
+                      )}
+                      {params.row.evento === "Supervisão" && (
+                        <button
+                          className="btn btn-warning btn-sm m-1"
+                          onClick={() => generatePDF(params.row._id, params.row.supervisor)}
+                        >
+                          Gerar PDF
+                        </button>
+                      )}
+                      {params.row.evento === "Ocorrência" && (
+                        <button
+                          className="btn btn-info btn-sm m-1"
+                          onClick={() => openModal(params.row)}
+                        >
+                          Detalhes
+                        </button>
+                      )}
                     </div>
                   ),
                 },
@@ -238,23 +262,24 @@ const NotificationList = () => {
               pageSize={5}
               autoHeight
             />
-            {/* <Modal
+
+
+            <Modal
               show={modalShow}
               onHide={() => setModalShow(false)}
               size="lg"
               centered
             >
               <Modal.Header closeButton>
-                <Modal.Title>Detalhes da Notificação</Modal.Title>
+                <Modal.Title>Detalhes da Ocorrência</Modal.Title>
               </Modal.Header>
               <Modal.Body>
                 <h1 style={{ textAlign: "center" }}>{selectedNotification?.evento}</h1>
-                <label>Supervisor: {selectedNotification?.supervisor}</label><br />
-                <label>Site: {selectedNotification?.siteName}</label><br />
-                <label>Cliente: {selectedNotification?.cliente}</label><br />
-                <label>Estado: {selectedNotification?.estado}</label>
-                <div>
-                  <button className="btn btn-primary">Gerar PDF</button>
+                <div style={{ fontSize: "30px" }}>
+                  <label>Assunto: {selectedNotification?.name}</label><br />
+                  <label>Centro de custo: {selectedNotification?.costCenter}</label><br />
+                  <label>Prioridade: {selectedNotification?.priority === 0 ? "Máxima" : selectedNotification?.priority === 1 ? "Mínima" : "Baixa"}</label><br />
+                  <p >Detalhes: {selectedNotification?.details}</p>
                 </div>
               </Modal.Body>
               <Modal.Footer>
@@ -262,10 +287,10 @@ const NotificationList = () => {
                   Aprovar
                 </Button>
                 <Button variant="danger" onClick={handleRejection}>
-                  Reprovar
+                  Fechar
                 </Button>
               </Modal.Footer>
-            </Modal> */}
+            </Modal>
           </div>
         )}
       </div>
