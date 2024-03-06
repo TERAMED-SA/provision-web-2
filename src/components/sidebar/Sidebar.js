@@ -93,7 +93,7 @@ const Sidebar = ({ sidebarOpen, closeSidebar }) => {
             <i className="me-3 fs-5">
               <IoEyeSharp />
             </i>
-            <span className="fs-6">Supervisão</span>
+            <span className="fs-6">Mapa</span>
           </Link>
         </li>
 
