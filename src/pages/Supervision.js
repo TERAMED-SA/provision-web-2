@@ -1,7 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
 import "bootstrap/dist/css/bootstrap.css";
-import { IoEyeSharp } from "react-icons/io5";
-import Calendar from "./calendar";
 import axios from "axios";
 import CircularProgress from "@mui/material/CircularProgress";
 import { ToastContainer, toast } from "react-toastify";
@@ -121,7 +119,6 @@ const Supervision = () => {
       toast.error("Não há rota disponível para este usuário.");
       return;
     }
-
     const userMarkers = markers.filter(
       (marker) => marker.employeeId === selectedUser.employeeId
     );

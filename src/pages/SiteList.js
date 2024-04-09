@@ -205,10 +205,7 @@ function SiteList() {
         <>
           <DataGrid
             rows={siteList
-              .slice(
-                pageNumber * sitePerPage,
-                pageNumber * sitePerPage + sitePerPage
-              )
+
               .map((site, index) => ({
                 id: index + 1,
                 name: site.name || "",
@@ -220,7 +217,7 @@ function SiteList() {
               }))}
             columns={[
               { field: "id", headerName: "ID", width: 60 },
-              { field: "name", headerName: "Nome", width: 200 },
+              { field: "name", headerName: "Nome", width: 800 },
               { field: "address", headerName: "Endereço", width: 200 },
               { field: "mec", headerName: "MEC", width: 150 },
               { field: "ctClient", headerName: "CT Client", width: 150 },

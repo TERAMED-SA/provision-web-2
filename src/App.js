@@ -21,6 +21,7 @@ import Companies from "./pages/Companies";
 import Notification from "./pages/Notification";
 import Pusher from "pusher-js";
 import { ToastContainer, toast } from "react-toastify";
+import { appFirebase } from "./firebase";
 
 import "./App.css";
 import "./Style.css";
@@ -32,6 +33,9 @@ function App() {
   const location = useLocation();
   const navigate = useNavigate();
   useEffect(() => {
+
+    // appFirebase()
+
     const pusher = new Pusher(`${process.env.REACT_APP_KEY}`, {
       cluster: `${process.env.REACT_APP_CLUSTER}`,
       encrypted: true,

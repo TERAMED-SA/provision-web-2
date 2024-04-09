@@ -37,7 +37,7 @@ const Home = () => {
 
         // Fetching notification count
         const notificationResponse = await axios.get(
-          "https://provision-07c1.onrender.com/api/v1/notification/11835"
+          `${process.env.REACT_APP_API_URL}notification/11835?size=500`
         );
         setNotificationCount(notificationResponse.data.data.length);
       } catch (error) {
@@ -96,9 +96,7 @@ const Home = () => {
               </div>
             </div>
           </div>
-        </div>
-        <div className="row">
-          <div className="col-12 col-md-12 p-3">
+          <div className="col-12 col-md-8 p-3">
             <LineChart />
           </div>
         </div>

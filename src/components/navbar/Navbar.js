@@ -6,9 +6,6 @@ import "./Navbar.css";
 import React from "react";
 
 const Navbar = ({ sidebarOpen, openSidebar }) => {
-  {
-    /*Toggle*/
-  }
   return (
     <nav className="navbar navbar-expand-lg ">
       <div className="container-fluid">
@@ -25,6 +22,16 @@ const Navbar = ({ sidebarOpen, openSidebar }) => {
               
                 <input placeholder="Pesquisar..." className="form-control" style={{ borderRadius: '40px' }} />
               </div>*/}
+              {/* lista com 3 topologias 
+                                  depois de escolher a topologia  
+                                                vemos o numero de serie
+                                                qr code 
+                                                
+                                                verificar os funcionarios apartir de uma lista
+                                                e o nome aparece automaticamente
+                                                
+                                                editar o registo 
+                                                */}
             </li>
           </ul>
         </div>
