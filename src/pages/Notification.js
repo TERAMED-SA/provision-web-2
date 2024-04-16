@@ -17,6 +17,7 @@ const NotificationList = () => {
   const [selectedNotification, setSelectedNotification] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [modalShow, setModalShow] = useState(false);
+  const [verificationModal, setVerificationModal] = useState(false);
 
   useEffect(() => {
     fetchNotifications();
@@ -29,7 +30,7 @@ const NotificationList = () => {
       const response = await axios.get(
         `${process.env.REACT_APP_API_URL}notification/${user}?size=500`
       );
-      const formattedNotifications = response.data.data.map((notification) => ({
+      const formattedNotifications = await response.data.data.map((notification) => ({
         ...notification,
         createdAt: format(new Date(notification.createdAt), "dd/MM/yyyy"),
       }));
@@ -42,7 +43,7 @@ const NotificationList = () => {
   }
   async function getSupInfo(id) {
     try {
-      const response = await axios.get(`${process.env.REACT_APP_API_URL}supervision/getSupByNotification/${id}`)
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}supervision/getSupByNotification/${id}?size=500`)
       return response.data.data
     } catch (error) {
       console.error("Error:", error);
@@ -56,7 +57,7 @@ const NotificationList = () => {
   };
   const getOcorrenceByIdNot = async (id) => {
     try {
-      const response = await axios.get(`${process.env.REACT_APP_API_URL}occurrence/getOcorByNotification/${id}`)
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}occurrence/getOcorByNotification/${id}?size=500`)
       return response.data.data
     } catch (error) {
       console.error("Error:", error);
@@ -76,11 +77,26 @@ const NotificationList = () => {
     // Lógica para reprovar a notificação
     setModalShow(false);
   };
+  const openVerificationModal = (id, name, costCenter) => {
+    localStorage.setItem("supervisionId", id)
+    localStorage.setItem("supervisorName", name)
+    localStorage.setItem("supervisionCostCenter", costCenter)
+    setVerificationModal(true);
+  }
+  const closeVerificationModal = () => {
+    localStorage.removeItem("supervisionId")
+    localStorage.removeItem("supervisorName")
+    localStorage.removeItem("supervisionCostCenter")
+    setVerificationModal(true);
+  }
 
   const approve = async (costCenter, idNot) => {
     try {
       const response = await axios.put(`${process.env.REACT_APP_API_URL}supervision/validate/${costCenter}/${idNot}`)
       toast.success("Aprovado com sucesso")
+      localStorage.removeItem("supervisionId")
+      localStorage.removeItem("supervisorName")
+      localStorage.removeItem("supervisionCostCenter")
       setTimeout(() => {
         window.location.reload();
       }, 3000)
@@ -110,8 +126,8 @@ const NotificationList = () => {
       costCenter: dados.costCenter,
       report: dados.report,
     };
-
-    // Defina o conteúdo do documento PDF
+    const createdAt = new Date(data.createdAt);
+    const formattedDate = `${createdAt.getFullYear()}-${String(createdAt.getMonth() + 1).padStart(2, '0')}-${String(createdAt.getDate()).padStart(2, '0')}`;
     const documentDefinition = {
 
       footer: function (currentPage, pageCount) {
@@ -123,38 +139,47 @@ const NotificationList = () => {
       },
 
       content: [
-        { image: imageDataUrl, width: 70, margin: [0, 0, 0, 30], alignment: 'center' },
-        { text: 'RELATÓRIO DA SUPERVISÃO', margin: [0, 0, 0, 40], style: 'header', alignment: 'center' },
-        { text: 'Identificação', style: 'subheader', alignment: 'center' },
+        { image: imageDataUrl, width: 70, margin: [0, 0, 0, 20], alignment: 'center' },
+        { text: 'RELATÓRIO DA SUPERVISÃO', margin: [0, 0, 0, 20], style: 'header', alignment: 'center' },
+        { text: 'Identificação', size: 40, style: 'subheader', alignment: 'center' },
+        { text: 'Informação do Supervisor', bold: 900, margin: [10, 10, 0, 5] },
         { text: `Nome: ${data.name}` },
-        { text: `Feito em: ${data.createdAt.toLocaleString()}` },
         { text: `Código do Supervisor: ${data.supervisorCode}` },
-        { text: `Número Desejado: ${data.desiredNumber}` },
-        { text: `Número de Trabalhadores encontrados: ${data.numberOfWorkers}` },
-        { text: `Tempo: ${data.time}` },
+        { text: `Tempo da supervisão: ${data.time}` },
+        { text: `Feito em: ${data.createdAt.toLocaleString()}` },
+        { text: "" },
+        { text: 'Informação do Site', bold: 1000, margin: [20, 10, 0, 5] },
+        { text: `Nome do site: teste` },
         { text: `Centro de custo: ${data.costCenter}` },
+        { text: `Nome da empresa: teste empresa` },
+        { text: `Código de empresa: 000la ` },
         { canvas: [{ type: 'line', x1: 0, y1: 5, x2: 595 - 2 * 40, y2: 5, lineWidth: 1 }] },
-        { text: 'Informação dos Trabalhadores', style: 'subheader', alignment: 'center' },
+        { text: 'Informação dos Trabalhadores', style: 'subheader', alignment: 'center', margin: [0, 10, 0, 10] },
+        { text: `Numero de trabalhadores pretendido: ${data.desiredNumber}` },
+
+        { text: `Presentes: ${data.numberOfWorkers}` },
+        { text: `Faltou:  ${data.workerInformation.length}` },
+        { text: "Lista dos trabalhadores ausentes:", margin: [0, 0, 0, 10] },
         {
           ul: data.workerInformation.flatMap((worker) => ([
-            `Nome: ${worker.name}`,
-            `Número de trabalhador: ${worker.employeeNumber}`,
-            `Sitação: ${worker.state}`,
-            `OBS: ${worker.obs}`,
-            { text: '', margin: [0, 0, 0, 10] }
+            { text: `Nome: ${worker.name}`, margin: [30, 0, 0, 0] }, // Adicionando margem à esquerda
+            { text: `Número de trabalhador: ${worker.employeeNumber}`, margin: [30, 0, 0, 0] },
+            { text: `Situação: ${worker.state}`, margin: [30, 0, 0, 0] },
+            { text: `OBS: ${worker.obs}`, margin: [30, 0, 0, 10] }, // Margem maior na parte inferior
           ]))
         },
         { canvas: [{ type: 'line', x1: 0, y1: 5, x2: 595 - 2 * 40, y2: 5, lineWidth: 1 }] },
         { text: 'Equipamentos', style: 'subheader', alignment: 'center' },
+        { text: `Quantidade de equipamentos encontrado: ${data.equipment.length}` },
+        { text: `Lista dos equipamentos encontrados:  `, margin: [0, 0, 0, 10] },
         {
           ul: data.equipment.flatMap((equipment) => ([
-            `Nome: ${equipment.name}`,
-            `Número de série: ${equipment.serialNumber}`,
-            `Estado: ${equipment.state}`,
-            `Centro de custo: ${equipment.costCenter}`,
-            `OBS: ${equipment.obs}`,
-            { text: '', margin: [0, 0, 0, 10] }
-          ])),
+            { text: `Nome: ${equipment.name}`, margin: [30, 0, 0, 0] }, // Adicionando margem à esquerda
+            { text: `Número de série: ${equipment.serialNumber}`, margin: [30, 0, 0, 0] },
+            { text: `Estado: ${equipment.state}`, margin: [30, 0, 0, 0] },
+            { text: `Centro de custo: ${equipment.costCenter}`, margin: [30, 0, 0, 0] },
+            { text: `OBS: ${equipment.obs}`, margin: [30, 0, 0, 10] }, // Margem maior na parte inferior
+          ]))
         },
         { canvas: [{ type: 'line', x1: 0, y1: 5, x2: 595 - 2 * 40, y2: 5, lineWidth: 1 }] },
         { text: 'Informação extras da supervisão', style: 'subheader', alignment: 'center' },
@@ -172,10 +197,9 @@ const NotificationList = () => {
           bold: true,
           margin: [0, 10, 0, 5]
         }
-      }
+      },
     };
-
-    pdfMake.createPdf(documentDefinition).download();
+    pdfMake.createPdf(documentDefinition).download(`relatório_supervião_${formattedDate}.pdf`);
   };
 
   const convertImageToDataURL = (imagePath) => {
@@ -231,20 +255,12 @@ const NotificationList = () => {
                   width: 250,
                   renderCell: (params) => (
                     <div className="d-flex justify-content-center">
-                      {params.row.evento !== "Ocorrência" && (
-                        <button
-                          className="btn btn-success btn-sm m-1"
-                          onClick={() => approve(params.row.costCenter, params.row._id)}
-                        >
-                          Aprovar
-                        </button>
-                      )}
                       {params.row.evento === "Supervisão" && (
                         <button
                           className="btn btn-warning btn-sm m-1"
-                          onClick={() => generatePDF(params.row._id, params.row.supervisor)}
+                          onClick={() => openVerificationModal(params.row._id, params.row.supervisor, params.row.costCenter)}
                         >
-                          Gerar PDF
+                          Detalhes
                         </button>
                       )}
                       {params.row.evento === "Ocorrência" && (
@@ -283,14 +299,40 @@ const NotificationList = () => {
                 </div>
               </Modal.Body>
               <Modal.Footer>
-                <Button variant="success" onClick={handleApproval}>
+                <Button variant="success" onClick={() => approve()}>
                   Aprovar
                 </Button>
                 <Button variant="danger" onClick={handleRejection}>
-                  Fechar
+                  Gerar PDG
                 </Button>
               </Modal.Footer>
             </Modal>
+
+            <Modal
+              show={verificationModal}
+              onHide={() => setVerificationModal(false)}
+              size="lg"
+              centered
+            >
+              <Modal.Header closeButton>
+                <Modal.Title>Detalhes da Ocorrência</Modal.Title>
+              </Modal.Header>
+              <Modal.Body>
+                <h1 style={{ textAlign: "center" }}>{selectedNotification?.evento}</h1>
+                <div style={{ fontSize: "30px" }}>
+                  <p>Antes de aprovar por favor verificar o relatorio gerado</p>
+                </div>
+              </Modal.Body>
+              <Modal.Footer>
+                <Button variant="success" onClick={() => approve(localStorage.getItem("supervisionCostCenter"), localStorage.getItem("supervisionId"))}>
+                  Aprovar
+                </Button>
+                <Button onClick={() => generatePDF(localStorage.getItem("supervisionId"), localStorage.getItem("supervisorName"))} variant="danger">
+                  Gerar PDF
+                </Button>
+              </Modal.Footer>
+            </Modal>
+
           </div>
         )}
       </div>
