@@ -12,6 +12,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUserPlus } from "@fortawesome/free-solid-svg-icons"; // Importa ícones
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { MdGroupOff } from "react-icons/md";
+import { MdPeopleAlt } from "react-icons/md";
 
 // CSS override for spinner
 const override = css`
@@ -32,6 +34,7 @@ const Companies = () => {
   const [searchResults, setSearchResults] = useState([]); // Resultados da pesquisa
   const [name, setName] = useState(""); // Nome do cliente
   const [nif, setNif] = useState(""); // NIF do cliente
+  const [clientCode, setclientCode] = useState(""); // NIF do cliente
 
   useEffect(() => {
     async function fetchCompanies() {
@@ -146,13 +149,13 @@ const Companies = () => {
               {/* Botões para alternar a visualização */}
               <div className="mb-2">
                 <button
-                  className="btn btn-primary me-2"
+                  className="btn btn-secondary me-2"
                   onClick={toggleSortOrder}
                 >
                   <i className="bi bi-arrow-repeat"></i>
                   &nbsp; Inverter Ordem
                 </button>
-                <button className="btn btn-success" onClick={toggleViewMode}>
+                <button className="btn btn-info" onClick={toggleViewMode}>
                   <i className="bi bi-eye"></i> &nbsp;
                   {viewMode === "list" ? "Mosaico" : "Lista"}
                 </button>
@@ -163,6 +166,8 @@ const Companies = () => {
                   <FontAwesomeIcon icon={faUserPlus} />
                   &nbsp; Adicionar Cliente
                 </button>
+                <button className="btn btn-success"><MdPeopleAlt />&nbsp;Ativo</button>
+                <button className="btn btn-danger"><MdGroupOff />&nbsp;Inativos</button>
               </div>
 
               {/* Renderização condicional com base no modo de visualização */}
@@ -288,17 +293,17 @@ const Companies = () => {
               id="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-            />
+              placeholder="Nome do Cliente" />
           </div>
           <div className="form-group">
-            <label htmlFor="nif">NIF:</label>
+            <label htmlFor="clientCode">Código do Cliente:</label>
             <input
               type="text"
               className="form-control"
-              id="nif"
-              value={nif}
-              onChange={(e) => setNif(e.target.value)}
-            />
+              id="clientCode"
+              value={clientCode}
+              onChange={(e) => setclientCode(e.target.value)}
+              placeholder="Código do Cliente" />
           </div>
         </Modal.Body>
         <Modal.Footer>

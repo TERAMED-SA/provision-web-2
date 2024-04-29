@@ -22,6 +22,9 @@ import Notification from "./pages/Notification";
 import Pusher from "pusher-js";
 import { ToastContainer, toast } from "react-toastify";
 import { appFirebase } from "./firebase";
+import Occurrence from "./pages/occurrence";
+import Report from "./pages/report";
+import NewSupervision from "./pages/newSupervision";
 
 import "./App.css";
 import "./Style.css";
@@ -102,6 +105,9 @@ function App() {
             <Route path="/chat" element={<Chat />} />
             <Route path="/Chat/:userType/:userId" element={<Chat />} />
             <Route path="/Chat/:userId" element={<Chat />} />
+            <Route path="/Report" element={<Report />} />
+            <Route path="/newsupervision" element={<NewSupervision />} />
+            <Route path="/occurrence" element={<Occurrence />} />
             <Route path="/Notification" element={<Notification />} />
             <Route
               path="/Companies"
