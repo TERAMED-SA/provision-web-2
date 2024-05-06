@@ -20,6 +20,8 @@ const NotificationList = () => {
     const [modalShow, setModalShow] = useState(false);
     const [verificationModal, setVerificationModal] = useState(false);
     const [modalInfo, setModalInfo] = useState([])
+    const [companyInfo, setCompanyInfo] = useState([])
+    const [siteInfo, setSiteInfo] = useState([])
 
     useEffect(() => {
         fetchNotifications();
@@ -52,6 +54,15 @@ const NotificationList = () => {
             console.error("Error:", error);
         }
     }
+    async function getSiteInfo(costCenter) {
+        try {
+            const responseCompanySite = await axios.get(`${process.env.REACT_APP_API_URL}companySite/${costCenter}`)
+            return responseCompanySite.data.data
+        } catch (error) {
+            console.error("Error:", error);
+        }
+    }
+
 
     const handleViewDetails = (notification) => {
 
@@ -81,11 +92,14 @@ const NotificationList = () => {
         setModalShow(false);
     };
     const openVerificationModal = async (id, name, costCenter) => {
+        const response = await axios.get(`${process.env.REACT_APP_API_URL}companySite/getCompanyInfo/${costCenter}`)
+        const responseCompanySite = await axios.get(`${process.env.REACT_APP_API_URL}companySite/${costCenter}`)
         localStorage.setItem("supervisionId", id)
         localStorage.setItem("supervisorName", name)
         localStorage.setItem("supervisionCostCenter", costCenter)
         const dados = await getSupInfo(id);
-        console.log(dados)
+        setSiteInfo(responseCompanySite.data.data)
+        setCompanyInfo(response.data.data)
         setModalInfo(dados)
         setVerificationModal(true);
     }
@@ -112,10 +126,9 @@ const NotificationList = () => {
         }
     }
 
-    const generatePDF = async (id, name) => {
+    const generatePDF = async (id, name, costCenter) => {
         const dados = await getSupInfo(id);
         pdfMake.vfs = pdfFonts.pdfMake.vfs;
-
         // Converte a imagem para uma URL de dados (data URL)
         const imageDataUrl = await convertImageToDataURL(logo);
 
@@ -131,6 +144,9 @@ const NotificationList = () => {
             time: dados.time,
             costCenter: dados.costCenter,
             report: dados.report,
+            companyName: companyInfo.name,
+            companyClientCode: companyInfo.clientCode,
+            siteName: siteInfo.name
         };
 
         const createdAt = new Date(data.createdAt);
@@ -156,10 +172,10 @@ const NotificationList = () => {
                 { text: `Feito em: ${data.createdAt.toLocaleString()}` },
                 { text: "" },
                 { text: 'Informação do Site', bold: 1000, margin: [20, 10, 0, 5] },
-                { text: `Nome do site: teste` },
+                { text: `Nome do site: ${data.siteName}` },
                 { text: `Centro de custo: ${data.costCenter}` },
-                { text: `Nome da empresa: teste empresa` },
-                { text: `Código de empresa: 000la ` },
+                { text: `Nome da empresa: ${data.companyName}` },
+                { text: `Código de empresa: ${data.companyClientCode}` },
                 { canvas: [{ type: 'line', x1: 0, y1: 5, x2: 595 - 2 * 40, y2: 5, lineWidth: 1 }] },
                 { text: 'Informação dos Trabalhadores', style: 'subheader', alignment: 'center', margin: [0, 10, 0, 10] },
                 { text: `Numero de trabalhadores pretendido: ${data.desiredNumber}` },
@@ -190,7 +206,7 @@ const NotificationList = () => {
                 },
                 { canvas: [{ type: 'line', x1: 0, y1: 5, x2: 595 - 2 * 40, y2: 5, lineWidth: 1 }] },
                 { text: 'Informação extras da supervisão', style: 'subheader', alignment: 'center' },
-                { text: `${data.report}`, alignment: 'center' }
+                { text: `${data.report}` }
 
             ],
             styles: {
@@ -292,16 +308,16 @@ const NotificationList = () => {
                                 <div style={{ fontSize: "20px" }}>
                                     <h1 style={{ textAlign: 'center' }}>IDENTIFICAÇÃO</h1>
                                     <h3 style={{ marginLeft: '20px' }}>Informação do Supervisor</h3>
-                                    <p>Nome: Cristiano alberto</p>
+                                    <p>Nome: {localStorage.getItem('supervisorName')}</p>
                                     <p>Código do supervisor: {modalInfo.supervisorCode}</p>
                                     <p>Tempo da supersão: {modalInfo.time}</p>
-                                    <p>Feito em:{modalInfo.createdAt} </p>
+                                    <p>Feito em: {modalInfo.createdAt} </p>
 
                                     <h3 style={{ marginLeft: '20px' }}>Informação do site</h3>
-                                    <p>Nome: teste</p>
+                                    <p>Nome: {siteInfo.name}</p>
                                     <p>Centro de custo: {modalInfo.costCenter}</p>
-                                    <p>Nome da empresa: Teste empresa</p>
-                                    <p>Código de cliente: 00120</p>
+                                    <p>Nome da empresa:  {companyInfo.name}</p>
+                                    <p>Código de cliente:  {companyInfo.clientCode}</p>
                                     <hr />
                                     <h1 style={{ textAlign: 'center' }}>Informação dos trabalhadores</h1>
                                     <p>Numero de trabalhadores pretendido: 0</p>
@@ -347,7 +363,7 @@ const NotificationList = () => {
                                 <Button variant="success" onClick={() => approve(localStorage.getItem("supervisionCostCenter"), localStorage.getItem("supervisionId"))}>
                                     Aprovar
                                 </Button>
-                                <Button onClick={() => generatePDF(localStorage.getItem("supervisionId"), localStorage.getItem("supervisorName"))} variant="info">
+                                <Button onClick={() => generatePDF(localStorage.getItem("supervisionId"), localStorage.getItem("supervisorName"), localStorage.getItem("supervisionCostCenter"))} variant="info">
                                     Gerar PDF
                                 </Button>
                             </Modal.Footer>
