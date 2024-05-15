@@ -28,7 +28,7 @@ const Sidebar = ({ sidebarOpen, closeSidebar }) => {
   const fetchNotificationData = async () => {
     try {
       const response = await axios.get(
-        `${process.env.REACT_APP_API_URL}notification/11835?size=500`
+        `${process.env.REACT_APP_API_URL}notification/00001?size=500`
       );
       return response.data.data.length;
     } catch (error) {
