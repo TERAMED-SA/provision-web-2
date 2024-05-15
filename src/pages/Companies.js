@@ -66,6 +66,25 @@ const Companies = () => {
     navigate("/managementList");
   };
 
+  const createCompany = async (clientName, clientCode) => {
+    try {
+      const response = await axios.post(
+        `${process.env.REACT_APP_API_URL}company/create`,
+        {
+          name: clientName,
+          clientCode: clientCode
+        }
+      );
+      if (response.data.status === 200) {
+        toast.success("Cliente cadastrado com sucesso");
+        setTimeout(() => {
+          window.location.reload()
+        }, 3000);
+      }
+    } catch (error) {
+      toast.error(error.response.data.message)
+    }
+  }
   // Função para inverter a ordem dos nomes das empresas
   const toggleSortOrder = () => {
     setSortAsc(!sortAsc); // Alterna entre ordem crescente e decrescente
@@ -310,7 +329,7 @@ const Companies = () => {
           <Button variant="secondary" onClick={handleCloseModal}>
             Fechar
           </Button>
-          <Button variant="primary" onClick={handleConfirmAddClient}>
+          <Button variant="primary" onClick={() => createCompany(name, clientCode)}>
             Adicionar
           </Button>
         </Modal.Footer>

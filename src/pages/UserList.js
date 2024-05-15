@@ -113,8 +113,7 @@ const UserList = () => {
         }, 3000);
       }
     } catch (error) {
-      toast.error("Algo correu mal por favor tente novamente, ou consulte um administrador")
-      console.error("Erro ao adicionar usuário:", error);
+      toast.error(error.response.data.data.message)
     }
   };
 

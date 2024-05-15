@@ -182,7 +182,7 @@ function SiteList() {
         <div className="">
           <button
             className="btn btn-primary mb-3 btn-add-site"
-            onClick={handleOpenAddSiteModal}
+            onClick={() => handleOpenAddSiteModal}
           >
             <FontAwesomeIcon icon={faPlus} /> Adicionar Site
           </button>
