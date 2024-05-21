@@ -149,7 +149,7 @@ const Sidebar = ({ sidebarOpen, closeSidebar }) => {
           className={active === 5 ? "active nav-item p-2" : "nav-item p-2"}
           onClick={(e) => setActive(5)}
         >
-          <Link to="/Supervision" className="p-1">
+          <Link to="/Map" className="p-1">
             <i className="me-3 fs-5">
               <IoLocation />
             </i>

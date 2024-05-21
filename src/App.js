@@ -6,7 +6,7 @@ import Login from "./Home/Login";
 import UserList from "./pages/UserList";
 import CompanyList from "./pages/CompanyList";
 import SiteList from "./pages/SiteList";
-import Supervision from "./pages/Supervision";
+import Map from "./pages/Map";
 import EquipmentList from "./pages/EquipmentList";
 import MaterialList from "./pages/MaterialList";
 import ManagementList from "./pages/ManagementList";
@@ -94,7 +94,7 @@ function App() {
             <Route path="/users" element={<UserList />} />
             <Route path="/companylist" element={<CompanyList />} />
             <Route path="/SiteList" element={<SiteList />} />
-            <Route path="/Supervision" element={<Supervision />} />
+            <Route path="/Map" element={<Map />} />
             <Route path="/EquipmentList" element={<EquipmentList />} />
             <Route path="/MaterialList" element={<MaterialList />} />
             <Route path="/ManagementList" element={<ManagementList />} />
