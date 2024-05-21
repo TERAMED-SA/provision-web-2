@@ -1,12 +1,37 @@
-/* styles.css */
-.react-calendar {
-    font-family: Arial, sans-serif;
-  }
-  
-  .react-calendar__tile--now {
-    background-color: #f20000;
-    color: #333;
-  }
-  
-  /* Adicione mais estilos conforme necessário */
-  
+.popup-content {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+}
+
+.popup-content img {
+  max-width: 100px;
+  height: auto;
+  border-radius: 50%;
+  margin-right: 10px; /* Adiciona espaço entre a imagem e o texto */
+}
+
+.popup-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; /* Alinha o texto à esquerda, ajustável para à direita */
+}
+
+
+.status {
+  display: flex;
+  align-items: center;
+  margin-top: 5px;
+}
+.status .status-indicator {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 5px;
+}
+.status-active {
+  background-color: green;
+}
+.status-inactive {
+  background-color: red;
+}
