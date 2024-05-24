@@ -22,6 +22,7 @@ const MapComponent = () => {
   const [directionsRenderer, setDirectionsRenderer] = useState(null);
 
 
+
   const handleDateChange = (date) => {
     setStartDate(date);
   };
@@ -119,10 +120,12 @@ const MapComponent = () => {
                 <div class="popup-text">
                   <h6>Nome: ${user.name}</h6>
                   <h6>Mecanográfio: ${user.userId}</h6>
+                  <h6>Bateria: 86%</h6>
                   ${isOnline
               ? "<p>Online agora</p>"
               : `<p>Última atividade: ${formattedTime}</p>`
             }
+            
                 </div>
                </div>
 `);
@@ -138,16 +141,11 @@ const MapComponent = () => {
   async function handleUserSelection(user) {
     setSelectedUser(user);
     await fetchGeo(user.employeeId);
-
   }
 
   function clearRoute() {
-    if (directionsRenderer) {
-      directionsRenderer.setMap(null);
-      setDirectionsRenderer(null);
-    }
-  }
 
+  }
   function addMarker(locationLat, locationLng, title, employeeId) {
     const marker = new window.google.maps.Marker({
       position: { lat: locationLat, lng: locationLng },
@@ -163,46 +161,63 @@ const MapComponent = () => {
 
 
   async function showRoute() {
+    // Limpa a rota existente
     clearRoute();
-    await fetchGeo(selectedUser.employeeId);
-
+    // Filtra os marcadores para o usuário selecionado
     const userMarkers = markers.filter(
       (marker) => marker.employeeId === selectedUser.employeeId
     );
+    // Verifica se há marcadores para o usuário selecionado
     if (userMarkers.length === 0) {
       toast.error("Não há rota disponível para este usuário.");
       return;
     }
+
+    // Mapeia as localizações dos marcadores
     const waypoints = userMarkers.map((marker) => ({
       location: marker.marker.getPosition(),
+      stopover: true, // Indica que este ponto é uma parada
     }));
 
-    // Adiciona marcadores nos pontos de localização
-    waypoints.forEach((waypoint, index) => {
-      const marker = new window.google.maps.Marker({
-        position: waypoint.location,
-        map: map,
-        label: (index + 1).toString(), // Números sequenciais para os marcadores
-      });
+    // Remove o primeiro e o último ponto dos waypoints para usá-los como origem e destino
+    const origin = waypoints.shift().location;
+    const destination = waypoints.pop().location;
+
+    // Configurações para o serviço de direções
+    const directionsService = new window.google.maps.DirectionsService();
+    const directionsRenderer = new window.google.maps.DirectionsRenderer({
+      map: map,
+      suppressMarkers: true, // Suprime os marcadores padrões
     });
 
-    // Adiciona setas entre os pontos
-    for (let i = 0; i < waypoints.length - 1; i++) {
-      const origin = waypoints[i].location;
-      const destination = waypoints[i + 1].location;
-      const arrowSymbol = {
-        path: window.google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
-      };
-      const line = new window.google.maps.Polyline({
-        path: [origin, destination],
-        icons: [{
-          icon: arrowSymbol,
-          offset: '100%'
-        }],
-        map: map,
-      });
-    }
+    // Configuração da solicitação de rota
+    const request = {
+      origin: origin,
+      destination: destination,
+      waypoints: waypoints,
+      travelMode: window.google.maps.TravelMode.DRIVING,
+    };
+
+    // Calcula e exibe a rota
+    directionsService.route(request, (result, status) => {
+      if (status === window.google.maps.DirectionsStatus.OK) {
+        directionsRenderer.setDirections(result);
+
+        // Adiciona marcadores numerados nos pontos de localização
+        userMarkers.forEach((userMarker, index) => {
+          const marker = new window.google.maps.Marker({
+            position: userMarker.marker.getPosition(),
+            map: map,
+            label: (index + 1).toString(), // Números sequenciais para os marcadores
+          });
+        });
+      } else {
+        toast.error("Falha ao calcular a rota: " + status);
+      }
+    });
   }
+
+
 
   async function fetchGeo(id) {
     try {
@@ -218,9 +233,9 @@ const MapComponent = () => {
         return;
       }
 
-      const newMarkers = response.data.data
+      const newMarkers = await response.data.data
         .map((markerData) => {
-          if (markerData.route && typeof markerData.route === "object") {
+          if (markerData.route) {
             return Object.values(markerData.route).map((location) => {
               if (location.lat && location.lng) {
                 return addMarker(
@@ -322,11 +337,6 @@ const MapComponent = () => {
               showYearDropdown
               dropdownMode="select"
             />
-            {/* <div className="date-info">
-                <p>Dia: {startDate.getDate()}</p>
-                <p>Mês: {startDate.getMonth() + 1}</p>
-                <p>Ano: {startDate.getFullYear()}</p>
-              </div> */}
             <div className="additional-button-container">
               <button className="custom-button orange-button"
                 onClick={showRoute}
