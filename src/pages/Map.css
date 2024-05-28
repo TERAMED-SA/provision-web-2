@@ -8,13 +8,15 @@
   max-width: 100px;
   height: auto;
   border-radius: 50%;
-  margin-right: 10px; /* Adiciona espaço entre a imagem e o texto */
+  margin-right: 10px;
+  /* Adiciona espaço entre a imagem e o texto */
 }
 
 .popup-text {
   display: flex;
   flex-direction: column;
-  align-items: flex-start; /* Alinha o texto à esquerda, ajustável para à direita */
+  align-items: flex-start;
+  /* Alinha o texto à esquerda, ajustável para à direita */
 }
 
 
@@ -23,15 +25,18 @@
   align-items: center;
   margin-top: 5px;
 }
+
 .status .status-indicator {
   width: 10px;
   height: 10px;
   border-radius: 50%;
   margin-right: 5px;
 }
+
 .status-active {
   background-color: green;
 }
+
 .status-inactive {
   background-color: red;
 }
