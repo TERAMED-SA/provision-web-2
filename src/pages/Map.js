@@ -5,10 +5,12 @@ import CircularProgress from "@mui/material/CircularProgress";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "./Map.css"
-
+import Modal from "react-bootstrap/Modal";
+import Button from "react-bootstrap/Button";
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import customMarkerIcon from "../assets/logo.png";
+import { useNavigate } from "react-router-dom";
 const MapComponent = () => {
   const mapContainerRef = useRef(null);
   const [map, setMap] = useState(null);
@@ -21,6 +23,8 @@ const MapComponent = () => {
   const [stateButton, setStateButton] = useState(true);
   const [startDate, setStartDate] = useState(new Date());
   const [infoWindow, setInfoWindow] = useState(null);
+  const navigate = useNavigate();
+  //Essas vaiaveis sao para a modal
   useEffect(() => {
     const luandaCoords = { lat: -8.8368, lng: 13.2343 }; // Coordenadas para Mutamba, Luanda
     const googleMap = new window.google.maps.Map(mapContainerRef.current, {
@@ -185,7 +189,7 @@ const MapComponent = () => {
       setStateButton(true);
       return;
     }
-    clearMarkers()
+    // clearMarkers()
     clearRoute();
     fetchGeo(selectedUser.employeeId);
 
@@ -209,68 +213,10 @@ const MapComponent = () => {
       console.error("Erro ao buscar últimas localizações:", error.message);
     }
   }
-  async function onlineUsers() {
-    if (map) {
-      await fetchDataUsersMap();
-      console.log(usersMap.length)
-      if (usersMap.length > 0) {
 
-        usersMap.forEach((user) => {
-          const icon = {
-            url: customMarkerIcon,
-            scaledSize: new window.google.maps.Size(40, 40),
-            anchor: new window.google.maps.Point(15, 30),
-          };
 
-          const marker = new window.google.maps.Marker({
-            position: { lat: user.lat, lng: user.lng },
-            map: map,
-            title: user.userId,
-            icon: icon,
-          });
-
-          const userTime = new Date(user.time); // Converte a hora do usuário para um objeto Date
-          userTime.setHours(userTime.getHours()); // Adiciona uma hora ao objeto Date
-
-          const formattedTime = userTime.toLocaleString();
-
-          function convertToDate(dateString) {
-            const [datePart, timePart] = dateString.split(", ");
-            const [day, month, year] = datePart.split("/");
-            const [hours, minutes, seconds] = timePart.split(":");
-            return new Date(year, month - 1, day, hours, minutes, seconds);
-          }
-
-          // Supondo que você tenha `user` e `formattedTime` disponíveis no seu contexto
-          const currentTime = new Date();
-          const formattedTimeDate = convertToDate(formattedTime);
-          const fiveMinutesInMilliseconds = 5 * 60 * 1000;
-          const isOnline =
-            currentTime - formattedTimeDate <= fiveMinutesInMilliseconds;
-
-          marker.addListener("click", () => {
-            infoWindow.setContent(`
-                <div class="popup-content">
-                  <img src="/avatar2.png" alt="Foto de ${user.name}" />
-                  <div class="popup-text">
-                    <h6>Nome: ${user.name}</h6>
-                    <h6>Mecanográfio: ${user.userId}</h6>
-                    <h6>Bateria: 86%</h6>
-                    ${isOnline
-                ? "<p>Online agora</p>"
-                : `<p>Última atividade: ${formattedTime}</p>`
-              }
-             </div>
-            </div>
-              `);
-            infoWindow.open(map, marker);
-          });
-        });
-      } else {
-        alert("Sem registo")
-        return
-      }
-    }
+  const openModalOnlineUsers = async () => {
+    navigate("/mapOnline")
   }
 
   return (
@@ -318,7 +264,7 @@ const MapComponent = () => {
               <div className="col-md-6">
                 <button
                   className="btn btn-danger me-2 btn-lg form-control"
-                  onClick={onlineUsers}
+                  onClick={openModalOnlineUsers}
                 >
                   Online
                 </button>
@@ -362,6 +308,7 @@ const MapComponent = () => {
           ></div>
         </div>
       </div>
+
       <ToastContainer />
     </div>
   );

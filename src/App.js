@@ -30,6 +30,7 @@ import "./App.css";
 import "./Style.css";
 
 import "bootstrap-icons/font/bootstrap-icons.css";
+import MapOnlineComponent from "./pages/mapOnline";
 
 function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -109,6 +110,7 @@ function App() {
             <Route path="/newsupervision" element={<NewSupervision />} />
             <Route path="/occurrence" element={<Occurrence />} />
             <Route path="/Notification" element={<Notification />} />
+            <Route path="/mapOnline" element={<MapOnlineComponent />} />
             <Route
               path="/Companies"
               element={<Companies handleItemClick={navigateToManagementList} />}
