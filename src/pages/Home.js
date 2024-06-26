@@ -3,8 +3,6 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { FaUser } from "react-icons/fa";
-import { TiGroup } from "react-icons/ti";
 import LineChart from "../components/charts/LineChart";
 import PieChart from "../components/charts/PieChart";
 
@@ -97,7 +95,10 @@ const Home = () => {
             </div>
           </div>
           <div className="col-12 col-md-8 p-3">
-            <LineChart />
+
+          </div>
+          <div className="col-12 col-md-4 p-3">
+            <PieChart />
           </div>
         </div>
       </div>

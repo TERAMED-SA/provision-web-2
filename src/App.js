@@ -25,7 +25,7 @@ import { appFirebase } from "./firebase";
 import Occurrence from "./pages/occurrence";
 import Report from "./pages/report";
 import NewSupervision from "./pages/newSupervision";
-
+import Team from "./pages/team";
 import "./App.css";
 import "./Style.css";
 
@@ -111,6 +111,7 @@ function App() {
             <Route path="/occurrence" element={<Occurrence />} />
             <Route path="/Notification" element={<Notification />} />
             <Route path="/mapOnline" element={<MapOnlineComponent />} />
+            <Route path="/team" element={<Team />} />
             <Route
               path="/Companies"
               element={<Companies handleItemClick={navigateToManagementList} />}

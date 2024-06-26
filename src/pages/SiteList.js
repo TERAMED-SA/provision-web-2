@@ -77,7 +77,7 @@ function SiteList() {
       const clientCode = localStorage.getItem("selectedCompany");
 
       const response = await axios.post(
-        `${process.env.REACT_APP_API_URL}companySite/${clientCode}/1162`,
+        `${process.env.REACT_APP_API_URL}companySite/create/${clientCode}/1162`,
         {
           name: newSite.name,
           address: newSite.address,
@@ -91,6 +91,7 @@ function SiteList() {
       toast.success("Site adicionado com sucesso!");
     } catch (error) {
       console.error("Error adding site:", error.message);
+      console.log(error);
       toast.error("Erro ao adicionar o site. Por favor, tente novamente.");
     } finally {
       setIsAddSiteModalOpen(false);

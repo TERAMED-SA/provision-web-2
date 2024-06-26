@@ -11,7 +11,7 @@ import { FaUser } from "react-icons/fa";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { IoIosTime } from "react-icons/io";
-
+import { IoMdPersonAdd } from "react-icons/io";
 import "react-toastify/dist/ReactToastify.css";
 import "./Sidebar.css";
 import logo from "../../assets/logo.png";
@@ -28,7 +28,7 @@ const Sidebar = ({ sidebarOpen, closeSidebar }) => {
   const fetchNotificationData = async () => {
     try {
       const response = await axios.get(
-        `${process.env.REACT_APP_API_URL}notification/00001?size=500`
+        `${process.env.REACT_APP_API_URL}notification/11835?size=500`
       );
       return response.data.data.length;
     } catch (error) {
@@ -40,7 +40,7 @@ const Sidebar = ({ sidebarOpen, closeSidebar }) => {
   const fetchOccurrenceData = async () => {
     try {
       const response = await axios.get(
-        "https://provision-07c1.onrender.com/api/v1/occurrence"
+        "https://provision-07c1.onrender.com/api/v1/occurrence?size=500"
       );
       return response.data.data.length;
     } catch (error) {
@@ -77,7 +77,7 @@ const Sidebar = ({ sidebarOpen, closeSidebar }) => {
 
         // Fetching user count
         const userResponse = await axios.get(
-          "https://provision-07c1.onrender.com/api/v1/supervision"
+          "https://provision-07c1.onrender.com/api/v1/supervision?size=500"
         );
         setUserCount(userResponse.data.data.data.length);
 
@@ -129,7 +129,19 @@ const Sidebar = ({ sidebarOpen, closeSidebar }) => {
             <i className="me-3 fs-5">
               <FaUser />
             </i>
-            <span className="fs-6">Utilizadores</span>
+            <span className="fs-6">Supervisores</span>
+          </Link>
+        </li>
+        <li
+          className={active === 3 ? "active nav-item p-2" : "nav-item p-2"}
+          onClick={(e) => setActive(3)}
+        >
+          <Link to="/team" className="p-1">
+            <i className="me-3 fs-5">
+              <IoMdPersonAdd />
+            </i>
+
+            <span className="fs-6">Funcionários</span>
           </Link>
         </li>
 
@@ -157,7 +169,6 @@ const Sidebar = ({ sidebarOpen, closeSidebar }) => {
           </Link>
         </li>
 
-
         <li
           className={active === 7 ? "active nav-item p-2" : "nav-item p-2"}
           onClick={(e) => setActive(7)}
@@ -177,13 +188,20 @@ const Sidebar = ({ sidebarOpen, closeSidebar }) => {
             <i className="me-3 fs-5">
               <IoEyeSharp />
             </i>
-            <span className="fs-6">Ocorrências <span style={{
-              fontWeight: "bold",
-              background: "red",
-              borderRadius: "10px",
-              padding: "5px",
-              marginLeft: "3px",
-            }}>{equipmentCount}</span></span>
+            <span className="fs-6">
+              Ocorrências{" "}
+              <span
+                style={{
+                  fontWeight: "bold",
+                  background: "red",
+                  borderRadius: "10px",
+                  padding: "5px",
+                  marginLeft: "3px",
+                }}
+              >
+                {equipmentCount}
+              </span>
+            </span>
           </Link>
         </li>
 
@@ -195,13 +213,20 @@ const Sidebar = ({ sidebarOpen, closeSidebar }) => {
             <i className="me-3 fs-5">
               <IoIosTime />
             </i>
-            <span className="fs-7">Supervisão <span style={{
-              fontWeight: "bold",
-              background: "red",
-              borderRadius: "10px",
-              padding: "5px",
-              marginLeft: "3px",
-            }}>{userCount}</span></span>
+            <span className="fs-7">
+              Supervisão{" "}
+              <span
+                style={{
+                  fontWeight: "bold",
+                  background: "red",
+                  borderRadius: "10px",
+                  padding: "5px",
+                  marginLeft: "3px",
+                }}
+              >
+                {userCount}
+              </span>
+            </span>
           </Link>
         </li>
         <li
