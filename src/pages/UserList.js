@@ -70,7 +70,7 @@ const UserList = () => {
     setUsersPerPage(selectedUsersPerPage);
     setPageNumber(0);
   };
-  Modal.setAppElement('#root');
+  Modal.setAppElement("#root");
   const openModal = () => {
     setIsModalOpen(true);
   };
@@ -88,7 +88,7 @@ const UserList = () => {
 
   const handleAddUser = async () => {
     try {
-      const user = localStorage.getItem("userId")
+      const user = localStorage.getItem("userId");
       const response = await axios.post(
         `${process.env.REACT_APP_API_URL}userAuth/signUp?roler=3`,
         {
@@ -103,17 +103,17 @@ const UserList = () => {
           admissionDate: "2000-01-01",
           situation: "efectivo",
           departmentCode: "0009999",
-          mecCoordinator: user
+          mecCoordinator: user,
         }
       );
       if (response.data.data.status === 201) {
         toast.success("Utilizador cadastrado com sucesso");
         setTimeout(() => {
-          window.location.reload()
+          window.location.reload();
         }, 3000);
       }
     } catch (error) {
-      toast.error(error.response.data.data.message)
+      toast.error(error.response.data.data.message);
     }
   };
 
@@ -139,7 +139,7 @@ const UserList = () => {
 
       toast.info("Utilizador actualizado com sucesso");
       setTimeout(() => {
-        window.location.reload()
+        window.location.reload();
       }, 3000);
     } catch (error) {
       console.error("Erro ao salvar usuário:", error.message);
@@ -154,7 +154,7 @@ const UserList = () => {
       // const updatedUsers = users.filter((user) => user.id !== userId);
       // setUsers(updatedUsers);
       // setSelectedUserId(null);
-      toast.warning("Nao podes eliminar um utilizador de momento.")
+      toast.warning("Nao podes eliminar um utilizador de momento.");
     } catch (error) {
       console.error("Erro ao excluir usuário:", error.message);
     }
@@ -191,21 +191,21 @@ const UserList = () => {
                 rows={
                   Array.isArray(users)
                     ? users
-                      .slice(pagesVisited, pagesVisited + usersPerPage)
-                      .map((user, index) => ({
-                        id: index,
-                        avatar: (
-                          <Avatar
-                            name={`${user.name}`}
-                            size="40"
-                            round={true}
-                          />
-                        ),
-                        name: user.name || "",
+                        .slice(pagesVisited, pagesVisited + usersPerPage)
+                        .map((user, index) => ({
+                          id: index,
+                          avatar: (
+                            <Avatar
+                              name={`${user.name}`}
+                              size="40"
+                              round={true}
+                            />
+                          ),
+                          name: user.name || "",
 
-                        phoneNumber: user.phoneNumber || "",
-                        idUser: user._id,
-                      }))
+                          phoneNumber: user.phoneNumber || "",
+                          idUser: user._id,
+                        }))
                     : []
                 }
                 columns={[
@@ -273,14 +273,14 @@ const UserList = () => {
                 className="custom-modal"
                 style={{
                   overlay: {
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center'
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
                   },
                   content: {
-                    width: '80%',
-                    maxWidth: '500px' // Defina o tamanho máximo desejado aqui
-                  }
+                    width: "80%",
+                    maxWidth: "500px", // Defina o tamanho máximo desejado aqui
+                  },
                 }}
                 overlayClassName="custom-modal-overlay"
               >
@@ -386,26 +386,31 @@ const UserList = () => {
                       </select>
                     </div>
                   </div>
-
-
                 </div>
 
-                <div className="form-group text-center"> {/* Adicionando a classe "text-center" para alinhar o conteúdo no centro */}
+                <div className="form-group text-center">
+                  {" "}
+                  {/* Adicionando a classe "text-center" para alinhar o conteúdo no centro */}
                   <div className="row">
                     <div className="col-md-6">
-                      <button className="btn btn-success form-control" onClick={handleAddUser}>
+                      <button
+                        className="btn btn-success form-control"
+                        onClick={handleAddUser}
+                      >
                         Adicionar
                       </button>
                     </div>
 
                     <div className="col-md-6">
-                      <button className="btn btn-danger form-control" onClick={closeModal}>
+                      <button
+                        className="btn btn-danger form-control"
+                        onClick={closeModal}
+                      >
                         Fechar
                       </button>
                     </div>
                   </div>
                 </div>
-
               </Modal>
 
               <Modal
@@ -415,14 +420,14 @@ const UserList = () => {
                 className="custom-modal"
                 style={{
                   overlay: {
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center'
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
                   },
                   content: {
-                    width: '80%',
-                    maxWidth: '500px' // Defina o tamanho máximo desejado aqui
-                  }
+                    width: "80%",
+                    maxWidth: "500px", // Defina o tamanho máximo desejado aqui
+                  },
                 }}
                 overlayClassName="custom-modal-overlay"
               >
@@ -481,7 +486,10 @@ const UserList = () => {
                         placeholder="Número de Telefone"
                         value={editedUser.phoneNumber || ""}
                         onChange={(e) =>
-                          setEditedUser({ ...editedUser, phoneNumber: e.target.value })
+                          setEditedUser({
+                            ...editedUser,
+                            phoneNumber: e.target.value,
+                          })
                         }
                       />
                     </div>
@@ -512,21 +520,25 @@ const UserList = () => {
                 <div className="row">
                   <div className="col-md-6">
                     <div className="form-group">
-                      <button className="btn btn-primary form-control" onClick={updateUser}>
+                      <button
+                        className="btn btn-primary form-control"
+                        onClick={updateUser}
+                      >
                         <FontAwesomeIcon icon={faSave} className="" /> Salvar
                       </button>
                     </div>
                   </div>
                   <div className="col-md-6">
                     <div className="form-group">
-                      <button className="btn btn-danger form-control" onClick={() => setIsEditModalOpen(false)}>
+                      <button
+                        className="btn btn-danger form-control"
+                        onClick={() => setIsEditModalOpen(false)}
+                      >
                         <FontAwesomeIcon icon={faTimes} className=" " /> Fechar
                       </button>
                     </div>
                   </div>
                 </div>
-
-
               </Modal>
             </>
           )}
