@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faEdit,
@@ -29,6 +30,7 @@ const UserList = () => {
   const [employeeId, setEmployeeId] = useState("");
 
   const [users, setUsers] = useState([]);
+  const [filteredUsers, setFilteredUsers] = useState([]);
   const [type, setType] = useState("");
   const [editingUserId, setEditingUserId] = useState(null);
   const [editedUser, setEditedUser] = useState({});
@@ -36,13 +38,20 @@ const UserList = () => {
   const [pageNumber, setPageNumber] = useState(0);
   const [usersPerPage, setUsersPerPage] = useState(8);
   const [isLoading, setIsLoading] = useState(false);
+  const [searchTerm, setSearchTerm] = useState(""); // Novo estado para o termo de pesquisa
   const pagesVisited = pageNumber * usersPerPage;
-  const pageCount = Math.ceil(users.length / usersPerPage);
+  const pageCount = Math.ceil(filteredUsers.length / usersPerPage);
 
   useEffect(() => {
     fetchUsers();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    const filtered = users.filter(user => 
+      user.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    setFilteredUsers(filtered);
+  }, [searchTerm, users]);
 
   async function fetchUsers() {
     try {
@@ -53,6 +62,7 @@ const UserList = () => {
       );
       if (response.data && Array.isArray(response.data.data)) {
         setUsers(response.data.data);
+        setFilteredUsers(response.data.data);
       }
       setIsLoading(false);
     } catch (error) {
@@ -70,6 +80,7 @@ const UserList = () => {
     setUsersPerPage(selectedUsersPerPage);
     setPageNumber(0);
   };
+
   Modal.setAppElement("#root");
   const openModal = () => {
     setIsModalOpen(true);
@@ -125,7 +136,6 @@ const UserList = () => {
 
   async function updateUser() {
     try {
-      // eslint-disable-next-line no-unused-vars
       const response = await axios.put(
         `${process.env.REACT_APP_API_URL}user/updateMe/${editedUser._id}`,
         {
@@ -148,12 +158,6 @@ const UserList = () => {
 
   const handleDeleteUser = async (userId) => {
     try {
-      // await axios.delete(
-      //   `${process.env.REACT_APP_API_URL}user/deleteMe/${userId}`
-      // );
-      // const updatedUsers = users.filter((user) => user.id !== userId);
-      // setUsers(updatedUsers);
-      // setSelectedUserId(null);
       toast.warning("Nao podes eliminar um utilizador de momento.");
     } catch (error) {
       console.error("Erro ao excluir usuário:", error.message);
@@ -163,9 +167,19 @@ const UserList = () => {
   return (
     <div className="container4">
       <h1 style={{ textAlign: "center" }}>UTILIZADORES</h1>
-      <div className="container-fluid">
+      <div className="container-fluid">  <Link to="/Home" className="p-1">Início </Link> / <span>Utilizadores</span>
+      <br></br> <br></br> 
         <div className="space">
-          <div className=""></div>
+       
+          <div className="">
+            <input
+              type="text"
+              placeholder="Pesquisar usuários"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="form-control mb-3"
+            />
+          </div>
           <div className="">
             <button className="btn btn-primary mb-3" onClick={openModal}>
               <FontAwesomeIcon icon={faPlus} /> Adicionar Usuário
@@ -179,18 +193,18 @@ const UserList = () => {
             </div>
           )}
 
-          {!isLoading && users.length === 0 && (
+          {!isLoading && filteredUsers.length === 0 && (
             <div className="text-center text-black mt-4">
               Nenhum dado disponível
             </div>
           )}
 
-          {!isLoading && users.length > 0 && (
+          {!isLoading && filteredUsers.length > 0 && (
             <>
               <DataGrid
                 rows={
-                  Array.isArray(users)
-                    ? users
+                  Array.isArray(filteredUsers)
+                    ? filteredUsers
                         .slice(pagesVisited, pagesVisited + usersPerPage)
                         .map((user, index) => ({
                           id: index,
@@ -202,7 +216,6 @@ const UserList = () => {
                             />
                           ),
                           name: user.name || "",
-
                           phoneNumber: user.phoneNumber || "",
                           idUser: user._id,
                         }))
@@ -243,7 +256,7 @@ const UserList = () => {
                 pageSize={usersPerPage}
                 pagination
                 onPageChange={handlePageChange}
-                rowCount={users.length}
+                rowCount={filteredUsers.length}
                 pageCount={pageCount}
               />
               <Pagination>
@@ -265,286 +278,179 @@ const UserList = () => {
                   disabled={pageNumber === pageCount - 1}
                 />
               </Pagination>
-
-              <Modal
-                isOpen={isModalOpen}
-                onRequestClose={closeModal}
-                contentLabel="Adicionar Usuário"
-                className="custom-modal"
-                style={{
-                  overlay: {
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                  },
-                  content: {
-                    width: "80%",
-                    maxWidth: "500px", // Defina o tamanho máximo desejado aqui
-                  },
-                }}
-                overlayClassName="custom-modal-overlay"
-              >
-                <h2>Cadastrar utilizador</h2>
-                <div className="row">
-                  <div className="col-md-12">
-                    <div className="form-group">
-                      <label htmlFor="name" className="text-modal text-black">
-                        Nome
-                      </label>
-                      <input
-                        type="text"
-                        id="name"
-                        className="form-control"
-                        placeholder="Nome"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="col-md-12">
-                    <div className="form-group">
-                      <label htmlFor="email" className="text-modal text-black">
-                        Email
-                      </label>
-                      <input
-                        type="email"
-                        id="email"
-                        className="form-control"
-                        placeholder="Email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="col-md-6">
-                    <div className="form-group">
-                      <label htmlFor="phone" className="text-modal text-black">
-                        Número de Telefone
-                      </label>
-                      <input
-                        type="tel"
-                        id="phone"
-                        className="form-control"
-                        placeholder="Número de Telefone"
-                        value={phoneNumber}
-                        onChange={(e) => setPhoneNumber(e.target.value)}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="col-md-6">
-                    <div className="form-group">
-                      <label
-                        htmlFor="address"
-                        className="text-modal text-black"
-                      >
-                        Endereço
-                      </label>
-                      <input
-                        type="text"
-                        id="address"
-                        className="form-control"
-                        placeholder="Endereço"
-                        value={address}
-                        onChange={(e) => setAddress(e.target.value)}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="col-md-6">
-                    <div className="form-group">
-                      <label htmlFor="phone" className="text-modal text-black">
-                        Nª Mec
-                      </label>
-                      <input
-                        type="number"
-                        id="mec"
-                        className="form-control"
-                        placeholder="Digite o número mec"
-                        value={employeeId}
-                        onChange={(e) => setEmployeeId(e.target.value)}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="col-md-6">
-                    <div className="form-group">
-                      <label htmlFor="gender" className="text-modal text-black">
-                        Gênero
-                      </label>
-                      <select
-                        id="gender"
-                        className="form-control"
-                        value={gender}
-                        onChange={(e) => setGender(e.target.value)}
-                      >
-                        <option value="">Selecione um género</option>
-                        <option value="Masculino">Masculino</option>
-                        <option value="Feminino">Feminino</option>
-                      </select>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="form-group text-center">
-                  {" "}
-                  {/* Adicionando a classe "text-center" para alinhar o conteúdo no centro */}
-                  <div className="row">
-                    <div className="col-md-6">
-                      <button
-                        className="btn btn-success form-control"
-                        onClick={handleAddUser}
-                      >
-                        Adicionar
-                      </button>
-                    </div>
-
-                    <div className="col-md-6">
-                      <button
-                        className="btn btn-danger form-control"
-                        onClick={closeModal}
-                      >
-                        Fechar
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </Modal>
-
-              <Modal
-                isOpen={isEditModalOpen}
-                onRequestClose={() => setIsEditModalOpen(false)}
-                contentLabel="Editar Usuário"
-                className="custom-modal"
-                style={{
-                  overlay: {
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                  },
-                  content: {
-                    width: "80%",
-                    maxWidth: "500px", // Defina o tamanho máximo desejado aqui
-                  },
-                }}
-                overlayClassName="custom-modal-overlay"
-              >
-                <h2>Actualiza utilizador</h2>
-                <div className="row">
-                  <div className="col-md-12">
-                    <div className="form-group">
-                      <label htmlFor="name" className="text-modal text-black">
-                        Nome
-                      </label>
-                      <input
-                        type="text"
-                        id="name"
-                        className="form-control"
-                        placeholder="Nome"
-                        value={editedUser?.name || ""}
-                        onChange={(e) =>
-                          setEditedUser({ ...editedUser, name: e.target.value })
-                        }
-                      />
-                    </div>
-                  </div>
-
-                  <div className="col-md-12">
-                    <div className="form-group">
-                      <label htmlFor="email" className="text-modal text-black">
-                        Email
-                      </label>
-                      <input
-                        type="email"
-                        id="email"
-                        className="form-control"
-                        placeholder="Email"
-                        value={editedUser.email || ""}
-                        onChange={(e) =>
-                          setEditedUser({
-                            ...editedUser,
-                            email: e.target.value,
-                          })
-                        }
-                      />
-                    </div>
-                  </div>
-                  <div className="col-md-6">
-                    <div className="form-group">
-                      <label
-                        htmlFor="phoneNumber"
-                        className="text-modal text-black"
-                      >
-                        Número de Telefone
-                      </label>
-                      <input
-                        type="tel"
-                        id="phoneNumber"
-                        className="form-control"
-                        placeholder="Número de Telefone"
-                        value={editedUser.phoneNumber || ""}
-                        onChange={(e) =>
-                          setEditedUser({
-                            ...editedUser,
-                            phoneNumber: e.target.value,
-                          })
-                        }
-                      />
-                    </div>
-                  </div>
-
-                  <div className="col-md-6">
-                    <div className="form-group">
-                      <label htmlFor="gender" className="text-modal text-black">
-                        Gênero
-                      </label>
-                      <select
-                        id="gender"
-                        className="form-control"
-                        value={editedUser.gender || ""}
-                        onChange={(e) =>
-                          setEditedUser({
-                            ...editedUser,
-                            gender: e.target.value,
-                          })
-                        }
-                      >
-                        <option value="Male">Masculino</option>
-                        <option value="Female">Feminino</option>
-                      </select>
-                    </div>
-                  </div>
-                </div>
-                <div className="row">
-                  <div className="col-md-6">
-                    <div className="form-group">
-                      <button
-                        className="btn btn-primary form-control"
-                        onClick={updateUser}
-                      >
-                        <FontAwesomeIcon icon={faSave} className="" /> Salvar
-                      </button>
-                    </div>
-                  </div>
-                  <div className="col-md-6">
-                    <div className="form-group">
-                      <button
-                        className="btn btn-danger form-control"
-                        onClick={() => setIsEditModalOpen(false)}
-                      >
-                        <FontAwesomeIcon icon={faTimes} className=" " /> Fechar
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </Modal>
             </>
           )}
         </div>
       </div>
       <ToastContainer />
+      <Modal
+        isOpen={isModalOpen}
+        onRequestClose={closeModal}
+        className="custom-modal"
+        overlayClassName="custom-modal-overlay"
+      >
+        <h2>Adicionar Utilizador</h2>
+        <form onSubmit={handleAddUser}>
+          <div className="form-group">
+            <label>Nome:</label>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="form-control"
+              required
+            />
+          </div>
+          <div className="form-group">
+            <label>Email:</label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="form-control"
+              required
+            />
+          </div>
+          <div className="form-group">
+            <label>Telefone:</label>
+            <input
+              type="text"
+              value={phoneNumber}
+              onChange={(e) => setPhoneNumber(e.target.value)}
+              className="form-control"
+              required
+            />
+          </div>
+          <div className="form-group">
+            <label>Endereço:</label>
+            <input
+              type="text"
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              className="form-control"
+              required
+            />
+          </div>
+          <div className="form-group">
+            <label>Gênero:</label>
+            <select
+              value={gender}
+              onChange={(e) => setGender(e.target.value)}
+              className="form-control"
+              required
+            >
+              <option value="">Selecione o gênero</option>
+              <option value="Masculino">Masculino</option>
+              <option value="Feminino">Feminino</option>
+              <option value="Outro">Outro</option>
+            </select>
+          </div>
+          <div className="form-group">
+            <label>Employee ID:</label>
+            <input
+              type="text"
+              value={employeeId}
+              onChange={(e) => setEmployeeId(e.target.value)}
+              className="form-control"
+              required
+            />
+          </div>
+          <button type="submit" className="btn btn-primary">
+            <FontAwesomeIcon icon={faSave} /> Salvar
+          </button>
+          <button
+            type="button"
+            className="btn btn-secondary"
+            onClick={closeModal}
+          >
+            <FontAwesomeIcon icon={faTimes} /> Cancelar
+          </button>
+        </form>
+      </Modal>
+      <Modal
+        isOpen={isEditModalOpen}
+        onRequestClose={() => setIsEditModalOpen(false)}
+        className="custom-modal"
+        overlayClassName="custom-modal-overlay"
+      >
+        <h2>Editar Utilizador</h2>
+        <form onSubmit={updateUser}>
+          <div className="form-group">
+            <label>Nome:</label>
+            <input
+              type="text"
+              value={editedUser.name}
+              onChange={(e) =>
+                setEditedUser({ ...editedUser, name: e.target.value })
+              }
+              className="form-control"
+              required
+            />
+          </div>
+          <div className="form-group">
+            <label>Email:</label>
+            <input
+              type="email"
+              value={editedUser.email}
+              onChange={(e) =>
+                setEditedUser({ ...editedUser, email: e.target.value })
+              }
+              className="form-control"
+              required
+            />
+          </div>
+          <div className="form-group">
+            <label>Telefone:</label>
+            <input
+              type="text"
+              value={editedUser.phoneNumber}
+              onChange={(e) =>
+                setEditedUser({ ...editedUser, phoneNumber: e.target.value })
+              }
+              className="form-control"
+              required
+            />
+          </div>
+          <div className="form-group">
+            <label>Endereço:</label>
+            <input
+              type="text"
+              value={editedUser.address}
+              onChange={(e) =>
+                setEditedUser({ ...editedUser, address: e.target.value })
+              }
+              className="form-control"
+              required
+            />
+          </div>
+          <div className="form-group">
+            <label>Gênero:</label>
+            <select
+              value={editedUser.gender}
+              onChange={(e) =>
+                setEditedUser({ ...editedUser, gender: e.target.value })
+              }
+              className="form-control"
+              required
+            >
+              <option value="">Selecione o gênero</option>
+              <option value="Masculino">Masculino</option>
+              <option value="Feminino">Feminino</option>
+              <option value="Outro">Outro</option>
+            </select>
+          </div>
+          <button type="submit" className="btn btn-primary">
+            <FontAwesomeIcon icon={faSave} /> Salvar
+          </button>
+          <button
+            type="button"
+            className="btn btn-secondary"
+            onClick={() => setIsEditModalOpen(false)}
+          >
+            <FontAwesomeIcon icon={faTimes} /> Cancelar
+          </button>
+        </form>
+      </Modal>
     </div>
   );
 };

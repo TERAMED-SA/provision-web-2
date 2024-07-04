@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import Avatar from "react-avatar"; // Importa o componente Avatar
 import { css } from "@emotion/react";
@@ -60,11 +61,13 @@ const Companies = () => {
     fetchCompanies();
   }, [sortAsc]); // Adiciona sortAsc à lista de dependências
 
-  // Handle click event for company item
-  const handleItemClick = (clientCode) => {
-    localStorage.setItem("selectedCompany", clientCode);
-    navigate("/managementList");
-  };
+// Handle click event for company item
+const handleItemClick = (clientCode) => {
+  localStorage.setItem("selectedCompany", clientCode);
+  navigate("/managementList");
+};
+
+
 
   const createCompany = async (clientName, clientCode) => {
     try {
@@ -132,15 +135,16 @@ const Companies = () => {
   };
 
   return (
-    <div className="container4 mr-2" style={{ height: "89vh" }}>
-      <h2 style={{ fontSize: "50px" }}>
+    <div className="container4">
+      <h1 style={{ textAlign: "center" }}>
         CLIENTES <span className="badge badge-secondary">{numClients}</span>
-      </h2>
-      <div className="container-fluid">
+      </h1>
+      <div className="container-fluid"><Link to="/Home" className="p-1">Início </Link> / <span>Clientes</span>
+      <br></br> <br></br> 
         <div className="space">
-          <div className=""></div>
+        
           <div className="">
-            <div className="input-group mb-3">
+           
               <input
                 type="text"
                 className="form-control"
@@ -148,7 +152,7 @@ const Companies = () => {
                 value={searchTerm}
                 onChange={handleSearch}
               />
-            </div>
+           
           </div>
         </div>
         <div className="container4">

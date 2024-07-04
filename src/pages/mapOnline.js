@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import "bootstrap/dist/css/bootstrap.css";
 import axios from "axios";
+import { Link, useNavigate } from "react-router-dom";
 
 const MapOnlineComponent = () => {
     const mapContainerRef = useRef(null);
@@ -89,12 +90,18 @@ const MapOnlineComponent = () => {
     }, [map, usersMap]);
 
     return (
+        <div className="container4">
+      <h1 style={{ textAlign: "center" }}>
+     SUPERVISORES ONLINE <span className="badge badge-secondary"></span>
+    </h1>
+        <div className="container-fluid"><Link to="/Home" className="p-1">Início </Link> /<Link to="/Map" className="p-1">Rota</Link> / <span>Supervisores Online</span>
         <div className="row">
             <div
                 ref={mapContainerRef}
                 style={{ height: "80vh", width: "100%", marginTop: "20px" }}
             ></div>
         </div>
+        </div>        </div>
     );
 };
 

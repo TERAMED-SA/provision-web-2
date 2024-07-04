@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
+import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faEdit,
@@ -216,10 +217,21 @@ const Team = () => {
 
   return (
     <div className="container4">
-      <h1 style={{ textAlign: "center" }}>Funcionários</h1>
-      <div className="container-fluid">
+      <h1 style={{ textAlign: "center" }}>FUNCIONÁRIOS</h1>
+      <div className="container-fluid"><Link to="/Home" className="p-1">Início </Link> / <span>Funcionários</span>
+      <br></br> <br></br> 
         <div className="space">
-          <div className=""></div>
+          <div className="">
+          <input
+                  type="text"
+                  className="form-control mb-3"
+                  id="search"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Pesquisar funcionário"
+                    
+                />
+          </div>
           <div className="">
             <button className="btn btn-primary mb-3" onClick={openModal}>
               <FontAwesomeIcon icon={faPlus} /> Adicionar Funcionário
@@ -241,17 +253,7 @@ const Team = () => {
 
           {!isLoading && users.length > 0 && (
             <>
-              <div className="form-group">
-                <h4 htmlFor="search"><FcSearch /> Pesquisar Funcionário</h4>
-                <input
-                  type="text"
-                  className="form-control"
-                  id="search"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  placeholder="Digite o nome do funcionário"
-                />
-              </div>
+             
 
               <DataGrid
                 rows={filteredUsers.map((user) => ({

@@ -1,4 +1,5 @@
 import "./Home.css";
+import { Link } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import React, { useState, useEffect } from "react";
@@ -47,7 +48,14 @@ const Home = () => {
   }, []);
 
   return (
-    <div className="p-3 bg-light">
+
+    <div className="container4">
+    <h1 style={{ textAlign: "center" }}>
+  INÍCIO <span className="badge badge-secondary"></span>
+    </h1>
+        <div className="container-fluid"><Link to="/Home" className="p-1">Início </Link>
+        <br></br> <br></br> 
+
       <div className="container-fluid">
         <div className="row">
           <div className="col-12 col-sm-6 col-md-4 col-lg-3 p-3">
@@ -103,6 +111,8 @@ const Home = () => {
         </div>
       </div>
     </div>
+    </div>
+
   );
 };
 

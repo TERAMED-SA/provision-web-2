@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from "react";
 import "bootstrap/dist/css/bootstrap.css";
 import axios from "axios";
@@ -10,7 +11,7 @@ import Button from "react-bootstrap/Button";
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import customMarkerIcon from "../assets/logo.png";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 const MapComponent = () => {
   const mapContainerRef = useRef(null);
   const [map, setMap] = useState(null);
@@ -220,11 +221,18 @@ const MapComponent = () => {
   }
 
   return (
+
+    <div className="container4">
+      <h1 style={{ textAlign: "center" }}>
+    ROTA DOS SUPERVISORES <span className="badge badge-secondary"></span>
+    </h1>
+        <div className="container-fluid"><Link to="/Home" className="p-1">Início </Link> / <span>Rotas</span>
+
     <div className="container-fluid">
       <div className="row">
         <div className="col-md-4">
           <div className="mt-4">
-            <h2>Utilizadores</h2>
+            <h2>Supervisores</h2>
             {isLoading && (
               <div className="text-center mt-4">
                 <CircularProgress size={80} thickness={5} />
@@ -310,7 +318,7 @@ const MapComponent = () => {
       </div>
 
       <ToastContainer />
-    </div>
+    </div>  </div>  </div>
   );
 };
 

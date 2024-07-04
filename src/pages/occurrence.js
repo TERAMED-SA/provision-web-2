@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import CircularProgress from "@mui/material/CircularProgress";
@@ -109,7 +110,13 @@ const NotificationList = () => {
         setModalShow(false);
     };
 
-    return (
+    return (   
+    <div className="container4 mr-2" style={{ height: "89vh" }}>
+         <h1 style={{ textAlign: "center" }}>
+         OCORRÊNCIAS <span className="badge badge-secondary"></span>
+        </h1>
+            <div className="container-fluid"><Link to="/Home" className="p-1">Início </Link> / <span>Ocorrências</span>
+            <br></br> <br></br> 
         <div className="container">
             <div className="space">
                 <div className=""></div>
@@ -127,8 +134,9 @@ const NotificationList = () => {
                     )}
                 </div>
             </div>
-            <div className="container-fluid">
-                <h1>Ocorrência</h1>
+         
+            
+               
                 {isLoading ? (
                     <div className="text-center mt-4">
                         <CircularProgress size={80} thickness={5} />
@@ -253,6 +261,7 @@ const NotificationList = () => {
                 )}
             </div>
             <ToastContainer />
+        </div>
         </div>
     );
 };

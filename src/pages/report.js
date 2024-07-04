@@ -1,5 +1,7 @@
+import { Link } from "react-router-dom";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+
 import CircularProgress from "@mui/material/CircularProgress";
 import { DataGrid } from "@mui/x-data-grid";
 import { format } from "date-fns";
@@ -31,9 +33,13 @@ const Report = () => {
     }
 
     return (
-        <div className="container">
-            <div className="container-fluid">
-                <h1>Relatórios</h1>
+        <div className="container4 mr-2" style={{ height: "89vh" }}>
+        <h1 style={{ textAlign: "center" }}>
+         RELATÓRIOS <span className="badge badge-secondary"></span>
+        </h1>
+            <div className="container-fluid"><Link to="/Home" className="p-1">Início </Link> / <span>Relatórios</span>
+            <br></br> <br></br> 
+            
                 {isLoading ? (
                     <div className="text-center mt-4">
                         <CircularProgress size={80} thickness={5} />
