@@ -1,4 +1,3 @@
-import { Link } from "react-router-dom";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import CircularProgress from "@mui/material/CircularProgress";
@@ -15,7 +14,6 @@ import "react-toastify/dist/ReactToastify.css";
 import { AlignCenter } from "react-bootstrap-icons";
 import { FaFilePdf } from "react-icons/fa6";
 import { HiClipboardDocumentList } from "react-icons/hi2";
-
 const NotificationList = () => {
   const [notifications, setNotifications] = useState([]);
   const [selectedNotification, setSelectedNotification] = useState(null);
@@ -331,17 +329,11 @@ const NotificationList = () => {
     });
   };
   return (
-    <div className="container4" >
-    <h2>
-    SUPERVISÃO <span className="badge badge-secondary"></span>
-    </h2>
-        <div className="container-fluid"><Link to="/Home" className="p-1">Início </Link> / <span>Supervisão</span>
-        <br></br> <br></br> 
     <div className="container">
       <div className="container-fluid">
-    
+        <h1>Supervisão</h1>
         {isLoading ? (
-          <div className="text-center mt-8">
+          <div className="text-center mt-4">
             <CircularProgress size={80} thickness={5} />
           </div>
         ) : notifications.length === 0 ? (
@@ -531,7 +523,7 @@ const NotificationList = () => {
         )}
       </div>
       <ToastContainer />
-    </div>    </div>    </div>
+    </div>
   );
 };
 

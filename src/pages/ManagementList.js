@@ -60,8 +60,6 @@ const ManagementList = () => {
       content: "Gerar relatório do cliente",
       icon: faClipboardCheck,
       onClick: () => {
-        // Adicione sua lógica de função aqui
-        // generatePDF();
         toast.error("Funcionalidade ainda não implementada");
       },
     },
@@ -83,13 +81,37 @@ const ManagementList = () => {
 
   const [selectedEmployee] = useState(null);
   const [selectedClientCode, setSelectedClientCode] = useState("");
+  const [companyName, setCompanyName] = useState("");
 
   useEffect(() => {
     // Buscar o código do cliente no localStorage
     const clientCode = localStorage.getItem("selectedCompany");
+    console.log("Client Code from localStorage:", clientCode); // Verificação do clientCode
     if (clientCode) {
       setSelectedClientCode(clientCode);
     }
+
+    // Buscar os dados das companhias da API
+    const fetchCompanies = async () => {
+      try {
+        const response = await axios.get('https://provision-07c1.onrender.com/api/v1/company?size=500');
+        const companies = response.data.data.data;
+        console.log("Companies data:", companies); // Verificação dos dados da API
+        
+        // Encontrar a empresa correspondente ao código do cliente
+        const company = companies.find(comp => comp.clientCode === clientCode);
+        if (company) {
+          setCompanyName(company.name);
+          console.log("Company found:", company); // Verificação da empresa encontrada
+        } else {
+          console.log("No company found for the given clientCode");
+        }
+      } catch (error) {
+        console.error("Erro ao buscar as companhias: ", error);
+      }
+    };
+
+    fetchCompanies();
   }, []);
 
   return (
@@ -98,7 +120,7 @@ const ManagementList = () => {
         DETALHES <span className="badge badge-secondary"></span>
       </h2>
       <div className="container-fluid">
-        <Link to="/Home" className="p-1">Início </Link> / <Link to="/Companies" className="p-1">Cliente </Link> / <span className="cliente-code">{selectedClientCode}</span>
+        <Link to="/Home" className="p-1">Início </Link> / <Link to="/Companies" className="p-1">Cliente </Link> / <span className="cliente-code">{companyName}</span>
         <br /> <br /> 
         <div className="container-fluid">
           <h1 className="mb-4"> </h1>

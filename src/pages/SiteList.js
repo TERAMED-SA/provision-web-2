@@ -222,7 +222,6 @@ function SiteList() {
             { field: "id", headerName: "ID", width: 60 },
             { field: "name", headerName: "Nome", width: 800 },
             { field: "address", headerName: "Endereço", width: 200 },
-            { field: "mec", headerName: "MEC", width: 150 },
             { field: "ctClient", headerName: "CT Client", width: 150 },
             { field: "costCenter", headerName: "Cost Center", width: 150 },
             {
