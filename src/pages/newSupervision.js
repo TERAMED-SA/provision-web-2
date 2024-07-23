@@ -209,9 +209,7 @@ const NotificationList = () => {
     };
 
     const createdAt = new Date(data.createdAt);
-    const formattedDate = `${createdAt.getFullYear()}-${String(
-      createdAt.getMonth() + 1
-    ).padStart(2, "0")}-${String(createdAt.getDate()).padStart(2, "0")}`;
+    const formattedDate = `${String(createdAt.getDate()).padStart(2, '0')}-${String(createdAt.getMonth() + 1).padStart(2, '0')}-${createdAt.getFullYear()}`;
     const documentDefinition = {
       footer: function (currentPage, pageCount) {
         return {
@@ -244,7 +242,7 @@ const NotificationList = () => {
         { text: `Nome: ${data.name}` },
         { text: `Código do Supervisor: ${data.supervisorCode}` },
         { text: `Tempo da supervisão: ${data.time}` },
-        { text: `Feito em: ${data.createdAt.toLocaleString()}` },
+        { text: `Feito em: ${formattedDate}` },
         { text: "" },
         { text: "Informação do Site", bold: 1000, margin: [20, 10, 0, 5] },
         { text: `Nome do Site: ${data.siteName}` },
@@ -470,6 +468,9 @@ const NotificationList = () => {
     },
   ];
 
+  const createdAt = new Date(modalInfo.createdAt);
+  const modalFormatedDate = `${String(createdAt.getDate()).padStart(2, '0')}-${String(createdAt.getMonth() + 1).padStart(2, '0')}-${createdAt.getFullYear()}`;
+
   return (
     <div style={{ height: 650, width: "100%", marginTop: "20px" }}>
       <h2>
@@ -528,7 +529,7 @@ const NotificationList = () => {
                   <p>Nome: {localStorage.getItem("supervisorName")}</p>
                   <p>Código do supervisor: {modalInfo.supervisorCode}</p>
                   <p>Tempo da supersão: {modalInfo.time}</p>
-                  <p>Feito em: {modalInfo.createdAt} </p>
+                  <p>Feito em: {modalFormatedDate} </p>
                   <hr />
                   <h3 style={{ marginLeft: "20px" }}>Informação do site</h3>
                   <p>Nome: {siteInfo.name}</p>
