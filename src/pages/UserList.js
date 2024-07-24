@@ -967,7 +967,7 @@ const UserList = () => {
           overlayClassName="custom-modal-overlay"
         >
           <h2>Sites Supervisionados</h2>
-          <div className="site-list">
+          <div className="site-list" style={{ minWidth: 600, maxWidth: 600 }}>
             {loadingSites ? (
               "Carregando..."
             ) : (
@@ -975,23 +975,26 @@ const UserList = () => {
                 {sites.length === 0 ? (
                   <p>Nenhum site encontrado.</p>
                 ) : (
-                  <div style={{ padding: '10px' }}>
-                    {sites.map(site => (
-                      <div
-                        key={site._id}
-                        style={{
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          padding: '10px',
-                          borderBottom: '1px solid #ddd'
-                        }}
-                      >
-                        <div style={{ flex: 1 }}>{site.name}</div>
-                        <div style={{ flex: 1 }}>{site.clientCode}</div>
-                        <div style={{ flex: 1 }}>{site.address || 'N/A'}</div>
-                      </div>
-                    ))}
-                  </div>
+                  <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                    <thead>
+                      <tr>
+                        <th>Nome do Site</th>
+                        <th>Código do Cliente</th>
+                        <th>Endereço</th>
+                        <th>Centro de Custo</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {sites.map(site => (
+                        <tr key={site._id} style={{ borderBottom: '1px solid #ddd' }}>
+                          <td>{site.name || '--'}</td>
+                          <td>{site.clientCode || '--'}</td>
+                          <td>{site.address || '--'}</td>
+                          <td>{site.costCenter || '--'}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 )}
               </>
             )}
@@ -1002,10 +1005,9 @@ const UserList = () => {
             </button>
           </div>
         </Modal>
-
       </div>
       <ToastContainer />
-    </div>
+    </div >
   );
 };
 
