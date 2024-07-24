@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import "./Calendar.css"; // Importe o arquivo CSS com o estilo adicional
+import "./Calendar.css";
 
 const Calendar = () => {
   const [selectedStartDate, setSelectedStartDate] = useState(null);
