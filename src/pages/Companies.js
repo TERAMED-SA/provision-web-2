@@ -61,13 +61,11 @@ const Companies = () => {
     fetchCompanies();
   }, [sortAsc]); // Adiciona sortAsc à lista de dependências
 
-// Handle click event for company item
-const handleItemClick = (clientCode) => {
-  localStorage.setItem("selectedCompany", clientCode);
-  navigate("/managementList");
-};
-
-
+  // Handle click event for company item
+  const handleItemClick = (clientCode) => {
+    localStorage.setItem("selectedCompany", clientCode);
+    navigate("/managementList");
+  };
 
   const createCompany = async (clientName, clientCode) => {
     try {
@@ -75,19 +73,19 @@ const handleItemClick = (clientCode) => {
         `${process.env.REACT_APP_API_URL}company/create`,
         {
           name: clientName,
-          clientCode: clientCode
+          clientCode: clientCode,
         }
       );
       if (response.data.status === 200) {
         toast.success("Cliente cadastrado com sucesso");
         setTimeout(() => {
-          window.location.reload()
+          window.location.reload();
         }, 3000);
       }
     } catch (error) {
-      toast.error(error.response.data.message)
+      toast.error(error.response.data.message);
     }
-  }
+  };
   // Função para inverter a ordem dos nomes das empresas
   const toggleSortOrder = () => {
     setSortAsc(!sortAsc); // Alterna entre ordem crescente e decrescente
@@ -112,7 +110,7 @@ const handleItemClick = (clientCode) => {
   const handleConfirmAddClient = () => {
     // Aqui você pode adicionar a lógica para adicionar o cliente
     setShowModal(false);
-    toast.warning("Funcionalidade ainda não foi implementada")
+    toast.warning("Funcionalidade ainda não foi implementada");
   };
 
   // Função para lidar com a pesquisa de clientes
@@ -139,20 +137,21 @@ const handleItemClick = (clientCode) => {
       <h1 style={{ textAlign: "center" }}>
         CLIENTES <span className="badge badge-secondary">{numClients}</span>
       </h1>
-      <div className="container-fluid"><Link to="/Home" className="p-1">Início </Link> / <span>Clientes</span>
-      <br></br> <br></br> 
+      <div className="container-fluid">
+        <Link to="/Home" className="p-1">
+          Início{" "}
+        </Link>{" "}
+        / <span>Clientes</span>
+        <br></br> <br></br>
         <div className="space">
-        
           <div className="">
-           
-              <input
-                type="text"
-                className="form-control"
-                placeholder="Nome ou código cliente"
-                value={searchTerm}
-                onChange={handleSearch}
-              />
-           
+            <input
+              type="text"
+              className="form-control"
+              placeholder="Nome ou código cliente"
+              value={searchTerm}
+              onChange={handleSearch}
+            />
           </div>
         </div>
         <div className="container4">
@@ -189,8 +188,14 @@ const handleItemClick = (clientCode) => {
                   <FontAwesomeIcon icon={faUserPlus} />
                   &nbsp; Adicionar Cliente
                 </button>
-                <button className="btn btn-success"><MdPeopleAlt />&nbsp;Ativo</button>
-                <button className="btn btn-danger"><MdGroupOff />&nbsp;Inativos</button>
+                <button className="btn btn-success">
+                  <MdPeopleAlt />
+                  &nbsp;Ativo
+                </button>
+                <button className="btn btn-danger">
+                  <MdGroupOff />
+                  &nbsp;Inativos
+                </button>
               </div>
 
               {/* Renderização condicional com base no modo de visualização */}
@@ -198,30 +203,32 @@ const handleItemClick = (clientCode) => {
                 {searchTerm && searchResults.length > 0 ? (
                   <div>
                     {viewMode === "list" ? (
-                      <table>
-                        <tbody>
-                          {searchResults.map((company, index) => (
-                            <tr
-                              key={index}
-                              onClick={() =>
-                                handleItemClick(company.clientCode)
-                              }
-                              style={{ cursor: "pointer" }}
-                            >
-                              <td className="company-name">
-                                {/* Utiliza o componente Avatar para mostrar as iniciais do nome da empresa */}
-                                <Avatar
-                                  className="justify-content-center align-items-center"
-                                  name={company.name}
-                                  size="50"
-                                  round={true}
-                                />
-                                {company.name}
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
+                      <div style={{ overflowY: "auto", maxHeight: "700px" }}>
+                        <table>
+                          <tbody>
+                            {searchResults.map((company, index) => (
+                              <tr
+                                key={index}
+                                onClick={() =>
+                                  handleItemClick(company.clientCode)
+                                }
+                                style={{ cursor: "pointer" }}
+                              >
+                                <td className="company-name">
+                                  {/* Utiliza o componente Avatar para mostrar as iniciais do nome da empresa */}
+                                  <Avatar
+                                    className="justify-content-center align-items-center"
+                                    name={company.name}
+                                    size="50"
+                                    round={true}
+                                  />
+                                  {company.name}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
                     ) : (
                       <div className="row row-cols-1 row-cols-md-4 g-4">
                         {searchResults.map((company, index) => (
@@ -249,51 +256,57 @@ const handleItemClick = (clientCode) => {
                 ) : (
                   <div>
                     {viewMode === "list" ? (
-                      <table>
-                        <tbody>
+                      <div style={{ overflowY: "auto", maxHeight: "700px" }}>
+                        <table>
+                          <tbody>
+                            {companyList.map((company, index) => (
+                              <tr
+                                key={index}
+                                onClick={() =>
+                                  handleItemClick(company.clientCode)
+                                }
+                                style={{ cursor: "pointer" }}
+                              >
+                                <td className="company-name">
+                                  {/* Utiliza o componente Avatar para mostrar as iniciais do nome da empresa */}
+                                  <Avatar
+                                    className="justify-content-center align-items-center"
+                                    name={company.name}
+                                    size="50"
+                                    round={true}
+                                  />
+                                  {company.name}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    ) : (
+                      <div style={{ overflowY: "auto", maxHeight: "700px" }}>
+                        <div className="row row-cols-1 row-cols-md-4 g-4">
                           {companyList.map((company, index) => (
-                            <tr
+                            <div
                               key={index}
+                              className="col"
                               onClick={() =>
                                 handleItemClick(company.clientCode)
                               }
                               style={{ cursor: "pointer" }}
                             >
-                              <td className="company-name">
-                                {/* Utiliza o componente Avatar para mostrar as iniciais do nome da empresa */}
+                              <div className="cards h-100 bg-white text-center d-flex flex-column justify-content-center align-items-center">
+                                {/* Adiciona o avatar apenas no modo de mosaico */}
                                 <Avatar
-                                  className="justify-content-center align-items-center"
+                                  className="mb-3"
                                   name={company.name}
-                                  size="50"
+                                  size="100"
                                   round={true}
                                 />
-                                {company.name}
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    ) : (
-                      <div className="row row-cols-1 row-cols-md-4 g-4">
-                        {companyList.map((company, index) => (
-                          <div
-                            key={index}
-                            className="col"
-                            onClick={() => handleItemClick(company.clientCode)}
-                            style={{ cursor: "pointer" }}
-                          >
-                            <div className="cards h-100 bg-white text-center d-flex flex-column justify-content-center align-items-center">
-                              {/* Adiciona o avatar apenas no modo de mosaico */}
-                              <Avatar
-                                className="mb-3"
-                                name={company.name}
-                                size="100"
-                                round={true}
-                              />
-                              <h5 className="card-title">{company.name}</h5>
+                                <h5 className="card-title">{company.name}</h5>
+                              </div>
                             </div>
-                          </div>
-                        ))}
+                          ))}
+                        </div>
                       </div>
                     )}
                   </div>
@@ -316,7 +329,8 @@ const handleItemClick = (clientCode) => {
               id="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="Nome do Cliente" />
+              placeholder="Nome do Cliente"
+            />
           </div>
           <div className="form-group">
             <label htmlFor="clientCode">Código do Cliente:</label>
@@ -326,14 +340,18 @@ const handleItemClick = (clientCode) => {
               id="clientCode"
               value={clientCode}
               onChange={(e) => setclientCode(e.target.value)}
-              placeholder="Código do Cliente" />
+              placeholder="Código do Cliente"
+            />
           </div>
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={handleCloseModal}>
             Fechar
           </Button>
-          <Button variant="primary" onClick={() => createCompany(name, clientCode)}>
+          <Button
+            variant="primary"
+            onClick={() => createCompany(name, clientCode)}
+          >
             Adicionar
           </Button>
         </Modal.Footer>

@@ -13,6 +13,15 @@
 }
 
 
+.table-container {
+  max-height: 400px; /* Ajuste conforme necessário */
+  overflow-y: auto;
+}
+
+.card-container {
+  max-height: 400px; /* Ajuste conforme necessário */
+  overflow-y: auto;
+}
 
 .cards {
   --bs-card-spacer-y: 1rem;
