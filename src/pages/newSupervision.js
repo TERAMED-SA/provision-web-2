@@ -1,4 +1,3 @@
-import { Link } from "react-router-dom";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import CircularProgress from "@mui/material/CircularProgress";
@@ -6,66 +5,27 @@ import { DataGrid } from "@mui/x-data-grid";
 import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
 import { format } from "date-fns";
-
+import { margin, padding, textAlign } from "@mui/system";
 import pdfMake from "pdfmake/build/pdfmake";
 import pdfFonts from "pdfmake/build/vfs_fonts";
 import logo from "../assets/logo.png";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-
-import { FaFilePdf } from "react-icons/fa6";
-import { HiClipboardDocumentList } from "react-icons/hi2";
+import { AlignCenter } from "react-bootstrap-icons";
 
 const NotificationList = () => {
   const [notifications, setNotifications] = useState([]);
-  const [selectedNotification, setSelectedNotification] = useState({});
-  const [modalInfo, setModalInfo] = useState({});
-  const [companyInfo, setCompanyInfo] = useState({});
-  const [siteInfo, setSiteInfo] = useState({});
-
+  const [selectedNotification, setSelectedNotification] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [modalShow, setModalShow] = useState(false);
   const [verificationModal, setVerificationModal] = useState(false);
-  const [companyMap, setCompanyMap] = useState({});
-  const [siteMap, setSiteMap] = useState({});
+  const [modalInfo, setModalInfo] = useState([]);
+  const [companyInfo, setCompanyInfo] = useState([]);
+  const [siteInfo, setSiteInfo] = useState([]);
 
   useEffect(() => {
-    fetchCompanyData();
-    fetchSiteData();
     fetchNotifications();
   }, []);
-
-  async function fetchCompanyData() {
-    try {
-      const response = await axios.get(
-        "https://provision-07c1.onrender.com/api/v1/company?size=500"
-      );
-      const companies = response.data.data.data;
-      const companyMap = companies.reduce((map, company) => {
-        map[company.clientCode] = company.name;
-        return map;
-      }, {});
-      setCompanyMap(companyMap);
-    } catch (error) {
-      console.error("Error fetching company data:", error.message);
-    }
-  }
-
-  async function fetchSiteData() {
-    try {
-      const response = await axios.get(
-        "https://provision-07c1.onrender.com/api/v1/companySite?size=500"
-      );
-      const sites = response.data.data.data;
-      const siteMap = sites.reduce((map, site) => {
-        map[site.costCenter] = site.name;
-        return map;
-      }, {});
-      setSiteMap(siteMap);
-    } catch (error) {
-      console.error("Error fetching site data:", error.message);
-    }
-  }
 
   async function fetchNotifications() {
     try {
@@ -90,7 +50,6 @@ const NotificationList = () => {
       setIsLoading(false);
     }
   }
-
   async function getSupInfo(id) {
     try {
       const response = await axios.get(
@@ -101,7 +60,6 @@ const NotificationList = () => {
       console.error("Error:", error);
     }
   }
-
   async function getSiteInfo(costCenter) {
     try {
       const responseCompanySite = await axios.get(
@@ -115,8 +73,8 @@ const NotificationList = () => {
 
   const handleViewDetails = (notification) => {
     setSelectedNotification(notification);
+    // setModalShow(true);
   };
-
   const getOcorrenceByIdNot = async (id) => {
     try {
       const response = await axios.get(
@@ -127,7 +85,6 @@ const NotificationList = () => {
       console.error("Error:", error);
     }
   };
-
   const openModal = async (info) => {
     const occorence = await getOcorrenceByIdNot(info._id);
     setSelectedNotification(occorence);
@@ -141,9 +98,9 @@ const NotificationList = () => {
   };
 
   const handleRejection = () => {
+    // Lógica para reprovar a notificação
     setModalShow(false);
   };
-
   const openVerificationModal = async (id, name, costCenter) => {
     const response = await axios.get(
       `${process.env.REACT_APP_API_URL}companySite/getCompanyInfo/${costCenter}`
@@ -160,7 +117,6 @@ const NotificationList = () => {
     setModalInfo(dados);
     setVerificationModal(true);
   };
-
   const closeVerificationModal = () => {
     localStorage.removeItem("supervisionId");
     localStorage.removeItem("supervisorName");
@@ -189,6 +145,7 @@ const NotificationList = () => {
   const generatePDF = async (id, name, costCenter) => {
     const dados = await getSupInfo(id);
     pdfMake.vfs = pdfFonts.pdfMake.vfs;
+    // Converte a imagem para uma URL de dados (data URL)
     const imageDataUrl = await convertImageToDataURL(logo);
 
     const data = {
@@ -209,7 +166,9 @@ const NotificationList = () => {
     };
 
     const createdAt = new Date(data.createdAt);
-    const formattedDate = `${String(createdAt.getDate()).padStart(2, '0')}-${String(createdAt.getMonth() + 1).padStart(2, '0')}-${createdAt.getFullYear()}`;
+    const formattedDate = `${createdAt.getFullYear()}-${String(
+      createdAt.getMonth() + 1
+    ).padStart(2, "0")}-${String(createdAt.getDate()).padStart(2, "0")}`;
     const documentDefinition = {
       footer: function (currentPage, pageCount) {
         return {
@@ -242,15 +201,13 @@ const NotificationList = () => {
         { text: `Nome: ${data.name}` },
         { text: `Código do Supervisor: ${data.supervisorCode}` },
         { text: `Tempo da supervisão: ${data.time}` },
-        { text: `Feito em: ${formattedDate}` },
+        { text: `Feito em: ${data.createdAt.toLocaleString()}` },
         { text: "" },
         { text: "Informação do Site", bold: 1000, margin: [20, 10, 0, 5] },
-        { text: `Nome do Site: ${data.siteName}` },
+        { text: `Nome do site: ${data.siteName}` },
         { text: `Centro de custo: ${data.costCenter}` },
-        { text: "" },
-        { text: "Informação da Empresa", bold: 1000, margin: [20, 10, 0, 5] },
-        { text: `Nome da Empresa: ${data.companyName}` },
-        { text: `Cliente: ${data.companyClientCode}` },
+        { text: `Nome da empresa: ${data.companyName}` },
+        { text: `Código de empresa: ${data.companyClientCode}` },
         {
           canvas: [
             {
@@ -259,48 +216,20 @@ const NotificationList = () => {
               y1: 5,
               x2: 595 - 2 * 40,
               y2: 5,
-              lineWidth: 2,
-              lineColor: "#000000",
-              margin: [10, 10, 10, 10],
+              lineWidth: 1,
             },
           ],
         },
-        { text: "" },
         {
-          text: "INFORMAÇÃO DA SUPERVISÃO",
+          text: "Informação dos Trabalhadores",
           style: "subheader",
           alignment: "center",
+          margin: [0, 10, 0, 10],
         },
-        {
-          text: "Relatório da supervisão",
-          bold: 1000,
-          margin: [0, 15, 0, 15],
-        },
-        { text: `${data.report}` },
+        { text: `Numero de trabalhadores pretendido: ${data.desiredNumber}` },
 
-        { text: "EQUIPAMENTO UTILIZADO", bold: 1000, margin: [0, 15, 0, 5] },
-        {
-          ul: data.equipment.map((equip) => `${equip.quantity}x ${equip.name}`),
-        },
-        {
-          text: "Trabalhadores na Supervisão",
-          bold: 1000,
-          margin: [0, 15, 0, 5],
-        },
-        {
-          ul: data.workerInformation.map((worker) => `Nome: ${worker.name}`),
-        },
-        {
-          text: "NÚMERO DE TRABALHADORES",
-          bold: 1000,
-          margin: [0, 15, 0, 5],
-        },
-        {
-          ul: [
-            `Número de trabalhadores: ${data.numberOfWorkers}`,
-            `Faltou:  ${data.workerInformation.length}`,
-          ],
-        },
+        { text: `Presentes: ${data.numberOfWorkers}` },
+        { text: `Faltou:  ${data.workerInformation.length}` },
         { text: "Lista dos trabalhadores ausentes:", margin: [0, 0, 0, 10] },
         {
           ul: data.workerInformation.flatMap((worker) => [
@@ -312,6 +241,22 @@ const NotificationList = () => {
             { text: `Situação: ${worker.state}`, margin: [30, 0, 0, 0] },
             { text: `OBS: ${worker.obs}`, margin: [30, 0, 0, 10] }, // Margem maior na parte inferior
           ]),
+        },
+        {
+          canvas: [
+            {
+              type: "line",
+              x1: 0,
+              y1: 5,
+              x2: 595 - 2 * 40,
+              y2: 5,
+              lineWidth: 1,
+            },
+          ],
+        },
+        { text: "Equipamentos", style: "subheader", alignment: "center" },
+        {
+          text: `Quantidade de equipamentos encontrado: ${data.equipment.length}`,
         },
         {
           text: `Lista dos equipamentos encontrados:  `,
@@ -345,192 +290,132 @@ const NotificationList = () => {
           ],
         },
         {
-          canvas: [
-            {
-              type: "line",
-              x1: 0,
-              y1: 5,
-              x2: 595 - 2 * 40,
-              y2: 5,
-              lineWidth: 2,
-              lineColor: "#000000",
-              margin: [10, 10, 10, 10],
-            },
-          ],
-        },
-        {
           text: "Informação extras da supervisão",
           style: "subheader",
           alignment: "center",
-          margin: [0, 15, 0, 15],
         },
-        {
-          text: `${data.report}`,
-          margin: [0, 40, 0, 0],
-        },
-        {
-          text: `Data: ${formattedDate}`,
-          alignment: "right",
-        },
+        { text: `${data.report}` },
       ],
       styles: {
         header: {
-          fontSize: 18,
-          bold: true,
+          fontSize: 22,
+          bold: false,
+          margin: [0, 0, 0, 10],
         },
         subheader: {
           fontSize: 14,
           bold: true,
-          margin: [0, 15, 0, 5],
-        },
-        bigger: {
-          fontSize: 15,
-          italics: true,
+          margin: [0, 10, 0, 5],
         },
       },
     };
-
-    pdfMake.createPdf(documentDefinition).download("relatorio_supervisao.pdf");
+    pdfMake
+      .createPdf(documentDefinition)
+      .download(`relatório_supervião_${formattedDate}.pdf`);
   };
 
-  async function convertImageToDataURL(imageUrl) {
+  const convertImageToDataURL = (imagePath) => {
     return new Promise((resolve, reject) => {
-      const img = new Image();
-      img.crossOrigin = "Anonymous";
-      img.onload = function () {
-        const canvas = document.createElement("canvas");
-        canvas.width = img.width;
-        canvas.height = img.height;
-        const ctx = canvas.getContext("2d");
-        ctx.drawImage(img, 0, 0);
-        const dataURL = canvas.toDataURL("image/png");
-        resolve(dataURL);
+      const reader = new FileReader();
+      reader.onload = () => {
+        resolve(reader.result);
       };
-      img.onerror = function (error) {
-        reject(error);
-      };
-      img.src = imageUrl;
+      reader.onerror = reject;
+      fetch(imagePath)
+        .then((response) => response.blob())
+        .then((blob) => reader.readAsDataURL(blob))
+        .catch(reject);
     });
-  }
-
-  const columns = [
-    { field: "information", headerName: "Informação", width: 170 },
-    {
-      field: "clientCode",
-      headerName: "Empresa",
-      width: 200,
-      valueGetter: (params) =>
-        companyMap[params.row.clientCode] || params.row.clientCode,
-    },
-    {
-      field: "costCenter",
-      headerName: "Centro de Custo",
-      width: 200,
-      valueGetter: (params) =>
-        siteMap[params.row.costCenter] || params.row.costCenter,
-    },
-    { field: "createdAt", headerName: "Data", width: 170 },
-    {
-      field: "actions",
-      headerName: "Ações",
-      width: 500,
-      renderCell: (params) => (
-        <div>
-          <Button
-            className="btn btn-primary btn-sm m-1"
-            style={{ marginRight: 8 }}
-            onClick={() =>
-              openVerificationModal(
-                params.row._id,
-                params.row.supervisor,
-                params.row.costCenter
-              )
-            }
-          >
-            Detalhes
-          </Button>
-
-          <Button
-            className="btn btn-secondary btn-sm m-1"
-            onClick={() =>
-              generatePDF(
-                params.row._id,
-                params.row.supervisorName,
-                params.row.costCenter
-              )
-            }
-          >
-            <FaFilePdf style={{ marginRight: 4 }} />
-            Gerar PDF
-          </Button>
-        </div>
-      ),
-    },
-  ];
-
-  const createdAt = new Date(modalInfo.createdAt);
-  const modalFormatedDate = `${String(createdAt.getDate()).padStart(2, '0')}-${String(createdAt.getMonth() + 1).padStart(2, '0')}-${createdAt.getFullYear()}`;
-
+  };
   return (
-    <div style={{ height: 650, width: "100%", marginTop: "20px" }}>
-      <h2>
-        SUPERVISÃO <span className="badge badge-secondary"></span>
-      </h2>
+    <div className="container">
       <div className="container-fluid">
-        <Link to="/Home" className="p-1">
-          Início{" "}
-        </Link>{" "}
-        / <span>Supervisão</span>
-        <br></br> <br></br>
+        <h1>Supervisão</h1>
         {isLoading ? (
-          <CircularProgress />
+          <div className="text-center mt-4">
+            <CircularProgress size={80} thickness={5} />
+          </div>
+        ) : notifications.length === 0 ? (
+          <div className="text-center text-black mt-4">
+            Nenhuma notificação disponível
+          </div>
         ) : (
-          <div style={{ height: 630, width: "100%" }}>
+          <div style={{ overflow: "auto", maxHeight: "70vh" }}>
             <DataGrid
-              rows={notifications}
-              columns={columns}
-              pageSize={10}
-              rowsPerPageOptions={[10]}
-              getRowId={(row) => row._id}
-              disableColumnFilter
-              disableColumnMenu
-              disableSelectionOnClick
-              disableColumnSelector
-              autoHeight
-              components={{
-                NoRowsOverlay: () => (
-                  <div style={{ padding: "10px" }}>
-                    Nenhuma notificação encontrada
-                  </div>
-                ),
-              }}
-              initialState={{
-                pagination: {
-                  paginationModel: { pageSize: 12 },
+              rows={notifications.map((notification, index) => ({
+                id: index,
+                _id: notification._id,
+                data: notification.createdAt,
+                evento: notification.information,
+                supervisor: notification.supervisorName,
+                costCenter: notification.costCenter,
+                cliente: notification.clientCode,
+                estado: notification.state ? "Validado" : "Pendente",
+                link: notification.actionLocationId,
+                siteName: notification.siteName,
+              }))}
+              columns={[
+                { field: "data", headerName: "Data", width: 150 },
+                { field: "evento", headerName: "Evento", width: 150 },
+                { field: "supervisor", headerName: "Supervisor", width: 300 },
+                {
+                  field: "costCenter",
+                  headerName: "Centro de custo",
+                  width: 200,
                 },
-              }}
+                { field: "cliente", headerName: "Cliente", width: 100 },
+                { field: "estado", headerName: "Estado", width: 100 },
+                {
+                  field: "link",
+                  headerName: "Ação",
+                  width: 250,
+                  renderCell: (params) => (
+                    <div className="d-flex justify-content-center">
+                      {params.row.evento === "Supervisão" && (
+                        <button
+                          className="btn btn-warning btn-sm m-1"
+                          onClick={() =>
+                            openVerificationModal(
+                              params.row._id,
+                              params.row.supervisor,
+                              params.row.costCenter
+                            )
+                          }
+                        >
+                          Detalhes
+                        </button>
+                      )}
+                    </div>
+                  ),
+                },
+              ]}
+              pageSize={5}
+              autoHeight
             />
+
             <Modal
               show={verificationModal}
-              onHide={closeVerificationModal}
+              onHide={() => setVerificationModal(false)}
+              size="xl"
               centered
-              size="lg"
             >
               <Modal.Header closeButton>
                 <Modal.Title>RELATÓRIO DA SUPERVISÃO</Modal.Title>
               </Modal.Header>
               <Modal.Body>
+                <h1 style={{ textAlign: "center" }}>
+                  {selectedNotification?.evento}
+                </h1>
                 <div style={{ fontSize: "20px" }}>
                   <h1 style={{ textAlign: "center" }}>IDENTIFICAÇÃO</h1>
-                  <hr />
                   <h3 style={{ marginLeft: "20px" }}>
                     Informação do Supervisor
                   </h3>
                   <p>Nome: {localStorage.getItem("supervisorName")}</p>
                   <p>Código do supervisor: {modalInfo.supervisorCode}</p>
                   <p>Tempo da supersão: {modalInfo.time}</p>
-                  <p>Feito em: {modalFormatedDate} </p>
-                  <hr />
+                  <p>Feito em: {modalInfo.createdAt} </p>
+
                   <h3 style={{ marginLeft: "20px" }}>Informação do site</h3>
                   <p>Nome: {siteInfo.name}</p>
                   <p>Centro de custo: {modalInfo.costCenter}</p>
@@ -587,6 +472,7 @@ const NotificationList = () => {
                       ))}
                   </ul>
 
+                  <hr />
                   <h1 style={{ textAlign: "center" }}>
                     Informação extra da supervisão
                   </h1>
@@ -615,28 +501,14 @@ const NotificationList = () => {
                   }
                   variant="info"
                 >
-                  Gerar PDF .
-                  <FaFilePdf />
-                </Button>
-                <Button
-                  onClick={() =>
-                    generatePDF(
-                      localStorage.getItem("supervisionId"),
-                      localStorage.getItem("supervisorName"),
-                      localStorage.getItem("supervisionCostCenter")
-                    )
-                  }
-                  variant="primary"
-                >
-                  Exportar para Exel .
-                  <HiClipboardDocumentList />{" "}
+                  Gerar PDF
                 </Button>
               </Modal.Footer>
             </Modal>
-            <ToastContainer />
           </div>
         )}
       </div>
+      <ToastContainer />
     </div>
   );
 };
