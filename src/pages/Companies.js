@@ -15,6 +15,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { MdGroupOff } from "react-icons/md";
 import { MdPeopleAlt } from "react-icons/md";
+import { IoSearchCircle } from "react-icons/io5";
 
 // CSS override for spinner
 const override = css`
@@ -123,17 +124,33 @@ const Companies = () => {
         / <span>Clientes</span>
         <br></br> <br></br>
         <div className="space">
-          <div className=""></div>
-          <div className="">
-            <div className="input-group">
-              <input
-                type="text"
-                className="form-control"
-                placeholder="Nome ou código cliente"
-                value={searchTerm}
-                onChange={handleSearch}
-              />
-            </div>
+          <div style={{ position: "relative", display: "inline-block" }}>
+            <input
+              type="text"
+              className="form-control"
+              placeholder="Pesquisar..."
+              value={searchTerm}
+              onChange={handleSearch}
+              style={{ paddingLeft: "3rem" }} // espaço para o ícone
+            />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="30"
+              height="20"
+              fill="currentColor"
+              className="bi bi-search"
+              viewBox="0 0 16 16"
+              style={{
+                position: "absolute",
+                left: "10px",
+                top: "25px",
+                transform: "translateY(-50%)",
+                pointerEvents: "none",
+                color: "#0d214f ", // Azul suave
+              }}
+            >
+              <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001l3.85 3.85a1 1 0 0 0 1.415-1.415l-3.85-3.85zm-5.598 0A5.5 5.5 0 1 1 10.5 5.5a5.5 5.5 0 0 1-4.356 4.844z" />
+            </svg>
           </div>
         </div>
         <div className="container4">
