@@ -18,7 +18,7 @@
   list-style: none;
 }
 
-.header .breadcrumb-item + .breadcrumb-item::before {
+.header .breadcrumb-item+.breadcrumb-item::before {
   content: ">";
   color: #6c757d;
   padding: 0 5px;
@@ -112,6 +112,7 @@
   color: #007bff;
 }
 
+/* 
 .custom-modal {
   position: absolute;
   top: 50%;
@@ -120,7 +121,7 @@
   background-color: white;
   padding: 20px;
   border-radius: 8px;
-  width: 100%;
+
 }
 
 .custom-modal-overlay {
@@ -130,7 +131,7 @@
   right: 0;
   bottom: 0;
   background-color: rgba(0, 0, 0, 0.3);
-}
+} */
 
 .text-modal {
   display: block;
