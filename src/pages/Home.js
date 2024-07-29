@@ -48,71 +48,67 @@ const Home = () => {
   }, []);
 
   return (
-
     <div className="container4">
-    <h1 style={{ textAlign: "center" }}>
-  INÍCIO <span className="badge badge-secondary"></span>
-    </h1>
-        <div className="container-fluid"><Link to="/Home" className="p-1">Início </Link>
-        <br></br> <br></br> 
-
+      <h1 style={{ textAlign: "center" }}>
+        INÍCIO <span className="badge badge-secondary"></span>
+      </h1>
       <div className="container-fluid">
-        <div className="row">
-          <div className="col-12 col-sm-6 col-md-4 col-lg-3 p-3">
-            <div className="d-flex rounded justify-content-between p-4 align-items-center bg-button text-white border border-secondary shadow-sm">
-              <i className="fs-1">
-                <i className="bi bi-person-check-fill"></i>
-              </i>
-              <div>
-                <span className="size">Utilizadores</span>
-                <h2 className="text-white">{userCount}</h2>
+        <Link to="/Home" className="p-1">
+          Início{" "}
+        </Link>
+        <br></br> <br></br>
+        <div className="container-fluid">
+          <div className="row">
+            <div className="col-12 col-sm-6 col-md-4 col-lg-3 p-3">
+              <div className="d-flex rounded justify-content-between p-4 align-items-center bg-button text-white border border-secondary shadow-sm">
+                <i className="fs-1">
+                  <i className="bi bi-person-check-fill"></i>
+                </i>
+                <div>
+                  <span className="size">Utilizadores</span>
+                  <h2 className="text-white">{userCount}</h2>
+                </div>
               </div>
             </div>
-          </div>
-          <div className="col-12 col-sm-6 col-md-4 col-lg-3 p-3">
-            <div className="d-flex rounded justify-content-between p-4 align-items-center bg-button text-white border border-secondary shadow-sm">
-              <i className="fs-1">
-                <i className="bi bi-building-check"></i>
-              </i>
-              <div>
-                <span className="size">Empresas</span>
-                <h2 className="text-white">{companyCount}</h2>
+            <div className="col-12 col-sm-6 col-md-4 col-lg-3 p-3">
+              <div className="d-flex rounded justify-content-between p-4 align-items-center bg-button text-white border border-secondary shadow-sm">
+                <i className="fs-1">
+                  <i className="bi bi-building-check"></i>
+                </i>
+                <div>
+                  <span className="size">Empresas</span>
+                  <h2 className="text-white">{companyCount}</h2>
+                </div>
               </div>
             </div>
-          </div>
-          <div className="col-12 col-sm-6 col-md-4 col-lg-3 p-3">
-            <div className="d-flex rounded justify-content-between p-4 align-items-center bg-button text-white border border-secondary shadow-sm">
-              <i className="fs-1">
-                <i className="bi bi-gear-wide-connected"></i>
-              </i>
-              <div>
-                <span className="size">Equipamentos</span>
-                <h2 className="text-white">{equipmentCount}</h2>
+            <div className="col-12 col-sm-6 col-md-4 col-lg-3 p-3">
+              <div className="d-flex rounded justify-content-between p-4 align-items-center bg-button text-white border border-secondary shadow-sm">
+                <i className="fs-1">
+                  <i className="bi bi-gear-wide-connected"></i>
+                </i>
+                <div>
+                  <span className="size">Equipamentos</span>
+                  <h2 className="text-white">{equipmentCount}</h2>
+                </div>
               </div>
             </div>
-          </div>
-          <div className="col-12 col-sm-6 col-md-4 col-lg-3 p-3">
-            <div className="d-flex rounded justify-content-between p-4 align-items-center bg-button text-white border border-secondary shadow-sm">
-              <i className="fs-1">
-                <i className="bi bi-bell-fill"></i>
-              </i>
-              <div>
-                <span className="size">Notificações</span>
-                <h2 className="text-white">{notificationCount}</h2>
+            <div className="col-12 col-sm-6 col-md-4 col-lg-3 p-3">
+              <div className="d-flex rounded justify-content-between p-4 align-items-center bg-button text-white border border-secondary shadow-sm">
+                <i className="fs-1">
+                  <i className="bi bi-bell-fill"></i>
+                </i>
+                <div>
+                  <span className="size">Notificações</span>
+                  <h2 className="text-white">{notificationCount}</h2>
+                </div>
               </div>
             </div>
-          </div>
-          <div className="col-12 col-md-8 p-3">
-
-          </div>
-          <div className="col-12 col-md-4 p-3">
-            <PieChart />
+            <div className="col-12 col-md-8 p-3"></div>
+            <div className="col-12 col-md-4 p-3"></div>
           </div>
         </div>
       </div>
     </div>
-    </div>
-
   );
 };
 

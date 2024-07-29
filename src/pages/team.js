@@ -58,8 +58,8 @@ const Team = () => {
       const response = await axios.get(
         `${process.env.REACT_APP_API_URL}user/findBelongsToMe/${userCoord}?size=50`
       );
-      if (response.data && Array.isArray(response.data.data)) {
-        setUsers(response.data.data);
+      if (response.data && Array.isArray(response.data.data.data)) {
+        setUsers(response.data.data.data);
       }
       setIsLoading(false);
     } catch (error) {
@@ -176,7 +176,9 @@ const Team = () => {
 
   const handleDeleteUser = async (userId) => {
     try {
-      toast.warning("Nao podes eliminar um utilizador de momento.");
+      toast.warning(
+        " Você não tem autorização para eliminar usuários. Entre em contato com o administrador se precisar de mais assistência."
+      );
     } catch (error) {
       console.error("Erro ao excluir usuário:", error.message);
     }
@@ -193,44 +195,70 @@ const Team = () => {
     setUserToAssignSite(null);
   };
 
-  const handleAssignSiteToUser = async () => {
+  const handleAssignSiteToUser = async (e) => {
+    e.preventDefault();
     try {
-      // Adicione a lógica para atribuir o site ao usuário aqui
-      console.log(
-        `Atribuindo site ${selectedSite} ao usuário ${userToAssignSite}`
+      const response = await axios.post(
+        `https://provision-07c1.onrender.com/api/v1/companySite/assignSupervisor/${userToAssignSite}/${selectedSite}`
       );
-      toast.success("Site atribuído com sucesso");
-      setTimeout(() => {
-        window.location.reload();
-      }, 3000);
+      if (response.data) {
+        toast.success("Site atribuído com sucesso");
+        setTimeout(() => {
+          window.location.reload();
+        }, 3000);
+      }
     } catch (error) {
       toast.error("Erro ao atribuir site. Por favor, tente novamente.");
       console.error("Erro ao atribuir site:", error.message);
     }
   };
 
-  const filteredUsers = useMemo(() =>
-    users.filter((user) =>
-      user.name.toLowerCase().includes(searchTerm.toLowerCase())
-    )
-  , [users, searchTerm]);
+  const filteredUsers = useMemo(
+    () =>
+      users.filter((user) =>
+        user.name.toLowerCase().includes(searchTerm.toLowerCase())
+      ),
+    [users, searchTerm]
+  );
 
   return (
     <div className="container4">
       <h1 style={{ textAlign: "center" }}>FUNCIONÁRIOS</h1>
-      <div className="container-fluid"><Link to="/Home" className="p-1">Início </Link> / <span>Funcionários</span>
-      <br></br> <br></br> 
+      <div className="container-fluid">
+        <Link to="/Home" className="p-1">
+          Início{" "}
+        </Link>{" "}
+        / <span>Funcionários</span>
+        <br></br> <br></br>
         <div className="space">
           <div className="">
-          <input
-                  type="text"
-                  className="form-control mb-3"
-                  id="search"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  placeholder="Pesquisar funcionário"
-                    
-                />
+            <div style={{ position: "relative", display: "inline-block" }}>
+              <input
+                type="text"
+                className="form-control"
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Pesquisar funcionário"
+                style={{ paddingLeft: "3rem" }} // espaço para o ícone
+              />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="30"
+                height="20"
+                fill="currentColor"
+                className="bi bi-search"
+                viewBox="0 0 16 16"
+                style={{
+                  position: "absolute",
+                  left: "10px",
+                  top: "25px",
+                  transform: "translateY(-50%)",
+                  pointerEvents: "none",
+                  color: "#0d214f ", // Azul suave
+                }}
+              >
+                <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001l3.85 3.85a1 1 0 0 0 1.415-1.415l-3.85-3.85zm-5.598 0A5.5 5.5 0 1 1 10.5 5.5a5.5 5.5 0 0 1-4.356 4.844z" />
+              </svg>
+            </div>
           </div>
           <div className="">
             <button className="btn btn-primary mb-3" onClick={openModal}>
@@ -253,8 +281,6 @@ const Team = () => {
 
           {!isLoading && users.length > 0 && (
             <>
-             
-
               <DataGrid
                 rows={filteredUsers.map((user) => ({
                   id: user._id,

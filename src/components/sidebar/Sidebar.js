@@ -96,6 +96,7 @@ const Sidebar = ({ sidebarOpen, closeSidebar }) => {
 
   return (
     <div
+      style={{ overflowY: "scroll", height: "100vh" }}
       className={
         sidebarOpen
           ? "sidebar-responsive"

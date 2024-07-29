@@ -67,6 +67,25 @@ const Companies = () => {
     localStorage.setItem("selectedCompany", clientCode);
     navigate("/managementList");
   };
+  const createCompany = async (clientName, clientCode) => {
+    try {
+      const response = await axios.post(
+        `${process.env.REACT_APP_API_URL}company/create`,
+        {
+          name: clientName,
+          clientCode: clientCode,
+        }
+      );
+      if (response.data.status === 200) {
+        toast.success("Cliente cadastrado com sucesso");
+        setTimeout(() => {
+          window.location.reload();
+        }, 3000);
+      }
+    } catch (error) {
+      toast.error(error.response.data.message);
+    }
+  };
 
   // Função para inverter a ordem dos nomes das empresas
   const toggleSortOrder = () => {
@@ -307,6 +326,47 @@ const Companies = () => {
           )}
         </div>
       </div>
+      <Modal show={showModal} onHide={handleCloseModal}>
+        <Modal.Header closeButton>
+          <Modal.Title>Adicionar Cliente</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <div className="form-group">
+            <label htmlFor="name">Nome:</label>
+            <input
+              type="text"
+              className="form-control"
+              id="name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Nome do Cliente"
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="clientCode">Código do Cliente:</label>
+            <input
+              type="text"
+              className="form-control"
+              id="clientCode"
+              value={clientCode}
+              onChange={(e) => setclientCode(e.target.value)}
+              placeholder="Código do Cliente"
+            />
+          </div>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleCloseModal}>
+            Fechar
+          </Button>
+          <Button
+            variant="primary"
+            onClick={() => createCompany(name, clientCode)}
+          >
+            Adicionar
+          </Button>
+        </Modal.Footer>
+      </Modal>
+      <ToastContainer />
     </div>
   );
 };

@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import CircularProgress from "@mui/material/CircularProgress";
@@ -5,13 +6,11 @@ import { DataGrid } from "@mui/x-data-grid";
 import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
 import { format } from "date-fns";
-import { margin, padding, textAlign } from "@mui/system";
 import pdfMake from "pdfmake/build/pdfmake";
 import pdfFonts from "pdfmake/build/vfs_fonts";
 import logo from "../assets/logo.png";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { AlignCenter } from "react-bootstrap-icons";
 
 const NotificationList = () => {
   const [notifications, setNotifications] = useState([]);
@@ -22,8 +21,28 @@ const NotificationList = () => {
   const [modalInfo, setModalInfo] = useState([]);
   const [companyInfo, setCompanyInfo] = useState([]);
   const [siteInfo, setSiteInfo] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [companies, setCompanies] = useState([]);
+  const [error, setError] = useState({
+    status: false,
+    message: "",
+  });
+
+  const fetchCompanies = async () => {
+    try {
+      const response = await axios.get(
+        `${process.env.REACT_APP_API_URL}company`
+      );
+      setCompanies(response.data.dados);
+      console.log(response.data.dados);
+    } catch (error) {
+      console.log(error);
+      setError({ status: true, message: error.message });
+    }
+  };
 
   useEffect(() => {
+    fetchCompanies();
     fetchNotifications();
   }, []);
 
@@ -32,7 +51,7 @@ const NotificationList = () => {
       setIsLoading(true);
       const user = localStorage.getItem("userId");
       const response = await axios.get(
-        `${process.env.REACT_APP_API_URL}notification/${user}?size=500`
+        `${process.env.REACT_APP_API_URL}notification/${user}?size=10000`
       );
       const formattedNotifications = await response.data.data.map(
         (notification) => ({
@@ -82,7 +101,7 @@ const NotificationList = () => {
       );
       return response.data.data;
     } catch (error) {
-      console.error("Error:", error);
+      console.log(error);
     }
   };
   const openModal = async (info) => {
@@ -102,21 +121,29 @@ const NotificationList = () => {
     setModalShow(false);
   };
   const openVerificationModal = async (id, name, costCenter) => {
-    const response = await axios.get(
-      `${process.env.REACT_APP_API_URL}companySite/getCompanyInfo/${costCenter}`
-    );
-    const responseCompanySite = await axios.get(
-      `${process.env.REACT_APP_API_URL}companySite/${costCenter}`
-    );
-    localStorage.setItem("supervisionId", id);
-    localStorage.setItem("supervisorName", name);
-    localStorage.setItem("supervisionCostCenter", costCenter);
-    const dados = await getSupInfo(id);
-    setSiteInfo(responseCompanySite.data.data);
-    setCompanyInfo(response.data.data);
-    setModalInfo(dados);
-    setVerificationModal(true);
+    try {
+      const response = await axios.get(
+        `${process.env.REACT_APP_API_URL}companySite/getCompanyInfo/${costCenter}`
+      );
+      const responseCompanySite = await axios.get(
+        `${process.env.REACT_APP_API_URL}companySite/${costCenter}`
+      );
+      localStorage.setItem("supervisionId", id);
+      localStorage.setItem("supervisorName", name);
+      localStorage.setItem("supervisionCostCenter", costCenter);
+      const dados = await getSupInfo(id);
+      setSiteInfo(responseCompanySite.data.data);
+      setCompanyInfo(response.data.data);
+      setModalInfo(dados);
+      setVerificationModal(true);
+    } catch (error) {
+      setError({
+        status: true,
+        message: error.response.data.message,
+      });
+    }
   };
+
   const closeVerificationModal = () => {
     localStorage.removeItem("supervisionId");
     localStorage.removeItem("supervisorName");
@@ -327,190 +354,249 @@ const NotificationList = () => {
         .catch(reject);
     });
   };
+
+  const filteredRows = notifications
+    .filter((notification) => {
+      const date = new Date(notification.createdAt).toLocaleDateString();
+      return (
+        notification.supervisorName
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase()) || date.includes(searchQuery)
+      );
+    })
+    .map((notification, index) => ({
+      id: index,
+      _id: notification._id,
+      data: notification.createdAt,
+      evento: notification.information,
+      supervisor: notification.supervisorName,
+      costCenter: notification.costCenter,
+      cliente: notification.clientCode,
+      clienteName: notification.siteName,
+      // company: companies.data.find((element) => element.clientCode === notification.clientCode)?.nome,
+      estado: notification.state ? "Validado" : "Pendente",
+      link: notification.actionLocationId,
+      siteName: notification.siteName,
+    }));
+
   return (
-    <div className="container">
+    <div className="container4 mr-2" style={{ height: "89vh" }}>
+      <h1 style={{ textAlign: "center" }}>
+        Supervisão<span className="badge badge-secondary"></span>
+      </h1>
+
+      {error.status === true && (
+        <div className="alert alert-danger">{error.message}</div>
+      )}
+
       <div className="container-fluid">
-        <h1>Supervisão</h1>
-        {isLoading ? (
-          <div className="text-center mt-4">
-            <CircularProgress size={80} thickness={5} />
-          </div>
-        ) : notifications.length === 0 ? (
-          <div className="text-center text-black mt-4">
-            Nenhuma notificação disponível
-          </div>
-        ) : (
-          <div style={{ overflow: "auto", maxHeight: "70vh" }}>
-            <DataGrid
-              rows={notifications.map((notification, index) => ({
-                id: index,
-                _id: notification._id,
-                data: notification.createdAt,
-                evento: notification.information,
-                supervisor: notification.supervisorName,
-                costCenter: notification.costCenter,
-                cliente: notification.clientCode,
-                estado: notification.state ? "Validado" : "Pendente",
-                link: notification.actionLocationId,
-                siteName: notification.siteName,
-              }))}
-              columns={[
-                { field: "data", headerName: "Data", width: 150 },
-                { field: "evento", headerName: "Evento", width: 150 },
-                { field: "supervisor", headerName: "Supervisor", width: 300 },
-                {
-                  field: "costCenter",
-                  headerName: "Centro de custo",
-                  width: 200,
-                },
-                { field: "cliente", headerName: "Cliente", width: 100 },
-                { field: "estado", headerName: "Estado", width: 100 },
-                {
-                  field: "link",
-                  headerName: "Ação",
-                  width: 250,
-                  renderCell: (params) => (
-                    <div className="d-flex justify-content-center">
-                      {params.row.evento === "Supervisão" && (
-                        <button
-                          className="btn btn-warning btn-sm m-1"
-                          onClick={() =>
-                            openVerificationModal(
-                              params.row._id,
-                              params.row.supervisor,
-                              params.row.costCenter
-                            )
-                          }
-                        >
-                          Detalhes
-                        </button>
-                      )}
-                    </div>
-                  ),
-                },
-              ]}
-              pageSize={5}
-              autoHeight
+        <div className="container-fluid">
+          <Link to="/Home" className="p-1">
+            Início{" "}
+          </Link>{" "}
+          / <span>Supervisão</span>
+          <br></br> <br></br>
+          <div style={{ position: "relative", display: "inline-block" }}>
+            <input
+              type="text"
+              className="form-control"
+              placeholder="Pesquisar..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              style={{ paddingLeft: "3rem" }} // espaço para o ícone
             />
-
-            <Modal
-              show={verificationModal}
-              onHide={() => setVerificationModal(false)}
-              size="xl"
-              centered
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="30"
+              height="20"
+              fill="currentColor"
+              className="bi bi-search"
+              viewBox="0 0 16 16"
+              style={{
+                position: "absolute",
+                left: "10px",
+                top: "25px",
+                transform: "translateY(-50%)",
+                pointerEvents: "none",
+                color: "#0d214f ", // Azul suave
+              }}
             >
-              <Modal.Header closeButton>
-                <Modal.Title>RELATÓRIO DA SUPERVISÃO</Modal.Title>
-              </Modal.Header>
-              <Modal.Body>
-                <h1 style={{ textAlign: "center" }}>
-                  {selectedNotification?.evento}
-                </h1>
-                <div style={{ fontSize: "20px" }}>
-                  <h1 style={{ textAlign: "center" }}>IDENTIFICAÇÃO</h1>
-                  <h3 style={{ marginLeft: "20px" }}>
-                    Informação do Supervisor
-                  </h3>
-                  <p>Nome: {localStorage.getItem("supervisorName")}</p>
-                  <p>Código do supervisor: {modalInfo.supervisorCode}</p>
-                  <p>Tempo da supersão: {modalInfo.time}</p>
-                  <p>Feito em: {modalInfo.createdAt} </p>
-
-                  <h3 style={{ marginLeft: "20px" }}>Informação do site</h3>
-                  <p>Nome: {siteInfo.name}</p>
-                  <p>Centro de custo: {modalInfo.costCenter}</p>
-                  <p>Nome da empresa: {companyInfo.name}</p>
-                  <p>Código de cliente: {companyInfo.clientCode}</p>
-                  <hr />
-                  <h1 style={{ textAlign: "center" }}>
-                    Informação dos trabalhadores
-                  </h1>
-                  <p>Numero de trabalhadores pretendido: 0</p>
-                  <p>Presentes: {modalInfo.numberOfWorkers}</p>
-                  <p>
-                    Ausentes:{" "}
-                    {modalInfo.workerInformation &&
-                      modalInfo.workerInformation.length}
-                  </p>
-                  <p>Lista dos trabalhadores ausentes:</p>
-                  <ul>
-                    {modalInfo &&
-                      modalInfo.workerInformation &&
-                      modalInfo.workerInformation.map((item, index) => (
-                        <li key={index}>
-                          <div>
-                            <p>Nome: {item.name}</p>
-                            <p>ID trabalhador: {item.employeeNumber}</p>
-                            <p>Situação: {item.state}</p>
-                            <p>Observação: {item.obs}</p>
-                          </div>
-                        </li>
-                      ))}
-                  </ul>
-                  <hr />
-                  <h1 style={{ textAlign: "center" }}>
-                    Informação dos equipamentos
-                  </h1>
-                  <p>
-                    Quantidade de equipamentos encontrado:{" "}
-                    {modalInfo.equipment && modalInfo.equipment.length}
-                  </p>
-                  <p>Lista dos equipamentos encontrados: </p>
-                  <ul>
-                    {modalInfo &&
-                      modalInfo.equipment &&
-                      modalInfo.equipment.map((item, index) => (
-                        <li key={index}>
-                          <div>
-                            <p>Nome: {item.name}</p>
-                            <p>Número de série: {item.serialNumber}</p>
-                            <p>Centro de custi {item.costCenter}</p>
-                            <p>Estado: {item.state}</p>
-                            <p>Observação: {item.obs}</p>
-                          </div>
-                        </li>
-                      ))}
-                  </ul>
-
-                  <hr />
-                  <h1 style={{ textAlign: "center" }}>
-                    Informação extra da supervisão
-                  </h1>
-                  <p>{modalInfo.report}</p>
-                </div>
-              </Modal.Body>
-              <Modal.Footer>
-                <Button
-                  variant="success"
-                  onClick={() =>
-                    approve(
-                      localStorage.getItem("supervisionCostCenter"),
-                      localStorage.getItem("supervisionId")
-                    )
-                  }
-                >
-                  Aprovar
-                </Button>
-                <Button
-                  onClick={() =>
-                    generatePDF(
-                      localStorage.getItem("supervisionId"),
-                      localStorage.getItem("supervisorName"),
-                      localStorage.getItem("supervisionCostCenter")
-                    )
-                  }
-                  variant="info"
-                >
-                  Gerar PDF
-                </Button>
-              </Modal.Footer>
-            </Modal>
+              <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001l3.85 3.85a1 1 0 0 0 1.415-1.415l-3.85-3.85zm-5.598 0A5.5 5.5 0 1 1 10.5 5.5a5.5 5.5 0 0 1-4.356 4.844z" />
+            </svg>
           </div>
-        )}
+        </div>
+        <div className="container">
+          {isLoading ? (
+            <div className="text-center mt-4">
+              <CircularProgress size={80} thickness={5} />
+            </div>
+          ) : notifications.length === 0 ? (
+            <div className="text-center text-black mt-4">
+              Nenhuma notificação disponível
+            </div>
+          ) : (
+            <div style={{ overflow: "auto", maxHeight: "70vh" }}>
+              <DataGrid
+                rows={filteredRows}
+                columns={[
+                  { field: "id", headerName: "ID", width: 100 },
+                  { field: "data", headerName: "Data", width: 150 },
+                  { field: "supervisor", headerName: "Supervisor", width: 300 },
+                  {
+                    field: "clienteName",
+                    headerName: "Centro de custo",
+                    width: 200,
+                  },
+                  {
+                    /* field: "company", headerName: "Cliente", width: 300 */
+                  },
+                  { field: "estado", headerName: "Estado", width: 100 },
+                  {
+                    field: "link",
+                    headerName: "Ação",
+                    width: 250,
+                    renderCell: (params) => (
+                      <div className="d-flex justify-content-center">
+                        {params.row.evento === "Supervisão" && (
+                          <button
+                            className="btn btn-warning btn-sm m-1"
+                            onClick={() =>
+                              openVerificationModal(
+                                params.row._id,
+                                params.row.supervisor,
+                                params.row.costCenter
+                              )
+                            }
+                          >
+                            Detalhes
+                          </button>
+                        )}
+                      </div>
+                    ),
+                  },
+                ]}
+                pageSize={5}
+                autoHeight
+              />
+
+              <Modal
+                show={verificationModal}
+                onHide={() => setVerificationModal(false)}
+                size="xl"
+                centered
+              >
+                <Modal.Header closeButton>
+                  <Modal.Title>RELATÓRIO DA SUPERVISÃO</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                  <h1 style={{ textAlign: "center" }}>
+                    {selectedNotification?.evento}
+                  </h1>
+                  <div style={{ fontSize: "20px" }}>
+                    <h1 style={{ textAlign: "center" }}>IDENTIFICAÇÃO</h1>
+                    <h3 style={{ marginLeft: "20px" }}>
+                      Informação do Supervisor
+                    </h3>
+                    <p>Nome: {localStorage.getItem("supervisorName")}</p>
+                    <p>Código do supervisor: {modalInfo.supervisorCode}</p>
+                    <p>Tempo da supersão: {modalInfo.time}</p>
+                    <p>Feito em: {modalInfo.createdAt} </p>
+
+                    <h3 style={{ marginLeft: "20px" }}>Informação do site</h3>
+                    <p>Nome: {siteInfo.name}</p>
+                    <p>Centro de custo: {modalInfo.costCenter}</p>
+                    <p>Nome da empresa: {companyInfo.name}</p>
+                    <p>Código de cliente: {companyInfo.clientCode}</p>
+                    <hr />
+                    <h1 style={{ textAlign: "center" }}>
+                      Informação dos trabalhadores
+                    </h1>
+                    <p>Numero de trabalhadores pretendido: 0</p>
+                    <p>Presentes: {modalInfo.numberOfWorkers}</p>
+                    <p>
+                      Ausentes:{" "}
+                      {modalInfo.workerInformation &&
+                        modalInfo.workerInformation.length}
+                    </p>
+                    <p>Lista dos trabalhadores ausentes:</p>
+                    <ul>
+                      {modalInfo &&
+                        modalInfo.workerInformation &&
+                        modalInfo.workerInformation.map((item, index) => (
+                          <li key={index}>
+                            <div>
+                              <p>Nome: {item.name}</p>
+                              <p>ID trabalhador: {item.employeeNumber}</p>
+                              <p>Situação: {item.state}</p>
+                              <p>Observação: {item.obs}</p>
+                            </div>
+                          </li>
+                        ))}
+                    </ul>
+                    <hr />
+                    <h1 style={{ textAlign: "center" }}>
+                      Informação dos equipamentos
+                    </h1>
+                    <p>
+                      Quantidade de equipamentos encontrado:{" "}
+                      {modalInfo.equipment && modalInfo.equipment.length}
+                    </p>
+                    <p>Lista dos equipamentos encontrados: </p>
+                    <ul>
+                      {modalInfo &&
+                        modalInfo.equipment &&
+                        modalInfo.equipment.map((item, index) => (
+                          <li key={index}>
+                            <div>
+                              <p>Nome: {item.name}</p>
+                              <p>Número de série: {item.serialNumber}</p>
+                              <p>Centro de custi {item.costCenter}</p>
+                              <p>Estado: {item.state}</p>
+                              <p>Observação: {item.obs}</p>
+                            </div>
+                          </li>
+                        ))}
+                    </ul>
+
+                    <hr />
+                    <h1 style={{ textAlign: "center" }}>
+                      Informação extra da supervisão
+                    </h1>
+                    <p>{modalInfo.report}</p>
+                  </div>
+                </Modal.Body>
+                <Modal.Footer>
+                  <Button
+                    variant="success"
+                    onClick={() =>
+                      approve(
+                        localStorage.getItem("supervisionCostCenter"),
+                        localStorage.getItem("supervisionId")
+                      )
+                    }
+                  >
+                    Aprovar
+                  </Button>
+                  <Button
+                    onClick={() =>
+                      generatePDF(
+                        localStorage.getItem("supervisionId"),
+                        localStorage.getItem("supervisorName"),
+                        localStorage.getItem("supervisionCostCenter")
+                      )
+                    }
+                    variant="info"
+                  >
+                    Gerar PDF
+                  </Button>
+                </Modal.Footer>
+              </Modal>
+            </div>
+          )}
+        </div>
+        <ToastContainer />
       </div>
-      <ToastContainer />
     </div>
   );
 };
-
 export default NotificationList;

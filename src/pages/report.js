@@ -9,6 +9,9 @@ import { format } from "date-fns";
 const Report = () => {
     const [reports, setReports] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
+    const [searchTerm, setSearchTerm] = useState(""); // Termo de pesquisa
+    const [searchResults, setSearchResults] = useState([]); // Resultados da pesquisa
+    const [searchQuery, setSearchQuery] = useState("");
 
     useEffect(() => {
         fetchReports();
@@ -32,6 +35,7 @@ const Report = () => {
         }
     }
 
+
     return (
         <div className="container4 mr-2" style={{ height: "89vh" }}>
         <h1 style={{ textAlign: "center" }}>
@@ -39,7 +43,36 @@ const Report = () => {
         </h1>
             <div className="container-fluid"><Link to="/Home" className="p-1">Início </Link> / <span>Relatórios</span>
             <br></br> <br></br> 
-            
+            <div className="space">
+          <div style={{ position: "relative", display: "inline-block" }}>
+            <input
+              type="text"
+              className="form-control"
+              placeholder="Pesquisar..."
+              value={searchTerm}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              style={{ paddingLeft: "3rem" }} // espaço para o ícone
+            />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="30"
+              height="20"
+              fill="currentColor"
+              className="bi bi-search"
+              viewBox="0 0 16 16"
+              style={{
+                position: "absolute",
+                left: "10px",
+                top: "25px",
+                transform: "translateY(-50%)",
+                pointerEvents: "none",
+                color: "#0d214f ", // Azul suave
+              }}
+            >
+              <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001l3.85 3.85a1 1 0 0 0 1.415-1.415l-3.85-3.85zm-5.598 0A5.5 5.5 0 1 1 10.5 5.5a5.5 5.5 0 0 1-4.356 4.844z" />
+            </svg>
+          </div>
+        </div>
                 {isLoading ? (
                     <div className="text-center mt-4">
                         <CircularProgress size={80} thickness={5} />
