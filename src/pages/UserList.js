@@ -44,6 +44,8 @@ const UserList = () => {
   const pagesVisited = pageNumber * usersPerPage;
   const pageCount = Math.ceil(filteredUsers.length / usersPerPage);
 
+  const [userSite, setUserSite] = useState([]);
+
 
   // Estilos para a modal e colunas
   const modalStyles = {
@@ -103,9 +105,9 @@ const UserList = () => {
       const response = await axios.get(
         `${process.env.REACT_APP_API_URL}user/findBelongsToMe/${userCoord}?size=50`
       );
-      if (response.data && Array.isArray(response.data.data)) {
-        setUsers(response.data.data);
-        setFilteredUsers(response.data.data);
+      if (response.data && Array.isArray(response.data.data.data)) {
+        setUsers(response.data.data.data);
+        setFilteredUsers(response.data.data.data);
       }
       setIsLoading(false);
     } catch (error) {
@@ -177,7 +179,21 @@ const UserList = () => {
     setEditedUser(data);
   }
   async function handleSiteUser(userId) {
-    setIsSiteModalOpen(true);
+    try {
+      //setIsLoading(true);
+      setIsSiteModalOpen(true);
+      const response = await axios.get(
+        `${process.env.REACT_APP_API_URL}companySite/getSuperivsorSites/${userId}?size=500`
+      );
+      if (response.data && Array.isArray(response.data.data.data)) {
+        setUserSite(response.data.data.data);
+        // setFilteredUsers(response.data.data.data);
+      }
+      //setIsLoading(false);
+    } catch (error) {
+      console.error("Erro:", error.message);
+      // setIsLoading(false);
+    }
   }
 
   async function updateUser() {
@@ -209,6 +225,23 @@ const UserList = () => {
       console.error("Erro ao excluir usuário:", error.message);
     }
   };
+
+  const ITEMS_PER_PAGE = 5; // Defina quantos itens você quer mostrar por página
+
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const totalPages = Math.ceil(userSite.length / ITEMS_PER_PAGE);
+
+  const handlePreviousPage = () => {
+    setCurrentPage((prev) => Math.max(prev - 1, 1));
+  };
+
+  const handleNextPage = () => {
+    setCurrentPage((prev) => Math.min(prev + 1, totalPages));
+  };
+
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const currentItems = userSite.slice(startIndex, startIndex + ITEMS_PER_PAGE);
 
   return (
     <div className="container4">
@@ -264,6 +297,7 @@ const UserList = () => {
                         name: user.name || "",
                         phoneNumber: user.phoneNumber || "",
                         idUser: user._id,
+                        employeeId: user.employeeId
                       }))
                     : []
                 }
@@ -299,7 +333,7 @@ const UserList = () => {
                         </button>
                         <button
                           className="btn btn-info"
-                          onClick={() => handleSiteUser(params.row.id)}
+                          onClick={() => handleSiteUser(params.row.employeeId)}
                         >
                           <FontAwesomeIcon icon={faBuilding} />
                         </button>
@@ -516,12 +550,35 @@ const UserList = () => {
         <div style={columnStyles}>
           <div style={columnItemStyles}>
             <h2>NOME</h2>
-            <p>Nome do site</p>
+            {currentItems.map((site, index) => (
+              <p key={index}>{site.name}</p>
+            ))}
           </div>
           <div style={columnItemStyles}>
             <h2>Centro de custo</h2>
-            <p>Cost center</p>
+            {currentItems.map((site, index) => (
+              <p key={index}>{site.costCenter}</p>
+            ))}
           </div>
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '20px' }}>
+          <button
+            className="btn btn-secondary"
+            onClick={handlePreviousPage}
+            style={{ padding: '10px 20px', fontSize: '14px' }}
+            disabled={currentPage === 1}
+          >
+            Anterior
+          </button>
+          <span>Página {currentPage} de {totalPages}</span>
+          <button
+            className="btn btn-secondary"
+            onClick={handleNextPage}
+            style={{ padding: '10px 20px', fontSize: '14px' }}
+            disabled={currentPage === totalPages}
+          >
+            Próxima
+          </button>
         </div>
         <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '20px' }}>
           <button
@@ -533,6 +590,7 @@ const UserList = () => {
           </button>
         </div>
       </Modal>
+
     </div>
   );
 };
