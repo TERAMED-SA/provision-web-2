@@ -44,8 +44,9 @@ const MapComponent = () => {
       const response = await axios.get(
         `${process.env.REACT_APP_API_URL}user/findBelongsToMe/${userCoord}?size=50`
       );
-      if (response.data && Array.isArray(response.data.data)) {
-        setUsers(response.data.data);
+      console.log(response.data.data)
+      if (response.data && Array.isArray(response.data.data.data)) {
+        setUsers(response.data.data.data);
       }
       setIsLoading(false);
     } catch (error) {
@@ -219,106 +220,119 @@ const MapComponent = () => {
   const openModalOnlineUsers = async () => {
     navigate("/mapOnline")
   }
+  const [searchTerm, setSearchTerm] = useState('');
+  const filteredUsers = users.filter(user =>
+    user.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
 
     <div className="container4">
       <h1 style={{ textAlign: "center" }}>
-    ROTA DOS SUPERVISORES <span className="badge badge-secondary"></span>
-    </h1>
-        <div className="container-fluid"><Link to="/Home" className="p-1">Início </Link> / <span>Rotas</span>
+        ROTA DOS SUPERVISORES <span className="badge badge-secondary"></span>
+      </h1>
+      <div className="container-fluid"><Link to="/Home" className="p-1">Início </Link> / <span>Rotas</span>
 
-    <div className="container-fluid">
-      <div className="row">
-        <div className="col-md-4">
-          <div className="mt-4">
-            <h2>Supervisores</h2>
-            {isLoading && (
-              <div className="text-center mt-4">
-                <CircularProgress size={80} thickness={5} />
+        <div className="container-fluid">
+          <div className="row">
+            <div className="col-md-4">
+              <div className="mt-4">
+                <h2>Supervisores</h2>
+                <div className="mb-4">
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Buscar supervisores..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                </div>
+                {isLoading && (
+                  <div className="text-center mt-4">
+                    <CircularProgress size={80} thickness={5} />
+                  </div>
+                )}
+
+                {!isLoading && users.length === 0 && (
+                  <div className="text-center text-black mt-4">
+                    Nenhum dado disponível
+                  </div>
+                )}
+
+                {!isLoading && users.length > 0 && (
+                  <div style={{ overflow: "auto", maxHeight: "120px" }}>
+                    <ul className="list-unstyled">
+                      {filteredUsers.map((user) => (
+                        <li key={user.employeeId}>
+                          <label className="form-check-label">
+                            <input
+                              className="form-check-input"
+                              type="radio"
+                              checked={
+                                selectedUser &&
+                                selectedUser.employeeId === user.employeeId
+                              }
+                              onChange={() => handleUserSelection(user)}
+                            />
+                            {user.name}
+                          </label>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                <div className="row">
+                  <div className="col-md-6">
+                    <button
+                      className="btn btn-danger me-2 btn-lg form-control"
+                      onClick={openModalOnlineUsers}
+                    >
+                      Online
+                    </button>
+                  </div>
+                  <div className="col-md-6">
+                    <button
+                      className="btn btn-success btn-lg form-control"
+                      onClick={showRoute}
+                      disabled={stateButton}
+                    >
+                      Mostrar Rota
+                    </button>
+                  </div>
+                </div>
+
+                <div className="calendar-container">
+                  <DatePicker
+                    selected={startDate}
+                    onChange={handleDateChange}
+                    inline
+                    showMonthDropdown
+                    showYearDropdown
+                    dropdownMode="select"
+                  />
+                </div>
               </div>
-            )}
-
-            {!isLoading && users.length === 0 && (
-              <div className="text-center text-black mt-4">
-                Nenhum dado disponível
-              </div>
-            )}
-
-            {!isLoading && users.length > 0 && (
-              <div style={{ overflow: "auto", maxHeight: "120px" }}>
-                <ul className="list-unstyled">
-                  {users.map((user) => (
-                    <li key={user.employeeId}>
-                      <label className="form-check-label">
-                        <input
-                          className="form-check-input"
-                          type="radio"
-                          checked={
-                            selectedUser &&
-                            selectedUser.employeeId === user.employeeId
-                          }
-                          onChange={() => handleUserSelection(user)}
-                        />
-                        {user.name}
-                      </label>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
-            <div className="row">
-              <div className="col-md-6">
+              <div className="col-md-12">
                 <button
-                  className="btn btn-danger me-2 btn-lg form-control"
-                  onClick={openModalOnlineUsers}
+                  className="btn btn-primary btn-lg form-control"
+                  onClick={handleUpdateRoute}
                 >
-                  Online
-                </button>
-              </div>
-              <div className="col-md-6">
-                <button
-                  className="btn btn-success btn-lg form-control"
-                  onClick={showRoute}
-                  disabled={stateButton}
-                >
-                  Mostrar Rota
+                  Atualizar Rota
                 </button>
               </div>
             </div>
 
-            <div className="calendar-container">
-              <DatePicker
-                selected={startDate}
-                onChange={handleDateChange}
-                inline
-                showMonthDropdown
-                showYearDropdown
-                dropdownMode="select"
-              />
+            <div className="col-md-8">
+              <div
+                ref={mapContainerRef}
+                style={{ height: "80vh", width: "100%", marginTop: "20px" }}
+              ></div>
             </div>
           </div>
-          <div className="col-md-12">
-            <button
-              className="btn btn-primary btn-lg form-control"
-              onClick={handleUpdateRoute}
-            >
-              Atualizar Rota
-            </button>
-          </div>
-        </div>
 
-        <div className="col-md-8">
-          <div
-            ref={mapContainerRef}
-            style={{ height: "80vh", width: "100%", marginTop: "20px" }}
-          ></div>
-        </div>
-      </div>
-
-      <ToastContainer />
-    </div>  </div>  </div>
+          <ToastContainer />
+        </div>  </div>  </div>
   );
 };
 

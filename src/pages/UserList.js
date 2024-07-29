@@ -17,7 +17,7 @@ import { DataGrid } from "@mui/x-data-grid";
 import { Pagination } from "react-bootstrap";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { textAlign } from "@mui/system";
+import { fontSize, textAlign } from "@mui/system";
 
 const UserList = () => {
   const [selectedUserId, setSelectedUserId] = useState(null);
@@ -59,38 +59,92 @@ const UserList = () => {
       bottom: 'auto',
       marginRight: '-50%',
       transform: 'translate(-50%, -50%)',
-      width: '50%', // Largura da modal
-      backgroundColor: '#fff', // Fundo mais escuro para a modal
-      color: '#000', // Texto branco
-      border: 'none', // Remove a borda padrão
-      borderRadius: '8px', // Adiciona bordas arredondadas
-      padding: '20px', // Espaçamento interno
+      width: '60%', // Largura da modal
+      backgroundColor: '#fff', // Fundo branco para a modal
+      color: '#333', // Texto preto
+      border: '1px solid #ccc', // Borda cinza clara
+      borderRadius: '10px', // Adiciona bordas arredondadas
+      padding: '30px', // Espaçamento interno
+      boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', // Sombra sutil
     },
   };
 
-  const columnStyles = {
-    display: 'flex',
-    flexDirection: 'row',
-    justifyContent: 'space-around',
+  const tableContainerStyles = {
+    width: '100%',
+    borderCollapse: 'collapse',
+    marginBottom: '20px',
   };
 
-  const columnItemStyles = {
-    flex: 1,
-    margin: '0 10px',
-    padding: '10px',
-    border: '1px solid #ccc',
-    borderRadius: '4px',
+  const tableHeaderStyles = {
+    backgroundColor: '#5c3aff', // Cor roxa
+    color: '#fff',
     textAlign: 'center',
+    padding: '10px',
   };
 
+  const tableRowStyles = {
+    textAlign: 'center',
+    borderBottom: '1px solid #ddd', // Borda inferior
+  };
+
+  const tableCellStyles = {
+    padding: '10px',
+  };
+
+  const buttonContainerStyles = {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: '20px',
+  };
+
+  const buttonStyles = {
+    padding: '10px 20px',
+    fontSize: '14px',
+    borderRadius: '5px',
+    border: 'none',
+    cursor: 'pointer',
+    transition: 'background-color 0.3s ease',
+  };
+
+  const prevButtonStyles = {
+    ...buttonStyles,
+    backgroundColor: '#6c757d', // Cor cinza escuro
+    color: '#fff',
+  };
+
+  const nextButtonStyles = {
+    ...buttonStyles,
+    backgroundColor: '#6c757d', // Cor cinza escuro
+    color: '#fff',
+  };
+
+  const closeButtonStyles = {
+    position: "absolute",
+    top: "-70px",
+    right: "-30px",
+    background: "transparent",
+    border: "none",
+    fontSize: "44px",
+    cursor: "pointer",
+    color: "#000",
+  };
   const closeModalSite = () => {
     setIsSiteModalOpen(false);
   }
 
   useEffect(() => {
     fetchUsers();
+    if (isSiteModalOpen) {
+      setCurrentPage(1);
+    }
   }, []);
 
+  useEffect(() => {
+    if (isSiteModalOpen) {
+      setCurrentPage(1);
+    }
+  }, [isSiteModalOpen, userSite]);
   useEffect(() => {
     const filtered = users.filter(user =>
       user.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -182,6 +236,7 @@ const UserList = () => {
     try {
       //setIsLoading(true);
       setIsSiteModalOpen(true);
+      setUserSite([]);
       const response = await axios.get(
         `${process.env.REACT_APP_API_URL}companySite/getSuperivsorSites/${userId}?size=500`
       );
@@ -245,7 +300,7 @@ const UserList = () => {
 
   return (
     <div className="container4">
-      <h1 style={{ textAlign: "center" }}>UTILIZADORES</h1>
+      <h1 style={{ textAlign: "center" }}>SUPERVISORES</h1>
       <div className="container-fluid">  <Link to="/Home" className="p-1">Início </Link> / <span>Utilizadores</span>
         <br></br> <br></br>
         <div className="space">
@@ -457,137 +512,67 @@ const UserList = () => {
         </form>
       </Modal>
       <Modal
-        isOpen={isEditModalOpen}
-        onRequestClose={() => setIsEditModalOpen(false)}
-        className="custom-modal"
-        overlayClassName="custom-modal-overlay"
-      >
-        <h2>Editar Utilizador</h2>
-        <form onSubmit={updateUser}>
-          <div className="form-group">
-            <label>Nome:</label>
-            <input
-              type="text"
-              value={editedUser.name}
-              onChange={(e) =>
-                setEditedUser({ ...editedUser, name: e.target.value })
-              }
-              className="form-control"
-              required
-            />
-          </div>
-          <div className="form-group">
-            <label>Email:</label>
-            <input
-              type="email"
-              value={editedUser.email}
-              onChange={(e) =>
-                setEditedUser({ ...editedUser, email: e.target.value })
-              }
-              className="form-control"
-              required
-            />
-          </div>
-          <div className="form-group">
-            <label>Telefone:</label>
-            <input
-              type="text"
-              value={editedUser.phoneNumber}
-              onChange={(e) =>
-                setEditedUser({ ...editedUser, phoneNumber: e.target.value })
-              }
-              className="form-control"
-              required
-            />
-          </div>
-          <div className="form-group">
-            <label>Endereço:</label>
-            <input
-              type="text"
-              value={editedUser.address}
-              onChange={(e) =>
-                setEditedUser({ ...editedUser, address: e.target.value })
-              }
-              className="form-control"
-              required
-            />
-          </div>
-          <div className="form-group">
-            <label>Gênero:</label>
-            <select
-              value={editedUser.gender}
-              onChange={(e) =>
-                setEditedUser({ ...editedUser, gender: e.target.value })
-              }
-              className="form-control"
-              required
-            >
-              <option value="">Selecione o gênero</option>
-              <option value="Masculino">Masculino</option>
-              <option value="Feminino">Feminino</option>
-              <option value="Outro">Outro</option>
-            </select>
-          </div>
-          <button type="submit" className="btn btn-primary">
-            <FontAwesomeIcon icon={faSave} /> Salvar
-          </button>
-          <button
-            type="button"
-            className="btn btn-secondary"
-            onClick={() => setIsEditModalOpen(false)}
-          >
-            <FontAwesomeIcon icon={faTimes} /> Cancelar
-          </button>
-        </form>
-      </Modal>
-      <Modal
         isOpen={isSiteModalOpen}
         onRequestClose={closeModalSite}
         style={modalStyles}
         ariaHideApp={false}
       >
-        <h1 style={{ textAlign: 'center' }}>Meus sites</h1>
-        <div style={columnStyles}>
-          <div style={columnItemStyles}>
-            <h2>NOME</h2>
-            {currentItems.map((site, index) => (
-              <p key={index}>{site.name}</p>
-            ))}
-          </div>
-          <div style={columnItemStyles}>
-            <h2>Centro de custo</h2>
-            {currentItems.map((site, index) => (
-              <p key={index}>{site.costCenter}</p>
-            ))}
-          </div>
-        </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '20px' }}>
+        <div style={{ position: 'relative' }}>
           <button
-            className="btn btn-secondary"
-            onClick={handlePreviousPage}
-            style={{ padding: '10px 20px', fontSize: '14px' }}
-            disabled={currentPage === 1}
-          >
-            Anterior
-          </button>
-          <span>Página {currentPage} de {totalPages}</span>
-          <button
-            className="btn btn-secondary"
-            onClick={handleNextPage}
-            style={{ padding: '10px 20px', fontSize: '14px' }}
-            disabled={currentPage === totalPages}
-          >
-            Próxima
-          </button>
-        </div>
-        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '20px' }}>
-          <button
-            className="btn btn-danger"
+            className="btn-close"
             onClick={closeModalSite}
-            style={{ padding: '15px 30px', fontSize: '16px' }}
+            style={closeButtonStyles}
+            aria-label="Fechar"
           >
-            Fechar
+            &times; {/* Representa o símbolo "X" */}
           </button>
+          <h1 style={{ textAlign: 'center', marginBottom: '20px' }}>Meus sites</h1>
+          <table style={tableContainerStyles}>
+            <thead>
+              <tr>
+                <th style={tableHeaderStyles}>NOME</th>
+                <th style={tableHeaderStyles}>Centro de custo</th>
+              </tr>
+            </thead>
+            <tbody>
+              {currentItems.length === 0 ? (
+                <tr>
+                  <td colSpan="2" style={{ textAlign: 'center', padding: '20px' }}>
+                    Nenhum dado disponível
+                  </td>
+                </tr>
+              ) : (
+                currentItems.map((site, index) => (
+                  <tr key={index} style={tableRowStyles}>
+                    <td style={tableCellStyles}>{site.name}</td>
+                    <td style={tableCellStyles}>{site.costCenter}</td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+
+          {currentItems.length > 0 && (
+            <div style={buttonContainerStyles}>
+              <button
+                className="btn btn-secondary"
+                onClick={handlePreviousPage}
+                style={prevButtonStyles}
+                disabled={currentPage === 1}
+              >
+                Anterior
+              </button>
+              <span style={{ fontSize: '14px' }}>Página {currentPage} de {totalPages}</span>
+              <button
+                className="btn btn-secondary"
+                onClick={handleNextPage}
+                style={nextButtonStyles}
+                disabled={currentPage === totalPages}
+              >
+                Próxima
+              </button>
+            </div>
+          )}
         </div>
       </Modal>
 

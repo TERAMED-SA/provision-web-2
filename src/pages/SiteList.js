@@ -168,6 +168,7 @@ function SiteList() {
       const filteredSites = response.data.data.data.filter(
         (site) => clientCode === site.clientCode
       );
+      console.log(filteredSites)
       setSiteList(filteredSites);
     } catch (error) {
       console.error("Error fetching sites:", error.message);
@@ -179,6 +180,16 @@ function SiteList() {
   useEffect(() => {
     fetchSites();
   }, []);
+
+  const [searchTerm, setSearchTerm] = useState('');
+
+  // Filtra a lista de sites com base no termo de busca
+  const filteredSites = siteList.filter(site =>
+    (site.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (site.mec || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (site.clientCode || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (site.costCenter || "").toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div className="container4">
@@ -208,57 +219,65 @@ function SiteList() {
       )}
 
       {!isLoading && siteList.length > 0 && (
-        <DataGrid
-          rows={siteList.map((site, index) => ({
-            id: index + 1,
-            name: site.name || "",
-            address: site.address || "",
-            mec: site.mec || "",
-            ctClient: site.ctClient || "",
-            costCenter: site.costCenter || "", // Adicionando a coluna costCenter
-            idSite: site.costCenter,
-          }))}
-          columns={[
-            { field: "id", headerName: "ID", width: 60 },
-            { field: "name", headerName: "Nome", width: 800 },
-            { field: "address", headerName: "Endereço", width: 200 },
-            { field: "ctClient", headerName: "CT Client", width: 150 },
-            { field: "costCenter", headerName: "Cost Center", width: 150 },
-            {
-              field: "actions",
-              headerName: "Ações",
-              width: 250,
-              renderCell: (params) => (
-                <div>
-                  <button
-                    className="btn btn-primary btn-sm mr-2 mb-2"
-                    onClick={() => handleOpenEditModal(params.row)}
-                  >
-                    <FontAwesomeIcon icon={faEdit} />
-                  </button>
-                  <button
-                    className="btn btn-danger btn-sm mr-2 mb-2"
-                    onClick={() => handleDelete(params.row.idSite)}
-                  >
-                    <FontAwesomeIcon icon={faTrash} />
-                  </button>
-                  <button className="btn btn-success btn-sm mr-2 mb-2">
-                    <a
-                      href={`/equipmentList?costCenter=${params.row.idSite}`}
-                      style={{ color: "white" }}
-                    >
-                      <MdHomeRepairService />
-                    </a>
-                  </button>
-                </div>
-              ),
-            },
-          ]}
-          pageSize={sitePerPage}
-          rowCount={siteList.length}
-          pagination
-          onPageChange={handlePageChange}
-        />
+
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60vh' }}>
+          <div style={{ width: '90%' }}>
+            {/* Campo de busca */}
+            <div className="mb-4" style={{ width: '100%', maxWidth: '300px' }}>
+              <input
+                type="text"
+                className="form-control"
+                placeholder="Buscar sites..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                style={{ width: '100%' }}
+              />
+            </div>
+            <DataGrid
+              rows={filteredSites.map((site, index) => ({
+                id: index + 1,
+                name: site.name || "",
+                mec: site.mec || "",
+                ctClient: site.clientCode || "",
+                costCenter: site.costCenter || "",
+                idSite: site.costCenter,
+              }))}
+              columns={[
+                { field: "id", headerName: "ID", width: 60 },
+                { field: "name", headerName: "Nome", width: 200 },
+                { field: "ctClient", headerName: "Código cliente", width: 150 },
+                { field: "costCenter", headerName: "Centro de custo", width: 150 },
+                {
+                  field: "actions",
+                  headerName: "Ações",
+                  width: 200,
+                  renderCell: (params) => (
+                    <div>
+                      <button
+                        className="btn btn-danger btn-sm mr-2 mb-2"
+                        onClick={() => handleDelete(params.row.idSite)}
+                      >
+                        <FontAwesomeIcon icon={faTrash} />
+                      </button>
+                      <button className="btn btn-success btn-sm mr-2 mb-2">
+                        <a
+                          href={`/equipmentList?costCenter=${params.row.idSite}`}
+                          style={{ color: "white" }}
+                        >
+                          <MdHomeRepairService />
+                        </a>
+                      </button>
+                    </div>
+                  ),
+                },
+              ]}
+              pageSize={sitePerPage}
+              rowCount={filteredSites.length}
+              pagination
+              onPageChange={handlePageChange}
+            />
+          </div>
+        </div>
       )}
 
       <Modal show={isAddSiteModalOpen} onHide={handleCloseAddSiteModal}>
