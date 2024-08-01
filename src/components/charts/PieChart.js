@@ -1,10 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { Pie } from "react-chartjs-2";
-import { Chart, ArcElement, Tooltip, Legend, Title } from "chart.js";
-import { textAlign } from "@mui/system";
-
-// Registrar os elementos necessários do Chart.js
-Chart.register(ArcElement, Tooltip, Legend, Title);
 
 function PieChart() {
   const [chartData, setChartData] = useState(null);
@@ -55,7 +50,6 @@ function PieChart() {
               ],
               borderColor: "#fff",
               borderWidth: 1,
-
             },
           ],
         });
@@ -80,10 +74,9 @@ function PieChart() {
   };
 
   return (
-    <div className="bg-white border border-secondary text-left">
+    <div className="bg-white border border-secondary">
       {chartData && <Pie data={chartData} options={options} />}
     </div>
-
   );
 }
 

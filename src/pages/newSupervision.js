@@ -169,6 +169,14 @@ const NotificationList = () => {
     }
   };
 
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    const day = `0${date.getDate()}`.slice(-2);
+    const month = `0${date.getMonth() + 1}`.slice(-2); // Months are zero-indexed
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+  };
+
   const generatePDF = async (id, name, costCenter) => {
     const dados = await getSupInfo(id);
     pdfMake.vfs = pdfFonts.pdfMake.vfs;
@@ -193,9 +201,7 @@ const NotificationList = () => {
     };
 
     const createdAt = new Date(data.createdAt);
-    const formattedDate = `${createdAt.getFullYear()}-${String(
-      createdAt.getMonth() + 1
-    ).padStart(2, "0")}-${String(createdAt.getDate()).padStart(2, "0")}`;
+    const formattedDate = formatDate(createdAt);
     const documentDefinition = {
       footer: function (currentPage, pageCount) {
         return {
@@ -228,7 +234,7 @@ const NotificationList = () => {
         { text: `Nome: ${data.name}` },
         { text: `Código do Supervisor: ${data.supervisorCode}` },
         { text: `Tempo da supervisão: ${data.time}` },
-        { text: `Feito em: ${data.createdAt.toLocaleString()}` },
+        { text: `Feito em: ${formattedDate}` },
         { text: "" },
         { text: "Informação do Site", bold: 1000, margin: [20, 10, 0, 5] },
         { text: `Nome do site: ${data.siteName}` },
@@ -439,7 +445,7 @@ const NotificationList = () => {
               <DataGrid
                 rows={filteredRows}
                 columns={[
-                  { field: "id", headerName: "ID", width: 100 },
+                  { field: "id", headerName: "Número", width: 100 },
                   { field: "data", headerName: "Data", width: 150 },
                   { field: "supervisor", headerName: "Supervisor", width: 300 },
                   {
@@ -497,10 +503,10 @@ const NotificationList = () => {
                     <h3 style={{ marginLeft: "20px" }}>
                       Informação do Supervisor
                     </h3>
-                    <p>Nome: {localStorage.getItem("supervisorName")}</p>
+                    <p>Nome: {localStorage.getItem("supevisorName")}</p>
                     <p>Código do supervisor: {modalInfo.supervisorCode}</p>
                     <p>Tempo da supersão: {modalInfo.time}</p>
-                    <p>Feito em: {modalInfo.createdAt} </p>
+                    <p>Feito em: {formatDate(modalInfo.createdAt)} </p>
 
                     <h3 style={{ marginLeft: "20px" }}>Informação do site</h3>
                     <p>Nome: {siteInfo.name}</p>
@@ -511,8 +517,10 @@ const NotificationList = () => {
                     <h1 style={{ textAlign: "center" }}>
                       Informação dos trabalhadores
                     </h1>
-                    <p>Numero de trabalhadores pretendido: 0</p>
-                    <p>Presentes: {modalInfo.numberOfWorkers}</p>
+                    <p>
+                      Presentes:{" "}
+                      {modalInfo.numberOfWorkers}
+                    </p>
                     <p>
                       Ausentes:{" "}
                       {modalInfo.workerInformation &&

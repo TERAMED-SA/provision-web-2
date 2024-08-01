@@ -3,14 +3,49 @@
 	margin-top: auto;
 	margin-bottom: auto;
 }
+#usuarionome {
+	color: #ffffff
+}
 
-.card {
+#heaadermsg {
+	background-color: #1d09b2;
+}
+#footermsg {
+	background-color:#1d09b2;
+}
+
+#chat1 {
     height: 500px;
     border-radius: 15px !important;
-    background-image: url('../assets/backgroundChat.jpg');
+    background-color: #585859;
     background-size: cover; /* Ajusta o tamanho da imagem para cobrir todo o contêiner */
     background-position: center; /* Centraliza a imagem no contêiner */
 }
+.card {
+    height: 500px;
+    border-radius: 15px !important;
+    background: linear-gradient(to bottom, #8a898d, #7f7f83); /* Gradiente vertical de cinza para azul */
+    background-size: cover;
+    background-position: center;
+}
+
+#sms {
+	color: #ffffff;
+}
+.card-footer {
+	background-color:#1d09b2;
+}
+
+.card_chats{
+	background-color:#1d09b2;
+	height: 50px;
+	border-radius: 5px;
+}
+.card_chats h2{
+	color:#fbfbfb
+	
+}
+
 
 
 .contacts_body {
@@ -88,15 +123,23 @@
 	margin-bottom: auto;
 	margin-left: 15px;
 }
+.user_info span:hover {
+	margin-top: auto;
+	border-radius: 5px;
+    background-color: #130687;
+	padding-right: 300px;
+	padding-bottom:20px;
+	padding-top: 20px;
+}
 
 .user_info span {
 	font-size: 20px;
-	color: white;
+	color: rgb(255, 255, 255);
 }
 
 .user_info p {
 	font-size: 10px;
-	color: rgba(255, 255, 255, 0.6);
+	color: rgba(254, 254, 254, 0.6);
 }
 
 
@@ -105,17 +148,19 @@
 	margin-bottom: auto;
 	margin-left: 10px;
 	border-radius: 25px;
-	background-color: #d2d2d7;
+	background-color: #f9f9f9;
 	padding: 10px;
+	color: #080000;
 	position: relative;
 }
 
 .msg_cotainer_send {
+	color: #ffffff;
 	margin-top: auto;
 	margin-bottom: auto;
 	margin-right: 10px;
 	border-radius: 25px;
-	background-color: #ffffff;
+	background-color: #4430f5;
 	padding: 10px;
 	position: relative;
 }

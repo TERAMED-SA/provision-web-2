@@ -208,7 +208,7 @@ const Team = () => {
         }, 3000);
       }
     } catch (error) {
-      toast.error("Erro ao atribuir site. Por favor, tente novamente.");
+      toast.error("Por favor, tente mais tarde.");
       console.error("Erro ao atribuir site:", error.message);
     }
   };

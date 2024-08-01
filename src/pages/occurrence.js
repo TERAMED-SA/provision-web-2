@@ -8,16 +8,13 @@ import Button from "react-bootstrap/Button";
 import { format } from "date-fns";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import pdfMake from "pdfmake/build/pdfmake";
-import pdfFonts from "pdfmake/build/vfs_fonts";
-import logo from "../assets/logo.png";
 
 const NotificationList = () => {
   const [notifications, setNotifications] = useState([]);
   const [selectedNotification, setSelectedNotification] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [modalShow, setModalShow] = useState(false);
-  const [searchInput, setSearchInput] = useState("Ocorrência"); // Inicializando com "Supervisão"
+  const [searchInput, setSearchInput] = useState(""); // Inicializando com "Supervisão"
   const [inputVisible, setInputVisible] = useState(false); // Inicializando como falso
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -48,6 +45,7 @@ const NotificationList = () => {
     setSelectedNotification(notification);
     const occorence = await getOcorrenceByIdNot(notification._id);
     setSelectedNotification(occorence);
+    
     setModalShow(true);
   };
 
@@ -66,22 +64,27 @@ const NotificationList = () => {
     setSearchInput(event.target.value);
   };
 
-  const filteredNotifications = notifications.filter(
-    (notification) =>
-      notification.createdAt
-        .toLowerCase()
-        .includes(searchInput.toLowerCase()) ||
-      notification.supervisorName
-        .toLowerCase()
-        .includes(searchInput.toLowerCase()) ||
-      notification.costCenter
-        .toLowerCase()
-        .includes(searchInput.toLowerCase()) ||
-      notification.clientCode
-        .toLowerCase()
-        .includes(searchInput.toLowerCase()) ||
-      notification.information.toLowerCase().includes(searchInput.toLowerCase()) // Pesquisa por nome do evento
-  );
+  // Filtro para mostrar apenas eventos de tipo "Ocorrência"
+  const filteredNotifications = notifications
+    .filter((notification) => notification.information === "Ocorrência") // Filtra para mostrar apenas eventos de tipo "Ocorrência"
+    .filter(
+      (notification) =>
+        notification.createdAt
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase()) ||
+        notification.supervisorName
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase()) ||
+        notification.costCenter
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase()) ||
+        notification.clientCode
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase()) ||
+        notification.information
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase())
+    );
 
   const approve = async (costCenter, idNot) => {
     try {
@@ -123,37 +126,36 @@ const NotificationList = () => {
           Início{" "}
         </Link>{" "}
         / <span>Ocorrências</span>
-        <br/>
         <br />
-       
+        <br />
         <div style={{ position: "relative", display: "inline-block" }}>
-            <input
-              type="text"
-              className="form-control"
-              placeholder="Pesquisar..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              style={{ paddingLeft: "3rem" }} // espaço para o ícone
-            />
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="30"
-              height="20"
-              fill="currentColor"
-              className="bi bi-search"
-              viewBox="0 0 16 16"
-              style={{
-                position: "absolute",
-                left: "10px",
-                top: "25px",
-                transform: "translateY(-50%)",
-                pointerEvents: "none",
-                color: "#0d214f ", // Azul suave
-              }}
-            >
-              <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001l3.85 3.85a1 1 0 0 0 1.415-1.415l-3.85-3.85zm-5.598 0A5.5 5.5 0 1 1 10.5 5.5a5.5 5.5 0 0 1-4.356 4.844z" />
-            </svg>
-          </div>
+          <input
+            type="text"
+            className="form-control"
+            placeholder="Pesquisar..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            style={{ paddingLeft: "3rem" }} // espaço para o ícone
+          />
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="30"
+            height="20"
+            fill="currentColor"
+            className="bi bi-search"
+            viewBox="0 0 16 16"
+            style={{
+              position: "absolute",
+              left: "10px",
+              top: "25px",
+              transform: "translateY(-50%)",
+              pointerEvents: "none",
+              color: "#0d214f ", // Azul suave
+            }}
+          >
+            <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001l3.85 3.85a1 1 0 0 0 1.415-1.415l-3.85-3.85zm-5.598 0A5.5 5.5 0 1 1 10.5 5.5a5.5 5.5 0 0 1-4.356 4.844z" />
+          </svg>
+        </div>
         <div className="container">
           <div className="space">
             <div className=""></div>
@@ -194,6 +196,7 @@ const NotificationList = () => {
                     supervisor: notification.supervisorName,
                     costCenter: notification.costCenter,
                     cliente: notification.clientCode,
+                    clienteName: notification.siteName,
                     estado: notification.state ? "Validado" : "Pendente",
                     link: notification.actionLocationId,
                     siteName: notification.siteName,
@@ -203,11 +206,10 @@ const NotificationList = () => {
                   { field: "evento", headerName: "Evento", width: 150 },
                   { field: "supervisor", headerName: "Supervisor", width: 300 },
                   {
-                    field: "costCenter",
+                    field: "clienteName",
                     headerName: "Centro de custo",
                     width: 200,
                   },
-                  { field: "cliente", headerName: "Cliente", width: 100 },
                   { field: "estado", headerName: "Estado", width: 100 },
                   {
                     field: "link",
@@ -237,63 +239,83 @@ const NotificationList = () => {
                         )}
                         {params.row.evento === "Ocorrência" && (
                           <button
-                            className="btn btn-info btn-sm m-1"
+                            className="btn btn-primary btn-sm m-1"
                             onClick={() => handleViewDetails(params.row)}
                           >
-                            Detalhes
+                            Mais Informações
                           </button>
                         )}
                       </div>
                     ),
                   },
                 ]}
-                pageSize={5}
-                autoHeight
+                pageSize={10}
               />
-
-              <Modal
-                show={modalShow}
-                onHide={() => setModalShow(false)}
-                size="lg"
-                centered
-              >
-                <Modal.Header closeButton>
-                  <Modal.Title>Detalhes da Ocorrência</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                  <h1 style={{ textAlign: "center" }}>
-                    {selectedNotification?.evento}
-                  </h1>
-                  <div style={{ fontSize: "30px" }}>
-                    <label>Assunto: {selectedNotification?.name}</label>
-                    <br />
-                    <label>
-                      Centro de custo: {selectedNotification?.costCenter}
-                    </label>
-                    <br />
-                    <label>
-                      Prioridade:{" "}
-                      {selectedNotification?.priority === 0
-                        ? "Máxima"
-                        : selectedNotification?.priority === 1
-                        ? "Mínima"
-                        : "Baixa"}
-                    </label>
-                    <br />
-                    <p>Detalhes: {selectedNotification?.details}</p>
-                  </div>
-                </Modal.Body>
-                <Modal.Footer>
-                  <Button variant="success" onClick={handleApproval}>
-                    Aprovar
-                  </Button>
-                  <Button variant="danger" onClick={handleRejection}>
-                    Fechar
-                  </Button>
-                </Modal.Footer>
-              </Modal>
             </div>
           )}
+
+          <Modal show={modalShow} onHide={() => setModalShow(false)} size="lg">
+            <Modal.Header closeButton>
+              <Modal.Title>Detalhes da Ocorrência</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              <div>
+                <h5>Ocorrência:</h5>
+                <p>{selectedNotification?.name}</p>
+
+                <h5>Prioridade:</h5>
+                <p>
+                  {selectedNotification?.priority === 0
+                    ? "Máxima"
+                    : selectedNotification?.priority === 1
+                    ? "Mínima"
+                    : "Baixa"}
+                </p>
+                <h5>Detalhes:</h5>
+                <p>{selectedNotification?.details}</p>
+                {/* 
+<h5>Informações do Trabalhador:</h5>
+{selectedNotification?.workerInformation &&
+  selectedNotification.workerInformation.length > 0 ? (
+  
+  <ul>
+    {selectedNotification.workerInformation.map(
+      (worker, index) => (
+        <li key={index}>
+          {worker.nome} {worker.mec}
+        </li>
+      )
+    )}
+  </ul>
+) : (
+  <p>Nenhuma informação de trabalhador disponível.</p>
+)}
+*/}
+
+                <h5>Equipamentos:</h5>
+                {selectedNotification?.equipment &&
+                selectedNotification.equipment.length > 0 ? (
+                  <ul>
+                    {selectedNotification.equipment.map((equip, index) => (
+                      <li key={index}>
+                        {equip.name} {equip.serialNumber}
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p>Nenhum equipamento Mencionado.</p>
+                )}
+              </div>
+            </Modal.Body>
+            <Modal.Footer>
+              <Button variant="success" onClick={handleApproval}>
+                Aprovar
+              </Button>
+              <Button variant="danger" onClick={handleRejection}>
+                Fechar
+              </Button>
+            </Modal.Footer>
+          </Modal>
         </div>
         <ToastContainer />
       </div>
