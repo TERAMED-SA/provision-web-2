@@ -2,7 +2,7 @@
 import { Link } from "react-router-dom";
 import { FaHome } from "react-icons/fa";
 import { TiGroup } from "react-icons/ti";
-import { IoEyeSharp, IoNotifications } from "react-icons/io5";
+import { IoEyeSharp } from "react-icons/io5";
 import { IoClipboard } from "react-icons/io5";
 import { IoLocation } from "react-icons/io5";
 import { IoMdLogOut } from "react-icons/io";
@@ -251,7 +251,7 @@ const Sidebar = ({ sidebarOpen, closeSidebar }) => {
           </Link>
         </li>
       </ul>
-    </div>
+     </div>
   );
 };
 

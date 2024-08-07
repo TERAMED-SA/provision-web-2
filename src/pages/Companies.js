@@ -15,7 +15,6 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { MdGroupOff } from "react-icons/md";
 import { MdPeopleAlt } from "react-icons/md";
-import { IoSearchCircle } from "react-icons/io5";
 
 // CSS override for spinner
 const override = css`
@@ -35,7 +34,6 @@ const Companies = () => {
   const [searchTerm, setSearchTerm] = useState(""); // Termo de pesquisa
   const [searchResults, setSearchResults] = useState([]); // Resultados da pesquisa
   const [name, setName] = useState(""); // Nome do cliente
-  const [nif, setNif] = useState(""); // NIF do cliente
   const [clientCode, setclientCode] = useState(""); // NIF do cliente
 
   useEffect(() => {
