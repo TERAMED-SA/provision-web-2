@@ -7,7 +7,7 @@ import {
   faPlus,
   faSave,
   faTimes,
-  faBuilding
+  faBuilding,
 } from "@fortawesome/free-solid-svg-icons";
 import Modal from "react-modal";
 import Avatar from "react-avatar";
@@ -17,7 +17,6 @@ import { DataGrid } from "@mui/x-data-grid";
 import { Pagination } from "react-bootstrap";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { fontSize, textAlign } from "@mui/system";
 
 const UserList = () => {
   const [selectedUserId, setSelectedUserId] = useState(null);
@@ -46,77 +45,76 @@ const UserList = () => {
 
   const [userSite, setUserSite] = useState([]);
 
-
   // Estilos para a modal e colunas
   const modalStyles = {
     overlay: {
-      backgroundColor: 'rgba(0, 0, 0, 0.75)', // Fundo escuro semitransparente
+      backgroundColor: "rgba(0, 0, 0, 0.75)", // Fundo escuro semitransparente
     },
     content: {
-      top: '50%',
-      left: '50%',
-      right: 'auto',
-      bottom: 'auto',
-      marginRight: '-50%',
-      transform: 'translate(-50%, -50%)',
-      width: '60%', // Largura da modal
-      backgroundColor: '#fff', // Fundo branco para a modal
-      color: '#333', // Texto preto
-      border: '1px solid #ccc', // Borda cinza clara
-      borderRadius: '10px', // Adiciona bordas arredondadas
-      padding: '30px', // Espaçamento interno
-      boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', // Sombra sutil
+      top: "50%",
+      left: "50%",
+      right: "auto",
+      bottom: "auto",
+      marginRight: "-50%",
+      transform: "translate(-50%, -50%)",
+      width: "60%", // Largura da modal
+      backgroundColor: "#fff", // Fundo branco para a modal
+      color: "#333", // Texto preto
+      border: "1px solid #ccc", // Borda cinza clara
+      borderRadius: "10px", // Adiciona bordas arredondadas
+      padding: "30px", // Espaçamento interno
+      boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)", // Sombra sutil
     },
   };
 
   const tableContainerStyles = {
-    width: '100%',
-    borderCollapse: 'collapse',
-    marginBottom: '20px',
+    width: "100%",
+    borderCollapse: "collapse",
+    marginBottom: "20px",
   };
 
   const tableHeaderStyles = {
-    backgroundColor: '#5c3aff', // Cor roxa
-    color: '#fff',
-    textAlign: 'center',
-    padding: '10px',
+    backgroundColor: "#5c3aff", // Cor roxa
+    color: "#fff",
+    textAlign: "center",
+    padding: "10px",
   };
 
   const tableRowStyles = {
-    textAlign: 'center',
-    borderBottom: '1px solid #ddd', // Borda inferior
+    textAlign: "center",
+    borderBottom: "1px solid #ddd", // Borda inferior
   };
 
   const tableCellStyles = {
-    padding: '10px',
+    padding: "10px",
   };
 
   const buttonContainerStyles = {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: '20px',
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginTop: "20px",
   };
 
   const buttonStyles = {
-    padding: '10px 20px',
-    fontSize: '14px',
-    borderRadius: '5px',
-    border: 'none',
-    cursor: 'pointer',
-    transition: 'background-color 0.3s ease',
+    padding: "10px 20px",
+    fontSize: "14px",
+    borderRadius: "5px",
+    border: "none",
+    cursor: "pointer",
+    transition: "background-color 0.3s ease",
   };
 
   const prevButtonStyles = {
     ...buttonStyles,
-    backgroundColor: '#6c757d', // Cor cinza escuro
-    color: '#fff',
+    backgroundColor: "#6c757d", // Cor cinza escuro
+    color: "#fff",
   };
 
   const nextButtonStyles = {
     ...buttonStyles,
-    backgroundColor: '#6c757d', // Cor cinza escuro
-    color: '#fff',
+    backgroundColor: "#6c757d", // Cor cinza escuro
+    color: "#fff",
   };
 
   const closeButtonStyles = {
@@ -131,7 +129,7 @@ const UserList = () => {
   };
   const closeModalSite = () => {
     setIsSiteModalOpen(false);
-  }
+  };
 
   useEffect(() => {
     fetchUsers();
@@ -146,7 +144,7 @@ const UserList = () => {
     }
   }, [isSiteModalOpen, userSite]);
   useEffect(() => {
-    const filtered = users.filter(user =>
+    const filtered = users.filter((user) =>
       user.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
     setFilteredUsers(filtered);
@@ -301,10 +299,14 @@ const UserList = () => {
   return (
     <div className="container4">
       <h1 style={{ textAlign: "center" }}>SUPERVISORES</h1>
-      <div className="container-fluid">  <Link to="/Home" className="p-1">Início </Link> / <span>Utilizadores</span>
+      <div className="container-fluid">
+        {" "}
+        <Link to="/Home" className="p-1">
+          Início{" "}
+        </Link>{" "}
+        / <span>Utilizadores</span>
         <br></br> <br></br>
         <div className="space">
-
           <div className="">
             <input
               type="text"
@@ -339,21 +341,21 @@ const UserList = () => {
                 rows={
                   Array.isArray(filteredUsers)
                     ? filteredUsers
-                      .slice(pagesVisited, pagesVisited + usersPerPage)
-                      .map((user, index) => ({
-                        id: index,
-                        avatar: (
-                          <Avatar
-                            name={`${user.name}`}
-                            size="40"
-                            round={true}
-                          />
-                        ),
-                        name: user.name || "",
-                        phoneNumber: user.phoneNumber || "",
-                        idUser: user._id,
-                        employeeId: user.employeeId
-                      }))
+                        .slice(pagesVisited, pagesVisited + usersPerPage)
+                        .map((user, index) => ({
+                          id: index,
+                          avatar: (
+                            <Avatar
+                              name={`${user.name}`}
+                              size="40"
+                              round={true}
+                            />
+                          ),
+                          name: user.name || "",
+                          phoneNumber: user.phoneNumber || "",
+                          idUser: user._id,
+                          employeeId: user.employeeId,
+                        }))
                     : []
                 }
                 columns={[
@@ -361,17 +363,27 @@ const UserList = () => {
                     field: "avatar",
                     headerName: "Perfil",
                     width: 100,
-                    headerAlign: 'center',
+                    headerAlign: "center",
                     renderCell: (params) => params.value,
                   },
-                  { field: "name", headerName: "Nome", width: 395, headerAlign: 'center', },
-                  { field: "phoneNumber", headerName: "Telefone", width: 260, headerAlign: 'center' },
+                  {
+                    field: "name",
+                    headerName: "Nome",
+                    width: 395,
+                    headerAlign: "center",
+                  },
+                  {
+                    field: "phoneNumber",
+                    headerName: "Telefone",
+                    width: 260,
+                    headerAlign: "center",
+                  },
                   {
                     field: "actions",
                     headerName: "Ações",
                     width: 200,
-                    headerAlign: 'center',
-                    cellClassName: 'central',
+                    headerAlign: "center",
+                    cellClassName: "central",
                     renderCell: (params) => (
                       <div className="central mb-3">
                         <button
@@ -517,7 +529,7 @@ const UserList = () => {
         style={modalStyles}
         ariaHideApp={false}
       >
-        <div style={{ position: 'relative' }}>
+        <div style={{ position: "relative" }}>
           <button
             className="btn-close"
             onClick={closeModalSite}
@@ -526,7 +538,9 @@ const UserList = () => {
           >
             &times; {/* Representa o símbolo "X" */}
           </button>
-          <h1 style={{ textAlign: 'center', marginBottom: '20px' }}>Meus sites</h1>
+          <h1 style={{ textAlign: "center", marginBottom: "20px" }}>
+            Meus sites
+          </h1>
           <table style={tableContainerStyles}>
             <thead>
               <tr>
@@ -537,7 +551,10 @@ const UserList = () => {
             <tbody>
               {currentItems.length === 0 ? (
                 <tr>
-                  <td colSpan="2" style={{ textAlign: 'center', padding: '20px' }}>
+                  <td
+                    colSpan="2"
+                    style={{ textAlign: "center", padding: "20px" }}
+                  >
                     Nenhum dado disponível
                   </td>
                 </tr>
@@ -562,7 +579,9 @@ const UserList = () => {
               >
                 Anterior
               </button>
-              <span style={{ fontSize: '14px' }}>Página {currentPage} de {totalPages}</span>
+              <span style={{ fontSize: "14px" }}>
+                Página {currentPage} de {totalPages}
+              </span>
               <button
                 className="btn btn-secondary"
                 onClick={handleNextPage}
@@ -575,7 +594,6 @@ const UserList = () => {
           )}
         </div>
       </Modal>
-
     </div>
   );
 };
