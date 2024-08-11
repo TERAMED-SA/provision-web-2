@@ -17,7 +17,7 @@ import { DataGrid } from "@mui/x-data-grid";
 import { Pagination } from "react-bootstrap";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { fontSize, textAlign } from "@mui/system";
+
 
 const UserList = () => {
   const [selectedUserId, setSelectedUserId] = useState(null);
@@ -301,7 +301,7 @@ const UserList = () => {
   return (
     <div className="container4">
       <h1 style={{ textAlign: "center" }}>SUPERVISORES</h1>
-      <div className="container-fluid">  <Link to="/Home" className="p-1">Início </Link> / <span>Utilizadores</span>
+      <div className="container-fluid">  <Link to="/Home" className="p-1">Início </Link> / <span>Supervisores</span>
         <br></br> <br></br>
         <div className="space">
 

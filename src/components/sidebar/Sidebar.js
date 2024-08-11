@@ -1,5 +1,5 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { FaHome } from "react-icons/fa";
 import { TiGroup } from "react-icons/ti";
 import { IoEyeSharp } from "react-icons/io5";
@@ -16,6 +16,7 @@ import "react-toastify/dist/ReactToastify.css";
 import "./Sidebar.css";
 import logo from "../../assets/logo.png";
 import "bootstrap/dist/css/bootstrap.min.css";
+import { MdAccountCircle } from "react-icons/md";
 
 const Sidebar = ({ sidebarOpen, closeSidebar }) => {
   const [active, setActive] = useState(null);
@@ -24,6 +25,24 @@ const Sidebar = ({ sidebarOpen, closeSidebar }) => {
   const [equipmentCount, setEquipmentCount] = useState(0);
   const [userCount, setUserCount] = useState(0);
   const [companyCount, setCompanyCount] = useState(0);
+
+  const navigate = useNavigate();
+
+  // Recuperar o nome do usuário do localStorage
+  const userName = localStorage.getItem("userName");
+
+  // Redirecionar para a página de login se o usuário for desconhecido
+  useEffect(() => {
+    if (!userName) {
+      navigate("/login");
+    }
+  }, [userName, navigate]);
+
+  const handleLogout = () => {
+    localStorage.removeItem("userName");
+    localStorage.removeItem("userId");
+    navigate("/login");
+  };
 
   const fetchNotificationData = async () => {
     try {
@@ -111,6 +130,21 @@ const Sidebar = ({ sidebarOpen, closeSidebar }) => {
         </a>
       </div>
       <ul className="nav nav-pills flex-column mt-3">
+        {" "}
+        <span
+          style={{
+            fontWeight: "bold",
+            background: "#FF7200",
+            borderRadius: "5px",
+            padding: "5px",
+            marginLeft: "3px",
+            color: "white",
+          }}
+          className="fs-6"
+        >
+          <MdAccountCircle />{" "}
+          {userName ? ` ${userName}` : "Usuário: Desconhecido"}
+        </span>
         <li
           className={active === 1 ? "active nav-item p-2" : "nav-item p-2"}
           onClick={(e) => setActive(1)}
@@ -145,7 +179,6 @@ const Sidebar = ({ sidebarOpen, closeSidebar }) => {
             <span className="fs-6">Funcionários</span>
           </Link>
         </li>
-
         <li
           className={active === 4 ? "active nav-item p-2" : "nav-item p-2"}
           onClick={(e) => setActive(4)}
@@ -157,7 +190,6 @@ const Sidebar = ({ sidebarOpen, closeSidebar }) => {
             <span className="fs-8">Clientes</span>
           </Link>
         </li>
-
         <li
           className={active === 5 ? "active nav-item p-2" : "nav-item p-2"}
           onClick={(e) => setActive(5)}
@@ -169,7 +201,6 @@ const Sidebar = ({ sidebarOpen, closeSidebar }) => {
             <span className="fs-6">Mapa</span>
           </Link>
         </li>
-
         <li
           className={active === 7 ? "active nav-item p-2" : "nav-item p-2"}
           onClick={(e) => setActive(7)}
@@ -205,7 +236,6 @@ const Sidebar = ({ sidebarOpen, closeSidebar }) => {
             </span>
           </Link>
         </li>
-
         <li
           className={active === 9 ? "active nav-item p-2" : "nav-item p-2"}
           onClick={(e) => setActive(9)}
@@ -241,17 +271,23 @@ const Sidebar = ({ sidebarOpen, closeSidebar }) => {
             <span className="fs-7">Chat</span>
           </Link>
         </li>
-
         <li className="nav-item p-2">
-          <Link to="/" className="p-1">
+          <a href="#" onClick={handleLogout} className="p-1">
             <i className="me-3 fs-5">
               <IoMdLogOut />
             </i>
             <span className="fs-6">Sair</span>
-          </Link>
+          </a>
         </li>
       </ul>
-     </div>
+      <div
+        className="sidebar-footer text-center p-2 mt-auto"
+        style={{ color: "white" }}
+      >
+        <br />
+        <span className="fs-6">Versão 1.0</span>
+      </div>
+    </div>
   );
 };
 

@@ -29,6 +29,8 @@ function Login({ setIsAuthenticated }) {
       if (response.data.data.status === 200) {
         // Armazene as informações do usuário no localStorage
         localStorage.setItem("userId", response.data.data.data.employeeId);
+        localStorage.setItem("userName", response.data.data.data.name);
+        localStorage.setItem("userPhone", response.data.data.data.phoneNumber);
         // localStorage.setItem("token", response.data.data.token);
 
         //setIsAuthenticated(true);
@@ -36,14 +38,14 @@ function Login({ setIsAuthenticated }) {
         navigate("/home");
       } else {
         console.log("Login falhou:", response);
-        setLoginError("Credenciais inválidas. Por favor, tente novamente.");
+        setLoginError(
+          "Ocorreu um erro durante o login. Por favor, tente novamente."
+        );
       }
     } catch (error) {
       console.error("Erro no login:", error.message);
       console.log(number, password);
-      setLoginError(
-        "Ocorreu um erro durante o login. Por favor, tente novamente."
-      );
+      setLoginError("Credenciais inválidas. Por favor, tente novamente.");
     }
   };
 
