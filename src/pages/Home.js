@@ -4,14 +4,16 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import LineChart from "../components/charts/LineChart";
-import PieChart from "../components/charts/PieChart";
+import { DataGrid } from "@mui/x-data-grid";
+import { format } from "date-fns";
 
 const Home = () => {
   const [equipmentCount, setEquipmentCount] = useState(0);
   const [userCount, setUserCount] = useState(0);
   const [companyCount, setCompanyCount] = useState(0);
   const [notificationCount, setNotificationCount] = useState(0);
+  const [recentOccurrences, setRecentOccurrences] = useState([]);
+  const [notifications, setNotifications] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -39,8 +41,31 @@ const Home = () => {
           `${process.env.REACT_APP_API_URL}notification/11835?size=100`
         );
         setNotificationCount(notificationResponse.data.data.length);
+
+        // Fetching the last two occurrences
+        const user = localStorage.getItem("userId");
+        const response = await axios.get(
+          `${process.env.REACT_APP_API_URL}notification/${user}?size=500`
+        );
+        const formattedNotifications = response.data.data.map(
+          (notification) => ({
+            ...notification,
+            createdAt: format(new Date(notification.createdAt), "dd/MM/yyyy"),
+          })
+        );
+
+        // Ordenar as notificações por data
+        const sortedNotifications = formattedNotifications.sort((a, b) => {
+          const dateA = new Date(a.createdAt.split("/").reverse().join("-"));
+          const dateB = new Date(b.createdAt.split("/").reverse().join("-"));
+          return dateB - dateA;
+        });
+
+        // Pegar apenas as duas últimas
+        const lastTwoNotifications = sortedNotifications.slice(0, 2);
+        setNotifications(lastTwoNotifications);
       } catch (error) {
-        console.error("Error fetching data:", error.message);
+        console.error("Error fetching notifications:", error.message);
       }
     };
 
@@ -105,6 +130,42 @@ const Home = () => {
             </div>
             <div className="col-12 col-md-8 p-3"></div>
             <div className="col-12 col-md-4 p-3"></div>
+          </div>
+          <div className="row">
+            <h2>Últimas Atividades</h2>
+            <div style={{ height: 200, width: "100%" }}>
+              <DataGrid
+                sx={{
+                  "& .MuiDataGrid-columnHeaders": {
+                    backgroundColor: "#0d6efd", // Cor azul do cabeçalho
+                    color: "#fff", // Cor do texto do cabeçalho em branco
+                  },
+                }}
+                rows={notifications.map((notification, index) => ({
+                  id: index,
+                  data: notification.createdAt,
+                  evento: notification.information,
+                  supervisor: notification.supervisorName,
+                  clienteName: notification.siteName,
+                  estado: notification.state ? "Validado" : "Pendente",
+                }))}
+                columns={[
+                  { field: "data", headerName: "Data", width: 150 },
+                  { field: "evento", headerName: "Evento", width: 150 },
+                  { field: "supervisor", headerName: "Supervisor", width: 300 },
+                  {
+                    field: "clienteName",
+                    headerName: "Centro de custo",
+                    width: 200,
+                  },
+                  { field: "estado", headerName: "Estado", width: 100 },
+                ]}
+                pageSize={2}
+                pagination={false}
+                pageSizeOptions={[]} // Remove a opção "Rows per page"
+                hideFooterPagination // Esconde a paginação
+              />
+            </div>
           </div>
         </div>
       </div>

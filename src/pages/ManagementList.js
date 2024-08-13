@@ -5,15 +5,12 @@ import {
   faUsers,
   faHistory,
   faCalendar,
-  faWrench,
   faBuildingUser,
   faClipboardCheck,
   faExclamationCircle,
 } from "@fortawesome/free-solid-svg-icons";
-import logo from "../assets/logo.png";
 import axios from "axios";
-import pdfMake from 'pdfmake/build/pdfmake';
-import pdfFonts from 'pdfmake/build/vfs_fonts';
+
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 

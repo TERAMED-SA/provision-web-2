@@ -56,7 +56,14 @@ const NotificationList = () => {
       const formattedNotifications = await response.data.data.map(
         (notification) => ({
           ...notification,
-          createdAt: format(new Date(notification.createdAt), "dd/MM/yyyy"),
+          createdAt: format(
+            new Date(notification.createdAt),
+            "dd/MM/yyyy"
+          ),
+          createdAttime: format(
+            new Date(notification.createdAt),
+            "HH:mm"
+          ),
         })
       );
       const supervisionFilter = formattedNotifications.filter(
@@ -446,7 +453,7 @@ const NotificationList = () => {
                 rows={filteredRows}
                 columns={[
                   { field: "id", headerName: "Número", width: 100 },
-                  { field: "data", headerName: "Data", width: 150 },
+                  { field: "data", headerName: "Data", width: 200 },
                   { field: "supervisor", headerName: "Supervisor", width: 300 },
                   {
                     field: "clienteName",
@@ -517,10 +524,7 @@ const NotificationList = () => {
                     <h1 style={{ textAlign: "center" }}>
                       Informação dos trabalhadores
                     </h1>
-                    <p>
-                      Presentes:{" "}
-                      {modalInfo.numberOfWorkers}
-                    </p>
+                    <p>Presentes: {modalInfo.numberOfWorkers}</p>
                     <p>
                       Ausentes:{" "}
                       {modalInfo.workerInformation &&

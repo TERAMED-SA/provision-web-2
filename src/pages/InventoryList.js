@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Button, Modal, Form, Pagination } from "react-bootstrap";
 import { DataGrid } from "@mui/x-data-grid";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faShoppingCart } from "@fortawesome/free-solid-svg-icons";
 import axios from "axios";
 
 import "./InventoryList.css";
