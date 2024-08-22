@@ -62,7 +62,7 @@ const Home = () => {
         });
 
         // Pegar apenas as duas últimas
-        const lastTwoNotifications = sortedNotifications.slice(0, 2);
+        const lastTwoNotifications = sortedNotifications.slice(0, 9);
         setNotifications(lastTwoNotifications);
       } catch (error) {
         console.error("Error fetching notifications:", error.message);
@@ -123,7 +123,7 @@ const Home = () => {
                   <i className="bi bi-bell-fill"></i>
                 </i>
                 <div>
-                  <span className="size">Notificações</span>
+                  <span className="size">Notificações do sistema</span>
                   <h2 className="text-white">{notificationCount}</h2>
                 </div>
               </div>
@@ -133,7 +133,7 @@ const Home = () => {
           </div>
           <div className="row">
             <h2>Últimas Atividades</h2>
-            <div style={{ height: 200, width: "100%" }}>
+            <div style={{ height: 600, width: "100%" }}>
               <DataGrid
                 sx={{
                   "& .MuiDataGrid-columnHeaders": {
@@ -160,7 +160,7 @@ const Home = () => {
                   },
                   { field: "estado", headerName: "Estado", width: 100 },
                 ]}
-                pageSize={2}
+                pageSize={10}
                 pagination={false}
                 pageSizeOptions={[]} // Remove a opção "Rows per page"
                 hideFooterPagination // Esconde a paginação

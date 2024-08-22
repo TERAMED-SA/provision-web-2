@@ -3,7 +3,6 @@ import { Link, useNavigate } from "react-router-dom";
 import { FaHome } from "react-icons/fa";
 import { TiGroup } from "react-icons/ti";
 import { IoEyeSharp } from "react-icons/io5";
-import { IoClipboard } from "react-icons/io5";
 import { IoLocation } from "react-icons/io5";
 import { IoMdLogOut } from "react-icons/io";
 import { IoMdChatboxes } from "react-icons/io";
@@ -90,7 +89,7 @@ const Sidebar = ({ sidebarOpen, closeSidebar }) => {
       try {
         // Fetching equipment count
         const equipmentResponse = await axios.get(
-          "https://provision-07c1.onrender.com/api/v1/occurrence/"
+          "https://provision-07c1.onrender.com/api/v1/occurrence?size=500"
         );
         setEquipmentCount(equipmentResponse.data.data.data.length);
 
@@ -134,11 +133,11 @@ const Sidebar = ({ sidebarOpen, closeSidebar }) => {
         <span
           style={{
             fontWeight: "bold",
-            background: "#FF7200",
+            background: "#FFF",
             borderRadius: "5px",
             padding: "5px",
             marginLeft: "3px",
-            color: "white",
+            color: "black",
           }}
           className="fs-6"
         >
@@ -199,17 +198,6 @@ const Sidebar = ({ sidebarOpen, closeSidebar }) => {
               <IoLocation />
             </i>
             <span className="fs-6">Mapa</span>
-          </Link>
-        </li>
-        <li
-          className={active === 7 ? "active nav-item p-2" : "nav-item p-2"}
-          onClick={(e) => setActive(7)}
-        >
-          <Link to="/Report" className="p-1">
-            <i className="me-3 fs-5">
-              <IoClipboard />
-            </i>
-            <span className="fs-6">Relatórios</span>
           </Link>
         </li>
         <li
