@@ -197,10 +197,31 @@ const Team = () => {
 
   const handleAssignSiteToUser = async (e) => {
     e.preventDefault();
+
     try {
-      const response = await axios.post(
-        `https://provision-07c1.onrender.com/api/v1/companySite/assignSupervisor/${userToAssignSite}/${selectedSite}`
+      // Buscar o employeeId do utilizador selecionado
+      const selectedUser = users.find((user) => user._id === userToAssignSite);
+      const employeeId = selectedUser?.employeeId;
+
+      // Buscar o costCenter do site selecionado
+      const selectedSiteDetails = sites.find(
+        (site) => site._id === selectedSite
       );
+      const costCenter = selectedSiteDetails?.costCenter;
+
+      // Verificar se ambos os valores estão disponíveis
+      if (!employeeId || !costCenter) {
+        toast.error(
+          "Erro: Não foi possível encontrar o employeeId ou costCenter."
+        );
+        return;
+      }
+
+      // Chamada à API com employeeId e costCenter
+      const response = await axios.post(
+        `https://provision-07c1.onrender.com/api/v1/companySite/assignSupervisor/${employeeId}/${costCenter}`
+      );
+
       if (response.data) {
         toast.success("Site atribuído com sucesso");
         setTimeout(() => {

@@ -368,7 +368,7 @@ const UserList = () => {
                           avatar: (
                             <Avatar
                               name={`${user.name}`}
-                              size="40"
+                              size="50"
                               round={true}
                             />
                           ),
@@ -390,13 +390,13 @@ const UserList = () => {
                   {
                     field: "name",
                     headerName: "Nome",
-                    width: 395,
+                    width: 300,
                     headerAlign: "center",
                   },
                   {
                     field: "phoneNumber",
                     headerName: "Telefone",
-                    width: 260,
+                    width: 200,
                     headerAlign: "center",
                   },
                   {
@@ -429,7 +429,7 @@ const UserList = () => {
                     ),
                   },
                 ]}
-                checkboxSelection
+                checkboxSelection={false}
                 pageSize={usersPerPage}
                 pagination
                 onPageChange={handlePageChange}
