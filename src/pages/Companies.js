@@ -204,14 +204,14 @@ const Companies = () => {
                   <FontAwesomeIcon icon={faUserPlus} />
                   &nbsp; Adicionar Cliente
                 </button>
-                <button className="btn btn-success">
+                {/*    <button className="btn btn-success">
                   <MdPeopleAlt />
                   &nbsp;Ativo
                 </button>
                 <button className="btn btn-danger">
                   <MdGroupOff />
                   &nbsp;Inativos
-                </button>
+                </button>*/}
               </div>
 
               {/* Renderização condicional com base no modo de visualização */}
