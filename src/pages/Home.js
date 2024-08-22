@@ -20,21 +20,21 @@ const Home = () => {
       try {
         // Fetching equipment count
         const equipmentResponse = await axios.get(
-          "https://provision-07c1.onrender.com/api/v1/equipment/"
+          "https://provision-07c1.onrender.com/api/v1/equipment?size=500"
         );
         setEquipmentCount(equipmentResponse.data.data.data.length);
 
         // Fetching user count
         const userResponse = await axios.get(
-          "https://provision-07c1.onrender.com/api/v1/user?size=100"
+          "https://provision-07c1.onrender.com/api/v1/user?size=500"
         );
         setUserCount(userResponse.data.data.data.length);
 
         // Fetching company count
         const companyResponse = await axios.get(
-          "https://provision-07c1.onrender.com/api/v1/company?size=100"
+          "https://provision-07c1.onrender.com/api/v1/company?size=500"
         );
-        setCompanyCount(companyResponse.data.size);
+        setCompanyCount(companyResponse.data.data.data.length);
 
         // Fetching notification count
         const notificationResponse = await axios.get(
