@@ -615,6 +615,130 @@ const UserList = () => {
           )}
         </div>
       </Modal>
+      <Modal
+        isOpen={isEditModalOpen}
+        onRequestClose={() => setIsEditModalOpen(false)}
+        contentLabel="Editar Usuário"
+        className="custom-modal"
+        style={{
+          overlay: {
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          },
+          content: {
+            width: "80%",
+            maxWidth: "500px", // Defina o tamanho máximo desejado aqui
+          },
+        }}
+        overlayClassName="custom-modal-overlay"
+      >
+        <h2>Actualiza utilizador</h2>
+        <div className="row">
+          <div className="col-md-12">
+            <div className="form-group">
+              <label htmlFor="name" className="text-modal text-black">
+                Nome
+              </label>
+              <input
+                type="text"
+                id="name"
+                className="form-control"
+                placeholder="Nome"
+                value={editedUser?.name || ""}
+                onChange={(e) =>
+                  setEditedUser({ ...editedUser, name: e.target.value })
+                }
+              />
+            </div>
+          </div>
+
+          <div className="col-md-12">
+            <div className="form-group">
+              <label htmlFor="email" className="text-modal text-black">
+                Email
+              </label>
+              <input
+                type="email"
+                id="email"
+                className="form-control"
+                placeholder="Email"
+                value={editedUser.email || ""}
+                onChange={(e) =>
+                  setEditedUser({
+                    ...editedUser,
+                    email: e.target.value,
+                  })
+                }
+              />
+            </div>
+          </div>
+          <div className="col-md-6">
+            <div className="form-group">
+              <label htmlFor="phoneNumber" className="text-modal text-black">
+                Número de Telefone
+              </label>
+              <input
+                type="tel"
+                id="phoneNumber"
+                className="form-control"
+                placeholder="Número de Telefone"
+                value={editedUser.phoneNumber || ""}
+                onChange={(e) =>
+                  setEditedUser({
+                    ...editedUser,
+                    phoneNumber: e.target.value,
+                  })
+                }
+              />
+            </div>
+          </div>
+
+          <div className="col-md-6">
+            <div className="form-group">
+              <label htmlFor="gender" className="text-modal text-black">
+                Gênero
+              </label>
+              <select
+                id="gender"
+                className="form-control"
+                value={editedUser.gender || ""}
+                onChange={(e) =>
+                  setEditedUser({
+                    ...editedUser,
+                    gender: e.target.value,
+                  })
+                }
+              >
+                <option value="Male">Masculino</option>
+                <option value="Female">Feminino</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div className="row">
+          <div className="col-md-6">
+            <div className="form-group">
+              <button
+                className="btn btn-primary form-control"
+                onClick={updateUser}
+              >
+                <FontAwesomeIcon icon={faSave} className="" /> Salvar
+              </button>
+            </div>
+          </div>
+          <div className="col-md-6">
+            <div className="form-group">
+              <button
+                className="btn btn-danger form-control"
+                onClick={() => setIsEditModalOpen(false)}
+              >
+                <FontAwesomeIcon icon={faTimes} className=" " /> Fechar
+              </button>
+            </div>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 };
