@@ -273,7 +273,7 @@ const Sidebar = ({ sidebarOpen, closeSidebar }) => {
         style={{ color: "white" }}
       >
         <br />
-        <span className="fs-6">Versão 1.0</span>
+        <span className="fs-6">Versão 1.1</span>
       </div>
     </div>
   );
