@@ -14,10 +14,13 @@ const Home = () => {
   const [notificationCount, setNotificationCount] = useState(0);
   const [recentOccurrences, setRecentOccurrences] = useState([]);
   const [notifications, setNotifications] = useState([]);
+  const [totalNotifications, setTotalNotifications] = useState(0); // Novo estado
 
   useEffect(() => {
     const fetchData = async () => {
+      
       try {
+        
         // Fetching equipment count
         const equipmentResponse = await axios.get(
           "https://provision-07c1.onrender.com/api/v1/equipment?size=500"
@@ -124,7 +127,7 @@ const Home = () => {
                 </i>
                 <div>
                   <span className="size">Notificações do sistema</span>
-                  <h2 className="text-white">{notificationCount}</h2>
+                  <h2 className="text-white">{totalNotifications}</h2>
                 </div>
               </div>
             </div>

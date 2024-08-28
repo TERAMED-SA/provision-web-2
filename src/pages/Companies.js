@@ -278,6 +278,7 @@ const Companies = () => {
                               onClick={() =>
                                 handleItemClick(company.clientCode)
                               }
+                              title="Informações do cliente"
                               style={{ cursor: "pointer" }}
                             >
                               <td className="company-name">
@@ -301,6 +302,7 @@ const Companies = () => {
                             key={index}
                             className="col"
                             onClick={() => handleItemClick(company.clientCode)}
+                            title="Informações do cliente"
                             style={{ cursor: "pointer" }}
                           >
                             <div className="cards h-100 bg-white text-center d-flex flex-column justify-content-center align-items-center">

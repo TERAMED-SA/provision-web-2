@@ -218,7 +218,7 @@ const Team = () => {
       }
 
       // Chamada à API com employeeId e costCenter
-      const response = await axios.post(
+      const response = await axios.put(
         `https://provision-07c1.onrender.com/api/v1/companySite/assignSupervisor/${employeeId}/${costCenter}`
       );
 
@@ -320,18 +320,21 @@ const Team = () => {
                         <button
                           className="btn btn-warning btn-sm mr-2"
                           onClick={() => handleEditUser(params.row.id)}
+                          title="Editar"
                         >
                           <FontAwesomeIcon icon={faEdit} />
                         </button>
                         <button
                           className="btn btn-danger btn-sm mr-2"
                           onClick={() => handleDeleteUser(params.row.id)}
+                          title="Eliminar"
                         >
                           <FontAwesomeIcon icon={faTrash} />
                         </button>
                         <button
                           className="btn btn-info btn-sm"
                           onClick={() => handleAssignSite(params.row.id)}
+                          title="Atribuir Site"
                         >
                           <FontAwesomeIcon icon={faMapMarkerAlt} />
                         </button>

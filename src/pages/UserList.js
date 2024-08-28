@@ -383,45 +383,43 @@ const UserList = () => {
                   {
                     field: "avatar",
                     headerName: "Perfil",
-                    width: 100,
-                    headerAlign: "center",
                     renderCell: (params) => params.value,
                   },
                   {
                     field: "name",
                     headerName: "Nome",
-                    width: 300,
-                    headerAlign: "center",
+                    flex: 1,
                   },
                   {
                     field: "phoneNumber",
                     headerName: "Telefone",
-                    width: 200,
-                    headerAlign: "center",
+                    flex: 1,
                   },
                   {
                     field: "actions",
                     headerName: "Ações",
-                    width: 200,
-                    headerAlign: "center",
+                    flex: 1,
                     cellClassName: "central",
                     renderCell: (params) => (
                       <div className="central mb-3">
                         <button
                           className="btn btn-primary "
                           onClick={() => handleEditUser(params.row.idUser)}
+                          title="Editar"
                         >
                           <FontAwesomeIcon icon={faEdit} />
                         </button>
                         <button
                           className="btn btn-danger"
                           onClick={() => handleDeleteUser(params.row.id)}
+                          title="Eliminar"
                         >
                           <FontAwesomeIcon icon={faTrash} />
                         </button>
                         <button
                           className="btn btn-info"
                           onClick={() => handleSiteUser(params.row.employeeId)}
+                          title="Ver sites"
                         >
                           <FontAwesomeIcon icon={faBuilding} />
                         </button>
@@ -559,9 +557,7 @@ const UserList = () => {
           >
             &times; {/* Representa o símbolo "X" */}
           </button>
-          <h1 style={{ textAlign: "center", marginBottom: "20px" }}>
-            Meus sites
-          </h1>
+          <h1 style={{ textAlign: "center", marginBottom: "20px" }}>Sites</h1>
           <table style={tableContainerStyles}>
             <thead>
               <tr>

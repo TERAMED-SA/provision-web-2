@@ -91,12 +91,16 @@ const ManagementList = () => {
     // Buscar os dados das companhias da API
     const fetchCompanies = async () => {
       try {
-        const response = await axios.get('https://provision-07c1.onrender.com/api/v1/company?size=500');
+        const response = await axios.get(
+          "https://provision-07c1.onrender.com/api/v1/company?size=500"
+        );
         const companies = response.data.data.data;
         console.log("Companies data:", companies); // Verificação dos dados da API
-        
+
         // Encontrar a empresa correspondente ao código do cliente
-        const company = companies.find(comp => comp.clientCode === clientCode);
+        const company = companies.find(
+          (comp) => comp.clientCode === clientCode
+        );
         if (company) {
           setCompanyName(company.name);
           console.log("Company found:", company); // Verificação da empresa encontrada
@@ -104,7 +108,7 @@ const ManagementList = () => {
           console.log("No company found for the given clientCode");
         }
       } catch (error) {
-        console.error("Erro ao buscar as companhias: ", error);
+        console.error("Erro ao buscar Empresa: ", error);
       }
     };
 
@@ -117,8 +121,15 @@ const ManagementList = () => {
         DETALHES <span className="badge badge-secondary"></span>
       </h2>
       <div className="container-fluid">
-        <Link to="/Home" className="p-1">Início </Link> / <Link to="/Companies" className="p-1">Cliente </Link> / <span className="cliente-code">{companyName}</span>
-        <br /> <br /> 
+        <Link to="/Home" className="p-1">
+          Início{" "}
+        </Link>{" "}
+        /{" "}
+        <Link to="/Companies" className="p-1">
+          Cliente{" "}
+        </Link>{" "}
+        / <span className="cliente-code">{companyName}</span>
+        <br /> <br />
         <div className="container-fluid">
           <h1 className="mb-4"> </h1>
           <div className="row m-3">
@@ -132,7 +143,10 @@ const ManagementList = () => {
                   >
                     <div className="card-body">
                       <div className="d-flex align-items-center">
-                        <FontAwesomeIcon icon={item.icon} className="mr-2 icon" />
+                        <FontAwesomeIcon
+                          icon={item.icon}
+                          className="mr-2 icon"
+                        />
                         <h5 className="card-title titleStyle">{item.title}</h5>
                       </div>
                       <p className="card-text">{item.content}</p>
@@ -150,8 +164,13 @@ const ManagementList = () => {
                     >
                       <div className="card-body">
                         <div className="d-flex align-items-center">
-                          <FontAwesomeIcon icon={item.icon} className="mr-2 icon" />
-                          <h5 className="card-title titleStyle">{item.title}</h5>
+                          <FontAwesomeIcon
+                            icon={item.icon}
+                            className="mr-2 icon"
+                          />
+                          <h5 className="card-title titleStyle">
+                            {item.title}
+                          </h5>
                         </div>
                         <p className="card-text">{item.content}</p>
                       </div>
