@@ -4,6 +4,7 @@ import { AiOutlineTeam } from "react-icons/ai";
 import { TfiMapAlt } from "react-icons/tfi";
 import { FcBullish } from "react-icons/fc";
 import { IoMdLogOut } from "react-icons/io";
+import { IoEyeSharp } from "react-icons/io5";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import "react-toastify/dist/ReactToastify.css";
@@ -49,7 +50,7 @@ const Sidebar = ({ sidebarOpen, closeSidebar }) => {
   const fetchOccurrenceData = async () => {
     try {
       const response = await axios.get(
-        "https://provision-07c1.onrender.com/api/v1/occurrence?size=500"
+        `${process.env.REACT_APP_API_URL}occurrence?size=500`
       );
       const currentDate = getCurrentDate();
       const filteredOccurrences = response.data.data.filter(
@@ -61,24 +62,29 @@ const Sidebar = ({ sidebarOpen, closeSidebar }) => {
       return 0;
     }
   };
-  
 
-  // Fetching supervisions filtered by today's date
   const fetchSupervisionData = async () => {
     try {
       const response = await axios.get(
-        "https://provision-07c1.onrender.com/api/v1/supervision?size=500"
+        `${process.env.REACT_APP_API_URL}supervision?size=100`
       );
       const currentDate = getCurrentDate();
-      const filteredSupervisions = response.data.data.filter(
-        (item) => item.date.split("T")[0] === currentDate
+      
+      // Access the nested data structure correctly
+      const supervisions = response.data.data.data || [];
+      const filteredSupervisions = supervisions.filter(
+        (item) => item.createdAt.split("T")[0] === currentDate
       );
+      
       return filteredSupervisions.length;
     } catch (error) {
       console.error("Error fetching supervision data:", error.message);
       return 0;
     }
   };
+  
+  
+  
 
   const updateNotificationAndOccurrence = async () => {
     const occurrenceCount = await fetchOccurrenceData();
@@ -172,7 +178,7 @@ const Sidebar = ({ sidebarOpen, closeSidebar }) => {
             <span className="fs-6">Mapa</span>
           </Link>
         </li>
-      {/*  <li
+        {/*  <li
           className={active === 8 ? "active nav-item p-2" : "nav-item p-2"}
           onClick={(e) => setActive(8)}
         >
@@ -196,6 +202,30 @@ const Sidebar = ({ sidebarOpen, closeSidebar }) => {
             </span>
           </Link>
         </li> */}
+        <li
+          className={active === 8 ? "active nav-item p-2" : "nav-item p-2"}
+          onClick={(e) => setActive(8)}
+        >
+          <Link to="/Occurrence" className="p-1">
+            <i className="me-3 fs-5">
+              {" "}
+              <IoEyeSharp />
+            </i>
+            <span className="fs-6">
+              Ocorrências{" "}
+              <span
+                style={{
+                  fontWeight: "bold",
+                  background: "red",
+                  borderRadius: "10px",
+                  padding: "5px",
+                  marginLeft: "3px",
+                }}
+               
+              > {occurrenceNumber} </span>
+            </span>
+          </Link>
+        </li>
         <li
           className={active === 9 ? "active nav-item p-2" : "nav-item p-2"}
           onClick={(e) => setActive(9)}
@@ -226,7 +256,7 @@ const Sidebar = ({ sidebarOpen, closeSidebar }) => {
         >
           <Link to="/Report" className="p-1">
             <i className="me-3 fs-5">
-            <FcBullish />
+              <FcBullish />
             </i>
             <span className="fs-6">Estatística</span>
           </Link>

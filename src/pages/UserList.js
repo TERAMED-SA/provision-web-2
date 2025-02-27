@@ -155,7 +155,7 @@ const UserList = () => {
       const userCoord = localStorage.getItem("userId");
       setIsLoading(true);
       const response = await axios.get(
-        `${process.env.REACT_APP_API_URL}user/findBelongsToMe/${userCoord}?size=50`
+        `${process.env.REACT_APP_API_URL}user`
       );
       if (response.data && Array.isArray(response.data.data.data)) {
         setUsers(response.data.data.data);

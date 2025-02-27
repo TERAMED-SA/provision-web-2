@@ -23,7 +23,7 @@ const EmployeeList = () => {
     async function fetchEmployees() {
       try {
         const response = await axios.get(
-          "https://provision-07c1.onrender.com/api/v1/user"
+         `${process.env.REACT_APP_API_URL}user`
         );
         const employeeData = response.data.data.data.map((employee) => ({
           id: employee._id,

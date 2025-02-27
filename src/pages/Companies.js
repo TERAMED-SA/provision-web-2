@@ -193,6 +193,7 @@ const Companies = () => {
                   <i className="bi bi-eye"></i> &nbsp;
                   {viewMode === "list" ? "Mosaico" : "Lista"}
                 </button>
+                
                  {/*  <button
                   className="btn btn-primary ms-2"
                   onClick={handleAddCompanyClick}

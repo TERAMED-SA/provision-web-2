@@ -26,14 +26,17 @@ const NotificationList = () => {
   async function fetchNotifications() {
     try {
       setIsLoading(true);
-      const user = localStorage.getItem("userId");
+      // const user = localStorage.getItem("userId");
       const response = await axios.get(
-        `${process.env.REACT_APP_API_URL}notification/${user}?size=500`
+        `${process.env.REACT_APP_API_URL}occurrence`
       );
-      const formattedNotifications = response.data.data.map((notification) => ({
-        ...notification,
-        createdAt: format(new Date(notification.createdAt), "dd/MM/yyyy"),
-      }));
+      const formattedNotifications = response.data.data.data.map(
+        (notification) => ({
+          ...notification,
+          createdAt: format(new Date(notification.createdAt), "dd/MM/yyyy"),
+        })
+      );
+      console.log(formattedNotifications);
       setNotifications(formattedNotifications);
       setIsLoading(false);
     } catch (error) {
@@ -43,11 +46,12 @@ const NotificationList = () => {
   }
 
   const handleViewDetails = async (notification) => {
-    setSelectedNotification(notification);
-    const occorence = await getOcorrenceByIdNot(notification._id);
+    // Caso queira mesclar os dados, pode combinar o notification original com o retorno da API
+    const occorence = await getOcorrenceByIdNot(notification.idNotification);
     setSelectedNotification(occorence);
     setModalShow(true);
   };
+  
 
   async function getOcorrenceByIdNot(id) {
     try {
@@ -80,46 +84,27 @@ const NotificationList = () => {
 
   // Filtro principal
   const filteredRows = notifications
-    .filter((notification) => {
-      const notificationDate =
-        notification.createdAt && isValidDate(notification.createdAt)
-          ? notification.createdAt // Já está no formato "dd/MM/yyyy"
-          : null;
+  .filter((notification) => {
+    const notificationDate = notification.createdAt && isValidDate(notification.createdAt)
+      ? notification.createdAt 
+      : null;
 
-      const searchDate = selectedDate
-        ? format(selectedDate, "dd/MM/yyyy") // Converte selectedDate para "dd/MM/yyyy"
-        : null;
+    const searchDate = selectedDate
+      ? format(selectedDate, "dd/MM/yyyy")
+      : null;
 
-      return (
-        notification.information === "Ocorrência" && // Filtra apenas eventos de tipo "Ocorrência"
-        (notification.supervisorName
-          ?.toLowerCase()
-          .includes(searchQuery.toLowerCase()) ||
-          notification.costCenter
-            ?.toLowerCase()
-            .includes(searchQuery.toLowerCase()) ||
-          notification.clientCode
-            ?.toLowerCase()
-            .includes(searchQuery.toLowerCase()) ||
-          notification.information
-            ?.toLowerCase()
-            .includes(searchQuery.toLowerCase())) &&
-        (!selectedDate || notificationDate === searchDate) // Filtro por data
-      );
-    })
-    .map((notification, index) => ({
-      id: index,
-      _id: notification._id,
-      data: notification.createdAt,
-      evento: notification.information,
-      supervisor: notification.supervisorName,
-      costCenter: notification.costCenter,
-      cliente: notification.clientCode,
-      clienteName: notification.siteName,
-      estado: notification.state ? "Validado" : "Pendente",
-      link: notification.actionLocationId,
-      siteName: notification.siteName,
-    }));
+    return (
+      (notification.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+       notification.costCenter?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+       notification.details?.toLowerCase().includes(searchQuery.toLowerCase())) &&
+      (!selectedDate || notificationDate === searchDate)
+    );
+  })
+  .map((notification, index) => ({
+    id: index,
+    ...notification,
+  }));
+
 
   const approve = async (costCenter, idNot) => {
     try {
@@ -225,45 +210,27 @@ const NotificationList = () => {
           <DataGrid
             rows={filteredRows}
             columns={[
-              { field: "data", headerName: "Data", width: 150 },
-              { field: "evento", headerName: "Evento", width: 150 },
-              { field: "supervisor", headerName: "Supervisor", width: 300 },
+              { field: "createdAt", headerName: "Data", width: 150 },
+              { field: "details", headerName: "Evento", width: 360 },
+              { field: "name", headerName: "Site", width: 300 },
               {
-                field: "clienteName",
+                field: "costCenter",
                 headerName: "Centro de custo",
                 width: 200,
               },
-              { field: "estado", headerName: "Estado", width: 100 },
+
               {
-                field: "link",
-                headerName: "Ação",
-                width: 250,
+                field: "detalhes",
+                headerName: "Detalhes",
+                width: 130,
                 renderCell: (params) => (
-                  <>
-                    {params.row.evento !== "Ocorrência" && (
-                      <Button
-                        onClick={() =>
-                          approve(params.row.costCenter, params.row._id)
-                        }
-                      >
-                        Aprovar
-                      </Button>
-                    )}
-                    {params.row.evento === "Supervisão" && (
-                      <Button
-                        onClick={() =>
-                          generatePDF(params.row._id, params.row.supervisor)
-                        }
-                      >
-                        Gerar PDF
-                      </Button>
-                    )}
-                    {params.row.evento === "Ocorrência" && (
-                      <Button onClick={() => handleViewDetails(params.row)}>
-                        Mais Informações
-                      </Button>
-                    )}
-                  </>
+                  <Button
+                    variant="info"
+                    size="sm"
+                    onClick={() => handleViewDetails(params.row)}
+                  >
+                    Ver Detalhes
+                  </Button>
                 ),
               },
             ]}
@@ -276,37 +243,96 @@ const NotificationList = () => {
         <Modal.Header closeButton>
           <Modal.Title>Detalhes da Ocorrência</Modal.Title>
         </Modal.Header>
-        <Modal.Body>
-          <p>Ocorrência: {selectedNotification?.name}</p>
-          <p>Prioridade: {getPriorityLabel(selectedNotification?.priority)}</p>
-          <p>Detalhes: {selectedNotification?.details}</p>
-          <h4>Informações do Trabalhador:</h4>
+      <Modal.Body>
+        <div className="occurrence-details">
+          <h4>Informações Gerais</h4>
+          <div className="info-grid">
+            <p>
+              <strong>ID:</strong> {selectedNotification?._id}
+            </p>
+            <p>
+              <strong>Local:</strong> {selectedNotification?.name}
+            </p>
+            <p>
+              <strong>Centro de Custo:</strong>{" "}
+              {selectedNotification?.costCenter}
+            </p>
+           
+            <p>
+              <strong>ID Notificação:</strong>{" "}
+              {selectedNotification?.idNotification}
+            </p>
+            <p>
+              <strong>Prioridade:</strong>{" "}
+              {getPriorityLabel(selectedNotification?.priority)}
+            </p>
+            <p>
+              <strong>Número de Trabalhadores:</strong>{" "}
+              {selectedNotification?.numberOfWorkers}
+            </p>
+            <p>
+              <strong>Detalhes:</strong> {selectedNotification?.details}
+            </p>
+          </div>
+
+          <h4>Informações dos Trabalhadores</h4>
           {selectedNotification?.workerInformation &&
           selectedNotification.workerInformation.length > 0 ? (
-            selectedNotification.workerInformation.map((worker, index) => (
-              <div key={index}>
-                <p>
-                  {worker.nome} {worker.mec}
-                </p>
-              </div>
-            ))
+            <div className="worker-list">
+              {selectedNotification.workerInformation.map((worker, index) => (
+                <div key={index} className="worker-item">
+                  <p>
+                    <strong>Nome:</strong> {worker.name}
+                  </p>
+                  <p>
+                    <strong>Número:</strong> {worker.employeeNumber}
+                  </p>
+                  <p>
+                    <strong>Estado:</strong> {worker.state}
+                  </p>
+                  {worker.obs && (
+                    <p>
+                      <strong>Observações:</strong> {worker.obs}
+                    </p>
+                  )}
+                </div>
+              ))}
+            </div>
           ) : (
             <p>Nenhuma informação de trabalhador disponível.</p>
           )}
-          <h4>Equipamentos:</h4>
+
+          <h4>Equipamentos</h4>
           {selectedNotification?.equipment &&
           selectedNotification.equipment.length > 0 ? (
-            selectedNotification.equipment.map((equip, index) => (
-              <div key={index}>
-                <p>
-                  {equip.name} {equip.serialNumber}
-                </p>
-              </div>
-            ))
+            <div className="equipment-list">
+              {selectedNotification.equipment.map((equip, index) => (
+                <div key={index} className="equipment-item">
+                  <p>
+                    <strong>Nome:</strong> {equip.name}
+                  </p>
+                  <p>
+                    <strong>Número de Série:</strong> {equip.serialNumber}
+                  </p>
+                  <p>
+                    <strong>Estado:</strong> {equip.state}
+                  </p>
+                  <p>
+                    <strong>Centro de Custo:</strong> {equip.costCenter}
+                  </p>
+                  {equip.obs && (
+                    <p>
+                      <strong>Observações:</strong> {equip.obs}
+                    </p>
+                  )}
+                </div>
+              ))}
+            </div>
           ) : (
-            <p>Nenhum equipamento mencionado.</p>
+            <p>Nenhum equipamento registrado.</p>
           )}
-        </Modal.Body>
+        </div>
+      </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={() => setModalShow(false)}>
             Fechar

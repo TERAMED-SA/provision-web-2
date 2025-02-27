@@ -38,23 +38,12 @@ const MapComponent = () => {
 
   async function fetchUsers() {
     try {
+      //const userCoord = localStorage.getItem("userId");
       setIsLoading(true);
-      const response = await axios.get(
-        'https://provision-07c1.onrender.com/api/v1/admin/metrics?size=10&page=1'
-      );
-      if (response.data?.data?.sites) {
-        // Extract unique supervisors from sites
-        const supervisors = response.data.data.sites
-          .filter(site => site.supervisor) // Remove null supervisors
-          .map(site => ({
-            name: site.supervisor.name,
-            employeeId: site.supervisor.employeeId
-          }))
-          .filter((supervisor, index, self) => 
-            // Remove duplicates based on employeeId
-            index === self.findIndex(s => s.employeeId === supervisor.employeeId)
-          );
-        setUsers(supervisors);
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}user`);
+      
+      if (response.data && Array.isArray(response.data.data.data)) {
+        setUsers(response.data.data.data);
       }
       setIsLoading(false);
     } catch (error) {
@@ -62,8 +51,7 @@ const MapComponent = () => {
       setIsLoading(false);
     }
   }
-  
-  
+
   async function fetchGeo(id) {
     try {
       const response = await axios.get(

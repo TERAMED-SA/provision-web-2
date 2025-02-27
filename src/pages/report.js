@@ -16,7 +16,7 @@ const StatsPage = () => {
   const fetchMetrics = async () => {
     try {
       const response = await axios.get(
-        `https://provision-07c1.onrender.com/api/v1/admin/metrics?size=1000&page=1`
+         `${process.env.REACT_APP_API_URL}admin/metrics?size=1000&page=1`
       );
       console.log("Metrics Response:", response.data);
       setMetrics(response.data || null);
@@ -30,7 +30,7 @@ const StatsPage = () => {
   const fetchEquipments = async () => {
     try {
       const response = await axios.get(
-        `https://provision-07c1.onrender.com/api/v1/admin/equipments?size=10&page=4`
+        `${process.env.REACT_APP_API_URL}admin/equipments`
       );
       console.log("Equipments Response:", response.data);
       setEquipments(
@@ -46,7 +46,7 @@ const StatsPage = () => {
   const fetchSupervisions = async () => {
     try {
       const response = await axios.get(
-        `https://api.provision.support/admin/supervision?size=10&page=4`
+        `${process.env.REACT_APP_API_URL}admin/supervision`
       );
       console.log("Supervisions Response:", response.data);
       setSupervisions(
@@ -62,7 +62,7 @@ const StatsPage = () => {
   const fetchEmployees = async () => {
     try {
       const response = await axios.get(
-        `https://api.provision.support/admin/employees?size=10&page=4`
+        `${process.env.REACT_APP_API_URL}admin/employees`
       );
       console.log("Employees Response:", response.data);
       setEmployees(

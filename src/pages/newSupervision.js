@@ -49,7 +49,7 @@ const NotificationList = () => {
     try {
       setIsLoading(true);
       const response = await axios.get(
-       `${process.env.REACT_APP_API_URL}supervision`
+        `${process.env.REACT_APP_API_URL}supervision?size=50`
       );
 
       const formattedNotifications = response.data.data.data.map(
@@ -179,7 +179,6 @@ const NotificationList = () => {
         };
       },
       content: [
-        
         {
           text: "RELATÓRIO DA SUPERVISÃO",
           margin: [0, 40, 0, 20],
@@ -312,9 +311,9 @@ const NotificationList = () => {
   };
   const columns = [
     { field: "createdAt", headerName: "Data", width: 150 },
-    { field: "name", headerName: "Nome", width: 200 },
+    { field: "name", headerName: "Nome", width: 350 },
     { field: "supervisorName", headerName: "Supervisor", width: 200 },
-    { field: "siteName", headerName: "Site", width: 200 },
+    { field: "siteName", headerName: "Site", width: 350 },
 
     {
       field: "actions",
@@ -376,13 +375,21 @@ const NotificationList = () => {
         <p>Carregando...</p>
       ) : (
         <DataGrid
-          rows={filteredNotifications}
-          columns={columns}
-          pageSize={5}
-          autoHeight
-          pageSizeOptions={[]} // Remove a opção "Rows per page"
-          hideFooterPagination // Esconde a paginação
-        />
+        rows={filteredNotifications.sort((a, b) => b.createdAtDate - a.createdAtDate)}
+        columns={columns}
+        pageSize={10}
+        autoHeight
+        initialState={{
+          pagination: {
+            paginationModel: { pageSize: 15, page: 0 },
+          },
+        }}
+        pageSizeOptions={[5, 10, 25, 50]}
+        paginationMode="client"
+        pagination
+        disableSelectionOnClick
+        getRowId={(row) => row.id}
+      />      
       )}
       {modalInfo && (
         <Modal

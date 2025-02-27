@@ -15,8 +15,8 @@ const Home = () => {
   const [recentOccurrences, setRecentOccurrences] = useState([]);
   const [notifications, setNotifications] = useState([]);
   const [totalNotifications, setTotalNotifications] = useState(0);
-   const [metricsData, setMetricsData] = useState([]);
-    const [isLoading, setIsLoading] = useState(false);
+  const [metricsData, setMetricsData] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     fetchSupervisions();
@@ -31,7 +31,7 @@ const Home = () => {
     try {
       setIsLoading(true);
       const response = await axios.get(
-       `${process.env.REACT_APP_API_URL}supervision`
+        `${process.env.REACT_APP_API_URL}supervision?size=100`
       );
 
       const formattedNotifications = response.data.data.data.map(
@@ -47,8 +47,8 @@ const Home = () => {
       );
 
       // Sort notifications by date in descending order (most recent first)
-      const sortedNotifications = formattedNotifications.sort((a, b) => 
-        new Date(b.createdAtDate) - new Date(a.createdAtDate)
+      const sortedNotifications = formattedNotifications.sort(
+        (a, b) => new Date(b.createdAtDate) - new Date(a.createdAtDate)
       );
 
       setNotifications(sortedNotifications);
@@ -57,9 +57,7 @@ const Home = () => {
     } finally {
       setIsLoading(false);
     }
-}
-
- 
+  }
 
   const fetchMetrics = async () => {
     try {
@@ -89,7 +87,7 @@ const Home = () => {
 
         // Fetching company count
         const companyResponse = await axios.get(
-         `${process.env.REACT_APP_API_URL}company?size=500`
+          `${process.env.REACT_APP_API_URL}company?size=500`
         );
         setCompanyCount(companyResponse.data.data.data.length);
 
@@ -167,13 +165,10 @@ const Home = () => {
 
   const columns = [
     { field: "createdAt", headerName: "Data", width: 150 },
-    { field: "name", headerName: "Nome", width: 200 },
+    { field: "name", headerName: "Nome", width: 300 },
     { field: "supervisorName", headerName: "Supervisor", width: 200 },
     { field: "siteName", headerName: "Site", width: 200 },
-
-  
   ];
-
 
   return (
     <div className="container4">
@@ -242,20 +237,28 @@ const Home = () => {
           </div>
           <div className="row">
             <h2>Últimas Atividades</h2>
-            <div style={{ height: 600, width: "100%" }}>
+            <div style={{ height: 100, width: "100%" }}>
               {isLoading ? (
-                      <p>Carregando...</p>
-                    ) : (
-                      <DataGrid
-                      rows={notifications}
-                      columns={columns}
-                      pageSize={5}
-                      autoHeight
-                      pageSizeOptions={[]}
-                      hideFooterPagination
-                    />
-                    
-                    )}
+                <p>Carregando...</p>
+              ) : (
+                <DataGrid
+                rows={[...notifications].sort((a, b) => b.createdAtDate - a.createdAtDate)}
+                columns={columns}
+                autoHeight
+                initialState={{
+                  pagination: {
+                    paginationModel: { pageSize: 10, page: 0 },
+                  },
+                }}
+                pageSizeOptions={[5, 10, 25, 50]}
+                paginationMode="client"
+                pagination
+                disableSelectionOnClick
+                getRowId={(row) => row.id}
+              />
+              
+
+              )}
             </div>
           </div>
         </div>
