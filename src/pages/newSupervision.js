@@ -1,163 +1,76 @@
 import { Link } from "react-router-dom";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import CircularProgress from "@mui/material/CircularProgress";
 import { DataGrid } from "@mui/x-data-grid";
-import Modal from "react-bootstrap/Modal";
-import Button from "react-bootstrap/Button";
 import { format } from "date-fns";
+import { Modal, Button } from "react-bootstrap";
+import { ToastContainer, toast } from "react-toastify";
+import jsPDF from "jspdf";
 import pdfMake from "pdfmake/build/pdfmake";
 import pdfFonts from "pdfmake/build/vfs_fonts";
 import logo from "../assets/logo.png";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 
 const NotificationList = () => {
   const [notifications, setNotifications] = useState([]);
-  const [selectedNotification, setSelectedNotification] = useState(null);
+  const [metricsData, setMetricsData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [modalShow, setModalShow] = useState(false);
-  const [verificationModal, setVerificationModal] = useState(false);
-  const [modalInfo, setModalInfo] = useState([]);
-  const [companyInfo, setCompanyInfo] = useState([]);
-  const [siteInfo, setSiteInfo] = useState([]);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [companies, setCompanies] = useState([]);
-  const [error, setError] = useState({
-    status: false,
-    message: "",
-  });
-
-  const fetchCompanies = async () => {
-    try {
-      const response = await axios.get(
-        `${process.env.REACT_APP_API_URL}company`
-      );
-      setCompanies(response.data.dados);
-      console.log(response.data.dados);
-    } catch (error) {
-      console.log(error);
-      setError({ status: true, message: error.message });
-    }
+  const [searchSupervisor, setSearchSupervisor] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const fonts = {
+    Roboto: {
+      normal:
+        "https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.66/fonts/Roboto/Roboto-Regular.ttf",
+      bold: "https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.66/fonts/Roboto/Roboto-Medium.ttf",
+      italics:
+        "https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.66/fonts/Roboto/Roboto-Italic.ttf",
+      bolditalics:
+        "https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.66/fonts/Roboto/Roboto-MediumItalic.ttf",
+    },
   };
+
+  pdfMake.vfs = pdfFonts.pdfMake.vfs;
+  pdfMake.fonts = fonts;
+
+  const [verificationModal, setVerificationModal] = useState(false);
+  const [modalInfo, setModalInfo] = useState(null);
 
   useEffect(() => {
-    fetchCompanies();
-    fetchNotifications();
+    fetchSupervisions();
   }, []);
 
-  async function fetchNotifications() {
+  useEffect(() => {
+    if (notifications.length > 0) {
+      fetchMetrics();
+    }
+  }, [notifications]);
+
+  async function fetchSupervisions() {
     try {
       setIsLoading(true);
-      const user = localStorage.getItem("userId");
       const response = await axios.get(
-        `${process.env.REACT_APP_API_URL}notification/${user}?size=10000`
+       `${process.env.REACT_APP_API_URL}supervision`
       );
-      const formattedNotifications = await response.data.data.map(
-        (notification) => ({
-          ...notification,
-          createdAt: format(
-            new Date(notification.createdAt),
-            "dd/MM/yyyy"
-          ),
-          createdAttime: format(
-            new Date(notification.createdAt),
-            "HH:mm"
-          ),
+
+      const formattedNotifications = response.data.data.data.map(
+        (supervision) => ({
+          id: supervision._id,
+          ...supervision,
+          createdAt: format(new Date(supervision.createdAt), "dd/MM/yyyy"),
+          createdAtDate: new Date(supervision.createdAt),
+          createdAtTime: format(new Date(supervision.createdAt), "HH:mm"),
+          supervisorName: "Carregando...",
+          siteName: "Carregando...",
         })
       );
-      const supervisionFilter = formattedNotifications.filter(
-        (data) => data.information === "Supervisão"
-      );
-      setNotifications(supervisionFilter);
-      setIsLoading(false);
+
+      setNotifications(formattedNotifications);
     } catch (error) {
-      console.error("Error fetching notifications:", error.message);
+      console.error("Error fetching supervisions:", error.message);
+    } finally {
       setIsLoading(false);
     }
   }
-  async function getSupInfo(id) {
-    try {
-      const response = await axios.get(
-        `${process.env.REACT_APP_API_URL}supervision/getSupByNotification/${id}?size=500`
-      );
-      return response.data.data;
-    } catch (error) {
-      console.error("Error:", error);
-    }
-  }
-  async function getSiteInfo(costCenter) {
-    try {
-      const responseCompanySite = await axios.get(
-        `${process.env.REACT_APP_API_URL}companySite/${costCenter}`
-      );
-      return responseCompanySite.data.data;
-    } catch (error) {
-      console.error("Error:", error);
-    }
-  }
-
-  const handleViewDetails = (notification) => {
-    setSelectedNotification(notification);
-    // setModalShow(true);
-  };
-  const getOcorrenceByIdNot = async (id) => {
-    try {
-      const response = await axios.get(
-        `${process.env.REACT_APP_API_URL}occurrence/getOcorByNotification/${id}?size=500`
-      );
-      return response.data.data;
-    } catch (error) {
-      console.log(error);
-    }
-  };
-  const openModal = async (info) => {
-    const occorence = await getOcorrenceByIdNot(info._id);
-    setSelectedNotification(occorence);
-    setModalShow(true);
-  };
-
-  const handleApproval = () => {
-    toast.warning(
-      "Ainda não foi realizado o tratamento adequado desta informação."
-    );
-  };
-
-  const handleRejection = () => {
-    // Lógica para reprovar a notificação
-    setModalShow(false);
-  };
-  const openVerificationModal = async (id, name, costCenter) => {
-    try {
-      const response = await axios.get(
-        `${process.env.REACT_APP_API_URL}companySite/getCompanyInfo/${costCenter}`
-      );
-      const responseCompanySite = await axios.get(
-        `${process.env.REACT_APP_API_URL}companySite/${costCenter}`
-      );
-      localStorage.setItem("supervisionId", id);
-      localStorage.setItem("supervisorName", name);
-      localStorage.setItem("supervisionCostCenter", costCenter);
-      const dados = await getSupInfo(id);
-      setSiteInfo(responseCompanySite.data.data);
-      setCompanyInfo(response.data.data);
-      setModalInfo(dados);
-      setVerificationModal(true);
-    } catch (error) {
-      setError({
-        status: true,
-        message: error.response.data.message,
-      });
-    }
-  };
-
-  const closeVerificationModal = () => {
-    localStorage.removeItem("supervisionId");
-    localStorage.removeItem("supervisorName");
-    localStorage.removeItem("supervisionCostCenter");
-    setVerificationModal(true);
-  };
-
   const approve = async (costCenter, idNot) => {
     try {
       const response = await axios.put(
@@ -176,40 +89,88 @@ const NotificationList = () => {
     }
   };
 
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    const day = `0${date.getDate()}`.slice(-2);
-    const month = `0${date.getMonth() + 1}`.slice(-2); // Months are zero-indexed
-    const year = date.getFullYear();
-    return `${day}/${month}/${year}`;
+  const fetchMetrics = async () => {
+    try {
+      const response = await axios.get(
+        `${process.env.REACT_APP_API_URL}admin/metrics?size=100&page=1`
+      );
+      setMetricsData(response.data.data.sites);
+      updateNotificationsWithMetrics(response.data.data.sites);
+    } catch (error) {
+      console.error("Error fetching metrics:", error.message);
+    }
   };
 
-  const generatePDF = async (id, name, costCenter) => {
-    const dados = await getSupInfo(id);
-    pdfMake.vfs = pdfFonts.pdfMake.vfs;
-    // Converte a imagem para uma URL de dados (data URL)
+  const updateNotificationsWithMetrics = (metrics) => {
+    const updatedNotifications = notifications.map((notification) => {
+      const metricSite = metrics.find(
+        (site) => site.siteCostcenter === notification.costCenter
+      );
+      if (metricSite) {
+        const supervisor =
+          metricSite.supervisor &&
+          metricSite.supervisor.employeeId === notification.supervisorCode
+            ? metricSite.supervisor.name
+            : "Não encontrado";
+        return {
+          ...notification,
+          supervisorName: supervisor || "Sem supervisor",
+          siteName: metricSite.siteName || "Sem site",
+          equipment: notification.equipment || [],
+        };
+      }
+      return notification;
+    });
+    setNotifications(updatedNotifications);
+  };
+
+  const filteredNotifications = notifications.filter(
+    (notification) =>
+      (searchSupervisor === "" ||
+        notification.supervisorName
+          .toLowerCase()
+          .includes(searchSupervisor.toLowerCase())) &&
+      (startDate === "" || notification.createdAtDate >= new Date(startDate)) &&
+      (endDate === "" || notification.createdAtDate <= new Date(endDate))
+  );
+
+  const openModal = (info) => {
+    setModalInfo(info);
+    setVerificationModal(true);
+  };
+
+  const generatePDF = async (id, supervisorName, costCenter) => {
+    const createdAt = new Date(modalInfo.createdAt);
+    const formattedDate = modalInfo.createdAt; // Since it's already formatted as dd/MM/yyyy in your data
     const imageDataUrl = await convertImageToDataURL(logo);
 
-    const data = {
-      name: name,
-      createdAt: dados.createdAt,
-      supervisorCode: dados.supervisorCode,
-      workerInformation: dados.workerInformation,
-      numberOfWorkers: dados.numberOfWorkers,
-      desiredNumber: dados.desiredNumber,
-      equipment: dados.equipment,
-      taskId: dados.taskId ? dados.taskId : "",
-      time: dados.time,
-      costCenter: dados.costCenter,
-      report: dados.report,
-      companyName: companyInfo.name,
-      companyClientCode: companyInfo.clientCode,
-      siteName: siteInfo.name,
+    const getBase64ImageFromURL = (url) => {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.setAttribute("crossOrigin", "anonymous");
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          canvas.width = img.width;
+          canvas.height = img.height;
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0);
+          const dataURL = canvas.toDataURL("image/png");
+          resolve(dataURL);
+        };
+        img.onerror = (error) => reject(error);
+        img.src = url;
+      });
     };
 
-    const createdAt = new Date(data.createdAt);
-    const formattedDate = formatDate(createdAt);
+    const logoBase64 = await getBase64ImageFromURL(logo);
     const documentDefinition = {
+      pageMargins: [40, 100, 40, 60], // Ajuste as margens para dar espaço para a logo
+      header: {
+        image: logoBase64,
+        width: 100, // Ajuste o tamanho da logo conforme necessário
+        alignment: "center",
+        margin: [0, 20, 0, 0], // Margem superior para posicionar a logo
+      },
       footer: function (currentPage, pageCount) {
         return {
           text: `Gerado pelo sistema - Página ${currentPage} de ${pageCount}`,
@@ -217,116 +178,94 @@ const NotificationList = () => {
           margin: [0, 20, 0, 0],
         };
       },
-
       content: [
-        {
-          image: imageDataUrl,
-          width: 70,
-          margin: [0, 0, 0, 20],
-          alignment: "center",
-        },
+        
         {
           text: "RELATÓRIO DA SUPERVISÃO",
-          margin: [0, 0, 0, 20],
+          margin: [0, 40, 0, 20],
           style: "header",
           alignment: "center",
         },
+        { text: "Identificação", style: "subheader", alignment: "center" },
         {
-          text: "Identificação",
-          size: 40,
-          style: "subheader",
-          alignment: "center",
+          text: "Informação do Supervisor",
+          bold: true,
+          margin: [10, 10, 0, 5],
         },
-        { text: "Informação do Supervisor", bold: 900, margin: [10, 10, 0, 5] },
-        { text: `Nome: ${data.name}` },
-        { text: `Código do Supervisor: ${data.supervisorCode}` },
-        { text: `Tempo da supervisão: ${data.time}` },
+        { text: `Nome: ${modalInfo.supervisorName}` },
+        { text: `Código do Supervisor: ${modalInfo.supervisorCode}` },
         { text: `Feito em: ${formattedDate}` },
+        {
+          text: `Duração da Supervisão: ${
+            modalInfo.time ? modalInfo.time.split(".")[0] : "Não informado"
+          }`,
+        },
         { text: "" },
-        { text: "Informação do Site", bold: 1000, margin: [20, 10, 0, 5] },
-        { text: `Nome do site: ${data.siteName}` },
-        { text: `Centro de custo: ${data.costCenter}` },
-        { text: `Nome da empresa: ${data.companyName}` },
-        { text: `Código de empresa: ${data.companyClientCode}` },
+        { text: "Informação do Site", bold: true, margin: [20, 10, 0, 5] },
+        { text: `Nome do site: ${modalInfo.siteName}` },
+        { text: `Centro de custo: ${modalInfo.costCenter}` },
         {
           canvas: [
-            {
-              type: "line",
-              x1: 0,
-              y1: 5,
-              x2: 595 - 2 * 40,
-              y2: 5,
-              lineWidth: 1,
-            },
+            { type: "line", x1: 0, y1: 5, x2: 515, y2: 5, lineWidth: 1 },
           ],
         },
+
         {
           text: "Informação dos Trabalhadores",
           style: "subheader",
           alignment: "center",
           margin: [0, 10, 0, 10],
         },
-        { text: `Numero de trabalhadores pretendido: ${data.desiredNumber}` },
-
-        { text: `Presentes: ${data.numberOfWorkers}` },
-        { text: `Faltou:  ${data.workerInformation.length}` },
+        { text: `Trabalhadores Encontrados: ${modalInfo.workersFound}` },
+        {
+          text: `Faltou: ${
+            modalInfo.workerInformation ? modalInfo.workerInformation.length : 0
+          }`,
+        },
         { text: "Lista dos trabalhadores ausentes:", margin: [0, 0, 0, 10] },
         {
-          ul: data.workerInformation.flatMap((worker) => [
-            { text: `Nome: ${worker.name}`, margin: [30, 0, 0, 0] }, // Adicionando margem à esquerda
-            {
-              text: `Número de trabalhador: ${worker.employeeNumber}`,
-              margin: [30, 0, 0, 0],
-            },
-            { text: `Situação: ${worker.state}`, margin: [30, 0, 0, 0] },
-            { text: `OBS: ${worker.obs}`, margin: [30, 0, 0, 10] }, // Margem maior na parte inferior
-          ]),
+          ul: modalInfo.workerInformation
+            ? modalInfo.workerInformation.flatMap((worker) => [
+                { text: `Nome: ${worker.name}`, margin: [30, 0, 0, 0] },
+                {
+                  text: `Número de trabalhador: ${worker.employeeNumber}`,
+                  margin: [30, 0, 0, 0],
+                },
+                { text: `Situação: ${worker.state}`, margin: [30, 0, 0, 0] },
+                { text: `OBS: ${worker.obs}`, margin: [30, 0, 0, 10] },
+              ])
+            : [],
         },
+
         {
           canvas: [
-            {
-              type: "line",
-              x1: 0,
-              y1: 5,
-              x2: 595 - 2 * 40,
-              y2: 5,
-              lineWidth: 1,
-            },
+            { type: "line", x1: 0, y1: 5, x2: 515, y2: 5, lineWidth: 1 },
           ],
         },
         { text: "Equipamentos", style: "subheader", alignment: "center" },
         {
-          text: `Quantidade de equipamentos encontrado: ${data.equipment.length}`,
+          text: `Quantidade de equipamentos encontrado: ${
+            modalInfo.equipment ? modalInfo.equipment.length : 0
+          }`,
         },
+        { text: "Lista dos equipamentos encontrados:", margin: [0, 0, 0, 10] },
         {
-          text: `Lista dos equipamentos encontrados:  `,
-          margin: [0, 0, 0, 10],
+          ul: modalInfo.equipment
+            ? modalInfo.equipment.flatMap((equipment) => [
+                { text: `Nome: ${equipment.name}`, margin: [30, 0, 0, 0] },
+                {
+                  text: `Número de série: ${equipment.serialNumber}`,
+                  margin: [30, 0, 0, 0],
+                },
+                { text: `Estado: ${equipment.state}`, margin: [30, 0, 0, 0] },
+                { text: `OBS: ${equipment.obs}`, margin: [30, 0, 0, 10] },
+              ])
+            : [],
         },
-        {
-          ul: data.equipment.flatMap((equipment) => [
-            { text: `Nome: ${equipment.name}`, margin: [30, 0, 0, 0] }, // Adicionando margem à esquerda
-            {
-              text: `Número de série: ${equipment.serialNumber}`,
-              margin: [30, 0, 0, 0],
-            },
-            { text: `Estado: ${equipment.state}`, margin: [30, 0, 0, 0] },
-            {
-              text: `Centro de custo: ${equipment.costCenter}`,
-              margin: [30, 0, 0, 0],
-            },
-            { text: `OBS: ${equipment.obs}`, margin: [30, 0, 0, 10] }, // Margem maior na parte inferior
-          ]),
-        },
+
         {
           canvas: [
-            {
-              type: "line",
-              x1: 0,
-              y1: 5,
-              x2: 595 - 2 * 40,
-              y2: 5,
-              lineWidth: 1,
-            },
+            { type: "line", x1: 0, y1: 5, x2: 515, y2: 5, lineWidth: 1 },
           ],
         },
         {
@@ -334,12 +273,12 @@ const NotificationList = () => {
           style: "subheader",
           alignment: "center",
         },
-        { text: `${data.report}` },
+        { text: modalInfo.report || "Sem informações adicionais." },
       ],
       styles: {
         header: {
           fontSize: 22,
-          bold: false,
+          bold: true,
           margin: [0, 0, 0, 10],
         },
         subheader: {
@@ -349,266 +288,180 @@ const NotificationList = () => {
         },
       },
     };
+
     pdfMake
       .createPdf(documentDefinition)
-      .download(`relatório_supervião_${formattedDate}.pdf`);
+      .download(`relatório_supervisão_${formattedDate}.pdf`);
   };
-
   const convertImageToDataURL = (imagePath) => {
     return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => {
-        resolve(reader.result);
+      const img = new Image();
+      img.crossOrigin = "Anonymous"; // Permitir acesso cross-origin
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0);
+        const dataURL = canvas.toDataURL("image/png");
+        resolve(dataURL);
       };
-      reader.onerror = reject;
-      fetch(imagePath)
-        .then((response) => response.blob())
-        .then((blob) => reader.readAsDataURL(blob))
-        .catch(reject);
+      img.onerror = (error) => reject(error);
+      img.src = imagePath;
     });
   };
+  const columns = [
+    { field: "createdAt", headerName: "Data", width: 150 },
+    { field: "name", headerName: "Nome", width: 200 },
+    { field: "supervisorName", headerName: "Supervisor", width: 200 },
+    { field: "siteName", headerName: "Site", width: 200 },
 
-  const filteredRows = notifications
-    .filter((notification) => {
-      const date = new Date(notification.createdAt).toLocaleDateString();
-      return (
-        notification.supervisorName
-          .toLowerCase()
-          .includes(searchQuery.toLowerCase()) || date.includes(searchQuery)
-      );
-    })
-    .map((notification, index) => ({
-      id: index,
-      _id: notification._id,
-      data: notification.createdAt,
-      evento: notification.information,
-      supervisor: notification.supervisorName,
-      costCenter: notification.costCenter,
-      cliente: notification.clientCode,
-      clienteName: notification.siteName,
-      // company: companies.data.find((element) => element.clientCode === notification.clientCode)?.nome,
-      estado: notification.state ? "Validado" : "Pendente",
-      link: notification.actionLocationId,
-      siteName: notification.siteName,
-    }));
+    {
+      field: "actions",
+      headerName: "Ações",
+      width: 150,
+      renderCell: (params) => (
+        <Button variant="info" onClick={() => openModal(params.row)}>
+          Detalhes
+        </Button>
+      ),
+    },
+  ];
 
   return (
     <div className="container4 mr-2" style={{ height: "89vh" }}>
-      <h1 style={{ textAlign: "center" }}>
-        Supervisão<span className="badge badge-secondary"></span>
-      </h1>
-
-      {error.status === true && (
-        <div className="alert alert-danger">{error.message}</div>
-      )}
-
-      <div className="container-fluid">
+      <h1 style={{ textAlign: "center" }}>Supervisão</h1>
+      <div
+        style={{ display: "flex", alignItems: "center", marginBottom: "20px" }}
+      >
         <div className="container-fluid">
           <Link to="/Home" className="p-1">
             Início{" "}
           </Link>{" "}
           / <span>Supervisão</span>
           <br></br> <br></br>
-          <div style={{ position: "relative", display: "inline-block" }}>
-            <input
-              type="text"
-              className="form-control"
-              placeholder="Pesquisar..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              style={{ paddingLeft: "3rem" }} // espaço para o ícone
-            />
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="30"
-              height="20"
-              fill="currentColor"
-              className="bi bi-search"
-              viewBox="0 0 16 16"
-              style={{
-                position: "absolute",
-                left: "10px",
-                top: "25px",
-                transform: "translateY(-50%)",
-                pointerEvents: "none",
-                color: "#0d214f ", // Azul suave
-              }}
-            >
-              <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001l3.85 3.85a1 1 0 0 0 1.415-1.415l-3.85-3.85zm-5.598 0A5.5 5.5 0 1 1 10.5 5.5a5.5 5.5 0 0 1-4.356 4.844z" />
-            </svg>
-          </div>
-        </div>
-        <div className="container">
-          {isLoading ? (
-            <div className="text-center mt-4">
-              <CircularProgress size={80} thickness={5} />
-            </div>
-          ) : notifications.length === 0 ? (
-            <div className="text-center text-black mt-4">
-              Nenhuma notificação disponível
-            </div>
-          ) : (
-            <div style={{ overflow: "auto", maxHeight: "70vh" }}>
-              <DataGrid
-                rows={filteredRows}
-                columns={[
-                  { field: "id", headerName: "Número", width: 100 },
-                  { field: "data", headerName: "Data", width: 200 },
-                  { field: "supervisor", headerName: "Supervisor", width: 300 },
-                  {
-                    field: "clienteName",
-                    headerName: "Centro de custo",
-                    width: 200,
-                  },
-                  {
-                    /* field: "company", headerName: "Cliente", width: 300 */
-                  },
-                  { field: "estado", headerName: "Estado", width: 100 },
-                  {
-                    field: "link",
-                    headerName: "Ação",
-                    width: 250,
-                    renderCell: (params) => (
-                      <div className="d-flex justify-content-center">
-                        {params.row.evento === "Supervisão" && (
-                          <button
-                            className="btn btn-warning btn-sm m-1"
-                            onClick={() =>
-                              openVerificationModal(
-                                params.row._id,
-                                params.row.supervisor,
-                                params.row.costCenter
-                              )
-                            }
-                          >
-                            Detalhes
-                          </button>
-                        )}
-                      </div>
-                    ),
-                  },
-                ]}
-                pageSize={5}
-                autoHeight
-              />
-
-              <Modal
-                show={verificationModal}
-                onHide={() => setVerificationModal(false)}
-                size="xl"
-                centered
-              >
-                <Modal.Header closeButton>
-                  <Modal.Title>RELATÓRIO DA SUPERVISÃO</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                  <h1 style={{ textAlign: "center" }}>
-                    {selectedNotification?.evento}
-                  </h1>
-                  <div style={{ fontSize: "20px" }}>
-                    <h1 style={{ textAlign: "center" }}>IDENTIFICAÇÃO</h1>
-                    <h3 style={{ marginLeft: "20px" }}>
-                      Informação do Supervisor
-                    </h3>
-                    <p>Nome: {localStorage.getItem("supevisorName")}</p>
-                    <p>Código do supervisor: {modalInfo.supervisorCode}</p>
-                    <p>Tempo da supersão: {modalInfo.time}</p>
-                    <p>Feito em: {formatDate(modalInfo.createdAt)} </p>
-
-                    <h3 style={{ marginLeft: "20px" }}>Informação do site</h3>
-                    <p>Nome: {siteInfo.name}</p>
-                    <p>Centro de custo: {modalInfo.costCenter}</p>
-                    <p>Nome da empresa: {companyInfo.name}</p>
-                    <p>Código de cliente: {companyInfo.clientCode}</p>
-                    <hr />
-                    <h1 style={{ textAlign: "center" }}>
-                      Informação dos trabalhadores
-                    </h1>
-                    <p>Presentes: {modalInfo.numberOfWorkers}</p>
-                    <p>
-                      Ausentes:{" "}
-                      {modalInfo.workerInformation &&
-                        modalInfo.workerInformation.length}
-                    </p>
-                    <p>Lista dos trabalhadores ausentes:</p>
-                    <ul>
-                      {modalInfo &&
-                        modalInfo.workerInformation &&
-                        modalInfo.workerInformation.map((item, index) => (
-                          <li key={index}>
-                            <div>
-                              <p>Nome: {item.name}</p>
-                              <p>ID trabalhador: {item.employeeNumber}</p>
-                              <p>Situação: {item.state}</p>
-                              <p>Observação: {item.obs}</p>
-                            </div>
-                          </li>
-                        ))}
-                    </ul>
-                    <hr />
-                    <h1 style={{ textAlign: "center" }}>
-                      Informação dos equipamentos
-                    </h1>
-                    <p>
-                      Quantidade de equipamentos encontrado:{" "}
-                      {modalInfo.equipment && modalInfo.equipment.length}
-                    </p>
-                    <p>Lista dos equipamentos encontrados: </p>
-                    <ul>
-                      {modalInfo &&
-                        modalInfo.equipment &&
-                        modalInfo.equipment.map((item, index) => (
-                          <li key={index}>
-                            <div>
-                              <p>Nome: {item.name}</p>
-                              <p>Número de série: {item.serialNumber}</p>
-                              <p>Centro de custi {item.costCenter}</p>
-                              <p>Estado: {item.state}</p>
-                              <p>Observação: {item.obs}</p>
-                            </div>
-                          </li>
-                        ))}
-                    </ul>
-
-                    <hr />
-                    <h1 style={{ textAlign: "center" }}>
-                      Informação extra da supervisão
-                    </h1>
-                    <p>{modalInfo.report}</p>
-                  </div>
-                </Modal.Body>
-                <Modal.Footer>
-                  <Button
-                    variant="success"
-                    onClick={() =>
-                      approve(
-                        localStorage.getItem("supervisionCostCenter"),
-                        localStorage.getItem("supervisionId")
-                      )
-                    }
-                  >
-                    Aprovar
-                  </Button>
-                  <Button
-                    onClick={() =>
-                      generatePDF(
-                        localStorage.getItem("supervisionId"),
-                        localStorage.getItem("supervisorName"),
-                        localStorage.getItem("supervisionCostCenter")
-                      )
-                    }
-                    variant="info"
-                  >
-                    Gerar PDF
-                  </Button>
-                </Modal.Footer>
-              </Modal>
-            </div>
-          )}
-        </div>
-        <ToastContainer />
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              marginBottom: "10px",
+            }}
+          ></div>
+          <input
+            type="text"
+            placeholder="Pesquisar "
+            value={searchSupervisor}
+            onChange={(e) => setSearchSupervisor(e.target.value)}
+            style={{ marginRight: "10px", padding: "5px" }}
+          />
+          <label>Início .</label>
+          <input
+            type="date"
+            value={startDate}
+            placeholder="Data inicial"
+            onChange={(e) => setStartDate(e.target.value)}
+            style={{ marginRight: "10px", padding: "5px" }}
+          />
+          <label>Fim .</label>
+          <input
+            placeholder="Data final"
+            type="date"
+            value={endDate}
+            onChange={(e) => setEndDate(e.target.value)}
+            style={{ padding: "5px" }}
+          />
+        </div>{" "}
       </div>
+      {isLoading ? (
+        <p>Carregando...</p>
+      ) : (
+        <DataGrid
+          rows={filteredNotifications}
+          columns={columns}
+          pageSize={5}
+          autoHeight
+          pageSizeOptions={[]} // Remove a opção "Rows per page"
+          hideFooterPagination // Esconde a paginação
+        />
+      )}
+      {modalInfo && (
+        <Modal
+          show={verificationModal}
+          onHide={() => setVerificationModal(false)}
+          size="x"
+          centered
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>RELATÓRIO DA SUPERVISÃO</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <h1 style={{ textAlign: "center" }}>IDENTIFICAÇÃO</h1>
+            <h3 style={{ marginLeft: "20px" }}>Informação do Supervisor</h3>
+            <p>Nome do Supervisor: {modalInfo.supervisorName}</p>
+            <p>Código do Supervisor: {modalInfo.supervisorCode}</p>
+            <p>Centro de Custo: {modalInfo.costCenter}</p>
+            <p>Relatório: {modalInfo.report}</p>
+            <h3>Equipamentos</h3>
+            {modalInfo.equipment && modalInfo.equipment.length > 0 ? (
+              modalInfo.equipment.map((equip, index) => (
+                <div key={index}>
+                  <p>Nome: {equip.name}</p>
+                  <p>Número de Série: {equip.serialNumber}</p>
+                  <p>Estado: {equip.state}</p>
+                  <p>Observação: {equip.obs}</p>
+                </div>
+              ))
+            ) : (
+              <p>Nenhum equipamento registrado.</p>
+            )}
+            <h3>Trabalhadores Ausentes</h3>
+            {modalInfo.workerInformation &&
+            modalInfo.workerInformation.length > 0 ? (
+              modalInfo.workerInformation.map((worker, index) => (
+                <div key={index}>
+                  <p>Nome: {worker.name}</p>
+                  <p>Número de Empregado: {worker.employeeNumber}</p>
+                  <p>Estado: {worker.state}</p>
+                  <p>Observação: {worker.obs}</p>
+                </div>
+              ))
+            ) : (
+              <p>Nenhum trabalhador ausente registrado.</p>
+            )}
+            <h1 style={{ textAlign: "center" }}>
+              Informação extra da supervisão
+            </h1>
+            <p>{modalInfo.report}</p>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button
+              variant="success"
+              onClick={() =>
+                approve(
+                  localStorage.getItem("supervisionCostCenter"),
+                  localStorage.getItem("supervisionId")
+                )
+              }
+            >
+              Aprovar
+            </Button>
+            <Button
+              onClick={() =>
+                generatePDF(
+                  localStorage.getItem("supervisionId"),
+                  localStorage.getItem("supervisorName"),
+                  localStorage.getItem("supervisionCostCenter")
+                )
+              }
+              variant="info"
+            >
+              Gerar PDF
+            </Button>
+          </Modal.Footer>
+        </Modal>
+      )}
     </div>
   );
 };
+
 export default NotificationList;

@@ -1,14 +1,9 @@
+import { Link } from "react-router-dom";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import CircularProgress from "@mui/material/CircularProgress";
 import { DataGrid } from "@mui/x-data-grid";
-import {
-  faEdit,
-  faTrash,
-  faPlus,
-  faSave,
-  faTimes,
-} from "@fortawesome/free-solid-svg-icons";
+import { faTrash, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
@@ -31,8 +26,6 @@ function SiteList() {
     ctClient: "",
   });
   const [editingSite, setEditingSite] = useState(null);
-  const [equipmentList, setEquipmentList] = useState([]);
-  const [selectedSite, setSelectedSite] = useState(null);
   const sitePerPage = 5;
   const [selectedEquipment, setSelectedEquipment] = useState(null);
 
@@ -168,7 +161,7 @@ function SiteList() {
       const filteredSites = response.data.data.data.filter(
         (site) => clientCode === site.clientCode
       );
-      console.log(filteredSites)
+      console.log(filteredSites);
       setSiteList(filteredSites);
     } catch (error) {
       console.error("Error fetching sites:", error.message);
@@ -181,19 +174,30 @@ function SiteList() {
     fetchSites();
   }, []);
 
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
 
   // Filtra a lista de sites com base no termo de busca
-  const filteredSites = siteList.filter(site =>
-    (site.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (site.mec || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (site.clientCode || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (site.costCenter || "").toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredSites = siteList.filter(
+    (site) =>
+      (site.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (site.mec || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (site.clientCode || "")
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase()) ||
+      (site.costCenter || "").toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
-    <div className="container4">
+    <div className="container4 mr-2" style={{ height: "89vh" }}>
       <h1 style={{ textAlign: "center" }}>Lista dos sites</h1>
+
+      <div className="container-fluid">
+        <Link to="/Home" className="p-1">
+          Início{" "}
+        </Link>{" "}
+        / <span>Supervisão</span>
+        <br></br> <br></br>
+      </div>
       <div className="space">
         <div className=""></div>
         <div className="">
@@ -219,18 +223,24 @@ function SiteList() {
       )}
 
       {!isLoading && siteList.length > 0 && (
-
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60vh' }}>
-          <div style={{ width: '90%' }}>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            height: "60vh",
+          }}
+        >
+          <div style={{ width: "90%" }}>
             {/* Campo de busca */}
-            <div className="mb-4" style={{ width: '100%', maxWidth: '300px' }}>
+            <div className="mb-4" style={{ width: "100%", maxWidth: "300px" }}>
               <input
                 type="text"
                 className="form-control"
                 placeholder="Buscar sites..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                style={{ width: '100%' }}
+                style={{ width: "100%" }}
               />
             </div>
             <DataGrid
@@ -244,9 +254,9 @@ function SiteList() {
               }))}
               columns={[
                 { field: "id", headerName: "ID", width: 60 },
-                { field: "name", headerName: "Nome", width: 200 },
-                { field: "ctClient", headerName: "Código cliente", width: 150 },
-                { field: "costCenter", headerName: "Centro de custo", width: 150 },
+                { field: "name", headerName: "Nome", width: 500 },
+                //    { field: "ctClient", headerName: "Código cliente", width: 150 },
+                //  { field: "costCenter", headerName: "Centro de custo", width: 150 },
                 {
                   field: "actions",
                   headerName: "Ações",
@@ -262,9 +272,14 @@ function SiteList() {
                       <button className="btn btn-success btn-sm mr-2 mb-2">
                         <a
                           href={`/equipmentList?costCenter=${params.row.idSite}`}
-                          style={{ color: "white" }}
+                          style={{
+                            color: "white",
+                            textDecoration: "none",
+                            padding: "5px",
+                          }}
                         >
                           <MdHomeRepairService />
+                          Equipamentos
                         </a>
                       </button>
                     </div>

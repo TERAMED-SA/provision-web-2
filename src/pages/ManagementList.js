@@ -16,49 +16,33 @@ import "react-toastify/dist/ReactToastify.css";
 
 const ManagementList = () => {
   const [data] = useState([
+    //{/*  {
+    // id: 1,
+    //  title: "Funcionários",
+    // content: "Funcionários nos sites do cliente.",
+    //  icon: faUsers,
+    //  link: "/EmployeeList",
+    //  }*},
     {
       id: 1,
-      title: "Funcionários",
-      content: "Funcionários da Empresa.",
-      icon: faUsers,
-      link: "/EmployeeList",
-    },
-    {
-      id: 2,
       title: "Sites",
-      content: "Sites da Empresa.",
+      content: "Sites do Cliente.",
       icon: faBuildingUser,
       link: "/SiteList",
     },
     {
-      id: 4,
-      title: "Histórico",
-      content: "Lista de Histórico.",
-      icon: faHistory,
-      link: "/HistoryList",
-    },
-    {
-      id: 5,
+      id: 2,
       title: "Agendamento",
-      content: "Lista de Agendamentos.",
+      content: "Agendar supervisão para um Supervisor.",
       icon: faCalendar,
       link: "/ScheduleList",
     },
     {
-      id: 6,
+      id: 3,
       title: "Ocorrência",
-      content: "Ocorrência Atuais.",
+      content: "Ocorrência do cliente.",
       icon: faExclamationCircle,
       link: "/InventoryList",
-    },
-    {
-      id: 7,
-      title: "Relatório",
-      content: "Gerar relatório do cliente",
-      icon: faClipboardCheck,
-      onClick: () => {
-        toast.error("Funcionalidade ainda não implementada");
-      },
     },
   ]);
 

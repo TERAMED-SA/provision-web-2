@@ -51,7 +51,7 @@ function ScheduleList() {
         (site) => site.clientCode === clientCode
       );
       const filterUser = await supervisorResponse.data.data.data.filter(
-        (user) => user.mecCoordinator !== ! ""
+        (user) => user.mecCoordinator !== !""
       );
       const supervisorCodes = filterSite.map((site) => site.supervisorCode);
       const siteCodes = filterSite.map((site) => site.costCenter);
@@ -77,7 +77,7 @@ function ScheduleList() {
         (supervisor) => supervisor.supervisorCode === id
       );
       setSiteListFilter(filter);
-    } catch (error) { }
+    } catch (error) {}
   }
 
   async function validateSite(id) {
@@ -169,14 +169,14 @@ function ScheduleList() {
         toast.success("Tarefa agendada com sucesso");
         setTimeout(() => {
           window.location.reload();
-        }, 2000)
+        }, 2000);
       }
     } catch (error) {
       console.error(error);
-      toast.error("Este site ja possui uma tarefa pendente");
+      toast.error("Este Cliente ja possui uma tarefa pendente");
       setTimeout(() => {
         window.location.reload();
-      }, 2000)
+      }, 2000);
     }
   };
 
@@ -209,7 +209,7 @@ function ScheduleList() {
             <div
               style={{ textAlign: "center", color: "black", padding: "20px" }}
             >
-              Nenhum dado disponível, este cliente ainda não possui Sites
+              Nenhum dado disponível, este cliente ainda não Agendamentos
             </div>
           )}
 
@@ -227,7 +227,12 @@ function ScheduleList() {
                       name: schedule.name,
                       costCenter: schedule.costCenter,
                       supervisorCode: schedule.supervisorCode,
-                      state: schedule.state === 0 ? "Pendente" : schedule.state === 1 ? "Feito" : ""
+                      state:
+                        schedule.state === 0
+                          ? "Pendente"
+                          : schedule.state === 1
+                          ? "Feito"
+                          : "",
                     }))}
                   columns={[
                     { field: "id", headerName: "ID", width: 60 },
@@ -277,7 +282,6 @@ function ScheduleList() {
                     setSelectedSchedule(newSelection[0]);
                   }}
                 />
-
               </div>
             </>
           )}

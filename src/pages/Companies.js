@@ -9,12 +9,8 @@ import "./Companies.css";
 import "./ManagementList.css";
 import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faUserPlus } from "@fortawesome/free-solid-svg-icons"; // Importa ícones
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { MdGroupOff } from "react-icons/md";
-import { MdPeopleAlt } from "react-icons/md";
 
 // CSS override for spinner
 const override = css`
@@ -62,7 +58,7 @@ const Companies = () => {
 
   // Handle click event for company item
   const handleItemClick = (clientCode) => {
-    localStorage.setItem("selectedCompany", clientCode);
+    localStorage.setItem("selectedCompany", clientCode, name);
     navigate("/managementList");
   };
   const createCompany = async (clientName, clientCode) => {
@@ -133,7 +129,7 @@ const Companies = () => {
 
   return (
     <div className="mr-2" style={{ height: "89vh" }}>
-      <h2 style={{ fontSize: "50px" }}>CLIENTES</h2>
+      <h2 style={{ textAlign: "center", fontSize: "50px" }}>CLIENTES</h2>
       <div className="container-fluid">
         <Link to="/Home" className="p-1">
           Início{" "}
@@ -197,14 +193,14 @@ const Companies = () => {
                   <i className="bi bi-eye"></i> &nbsp;
                   {viewMode === "list" ? "Mosaico" : "Lista"}
                 </button>
-                <button
+                 {/*  <button
                   className="btn btn-primary ms-2"
                   onClick={handleAddCompanyClick}
                 >
                   <FontAwesomeIcon icon={faUserPlus} />
                   &nbsp; Adicionar Cliente
                 </button>
-                {/*    <button className="btn btn-success">
+                 <button className="btn btn-success">
                   <MdPeopleAlt />
                   &nbsp;Ativo
                 </button>

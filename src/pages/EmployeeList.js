@@ -4,11 +4,11 @@ import { Button, Modal, Form } from "react-bootstrap";
 import { Trash } from "react-bootstrap-icons";
 import { DataGrid } from "@mui/x-data-grid";
 import axios from "axios";
-import { useSearchParams } from "react-router-dom";
 
 const EmployeeList = () => {
-  const [searchParams] = useSearchParams();
   const [employees, setEmployees] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const employeesPerPage = 5;
   const [showModal, setShowModal] = useState(false);
   const inputRef = useRef(null);
   const [formData, setFormData] = useState({
@@ -19,38 +19,27 @@ const EmployeeList = () => {
     position: "",
   });
 
-  const clientCode = searchParams.get("clientCode");
-
   useEffect(() => {
     async function fetchEmployees() {
       try {
-        const companyResponse = await axios.get(
-          "https://provision-07c1.onrender.com/api/v1/companySite"
+        const response = await axios.get(
+          "https://provision-07c1.onrender.com/api/v1/user"
         );
-        const companyData = companyResponse.data.data.data;
-
-        const companiesWithSameClientCode = companyData.filter(
-          (company) => company.clientCode === clientCode
-        );
-
-        const allWorkers = companiesWithSameClientCode.reduce(
-          (acc, company) => [...acc, ...company.workers],
-          []
-        );
-
-        const employeeData = allWorkers.map((worker) => ({
-          id: worker.mec,
-          name: worker.name,
-          mec: worker.mec, // Adiciona o MEC ao mapeamento
+        const employeeData = response.data.data.data.map((employee) => ({
+          id: employee._id,
+          name: employee.name,
+          phoneNumber: employee.phoneNumber,
+          address: employee.address,
+          email: employee.email,
+          position: employee.type,
         }));
-
         setEmployees(employeeData);
       } catch (error) {
         console.error("Erro ao buscar funcionários:", error.message);
       }
     }
     fetchEmployees();
-  }, [clientCode]);
+  }, []);
 
   const handleModalClose = () => {
     setShowModal(false);
@@ -75,6 +64,10 @@ const EmployeeList = () => {
     setEmployees(employees.filter((employee) => employee.id !== id));
   };
 
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({
@@ -84,17 +77,25 @@ const EmployeeList = () => {
   };
 
   const handleAddEmployee = () => {
+    // Aqui você pode adicionar a lógica para adicionar o funcionário
     console.log("Dados do novo funcionário:", formData);
     handleModalClose();
   };
 
+  const indexOfLastEmployee = currentPage * employeesPerPage;
+  const indexOfFirstEmployee = indexOfLastEmployee - employeesPerPage;
+  const currentEmployees = employees.slice(
+    indexOfFirstEmployee,
+    indexOfLastEmployee
+  );
+
   return (
     <div className="container4">
       <div className="container-fluid"></div>
-      <h2 style={{ fontSize: "45px" }}>Funcionários</h2>
+      <h2 style={{ fontSize: "45px" , textAlign: "center"}}> Funcionários </h2>
       <div className="space">
         <div className="d-flex justify-content-between align-items-center"></div>
-        <div className="mb-2">
+        <div className=" mb-2">
           <Button
             className="btn btn-primary"
             style={{ border: "1px solid " }}
@@ -104,34 +105,32 @@ const EmployeeList = () => {
           </Button>
         </div>
       </div>
-      <div style={{ height: 600, width: "100%" }}>
-        <DataGrid
-          rows={employees.map((employee) => ({
-            ...employee,
-            actions: (
-              <Trash
-                onClick={() => removeEmployee(employee.id)}
-                style={{ cursor: "pointer" }}
-              />
-            ),
-          }))}
-          columns={[
-            { field: "mec", headerName: "MEC", width: 150 }, // Coluna MEC adicionada
-            { field: "name", headerName: "Nome", width: 200 },
-            {
-              field: "actions",
-              headerName: "Ações",
-              width: 100,
-              renderCell: (params) => params.value,
-            },
-          ]}
-          pageSize={false}
-          rowsPerPageOptions={false}
-          autoHeight={false}
-          disableSelectionOnClick={false}
-          pagination={false}
-        />
-      </div>
+      <DataGrid
+        rows={currentEmployees.map((employee) => ({
+          ...employee,
+          actions: (
+            <Trash
+              onClick={() => removeEmployee(employee.id)}
+              style={{ cursor: "pointer" }}
+            />
+          ),
+        }))}
+        columns={[
+          { field: "name", headerName: "Nome", width: 200 },
+          { field: "phoneNumber", headerName: "Telefone", width: 150 },
+          { field: "address", headerName: "Site", width: 300 },
+          {
+            field: "actions",
+            headerName: "Ações",
+            width: 100,
+            renderCell: (params) => params.value,
+          },
+        ]}
+        pageSize={employeesPerPage}
+        pagination
+        onPageChange={(params) => handlePageChange(params.page)}
+        rowCount={employees.length}
+      />
       <Modal
         show={showModal}
         onHide={handleModalClose}

@@ -338,9 +338,9 @@ const UserList = () => {
             </div>
           </div>
           <div className="">
-            <button className="btn btn-primary mb-3" onClick={openModal}>
+          {/* <button className="btn btn-primary mb-3" onClick={openModal}>
               <FontAwesomeIcon icon={faPlus} /> Adicionar Usuário
-            </button>
+            </button>*/}
           </div>
         </div>
         <div>

@@ -1,15 +1,14 @@
-
 import React, { useEffect, useRef, useState } from "react";
 import "bootstrap/dist/css/bootstrap.css";
 import axios from "axios";
 import CircularProgress from "@mui/material/CircularProgress";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import "./Map.css"
+import "./Map.css";
 import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
-import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 import customMarkerIcon from "../assets/logo.png";
 import { Link, useNavigate } from "react-router-dom";
 const MapComponent = () => {
@@ -39,14 +38,23 @@ const MapComponent = () => {
 
   async function fetchUsers() {
     try {
-      const userCoord = localStorage.getItem("userId");
       setIsLoading(true);
       const response = await axios.get(
-        `${process.env.REACT_APP_API_URL}user/findBelongsToMe/${userCoord}?size=50`
+        'https://provision-07c1.onrender.com/api/v1/admin/metrics?size=10&page=1'
       );
-      console.log(response.data.data)
-      if (response.data && Array.isArray(response.data.data.data)) {
-        setUsers(response.data.data.data);
+      if (response.data?.data?.sites) {
+        // Extract unique supervisors from sites
+        const supervisors = response.data.data.sites
+          .filter(site => site.supervisor) // Remove null supervisors
+          .map(site => ({
+            name: site.supervisor.name,
+            employeeId: site.supervisor.employeeId
+          }))
+          .filter((supervisor, index, self) => 
+            // Remove duplicates based on employeeId
+            index === self.findIndex(s => s.employeeId === supervisor.employeeId)
+          );
+        setUsers(supervisors);
       }
       setIsLoading(false);
     } catch (error) {
@@ -54,12 +62,17 @@ const MapComponent = () => {
       setIsLoading(false);
     }
   }
-
+  
+  
   async function fetchGeo(id) {
     try {
       const response = await axios.get(
-        `${process.env.REACT_APP_API_URL}geoLocation/findUserGeo/${id}?day=${startDate.getDate()}&month=${startDate.getMonth() + 1}&year=${startDate.getFullYear()}`
-      )
+        `${
+          process.env.REACT_APP_API_URL
+        }geoLocation/findUserGeo/${id}?day=${startDate.getDate()}&month=${
+          startDate.getMonth() + 1
+        }&year=${startDate.getFullYear()}`
+      );
 
       if (response.data.data.length === 0) {
         toast.error(
@@ -87,10 +100,10 @@ const MapComponent = () => {
         })
         .flat() // Flatten the array of arrays
         .filter(Boolean); // Filter out any null values
-      // toast.info(
-      //   "Existem registros disponíveis para o utilizador selecionado."
-      // );
-      alert('Sucesso')
+      toast.info(
+        "Existem registros disponíveis para o utilizador selecionado."
+      );
+
       setStateButton(false);
       setMarkers(newMarkers);
     } catch (error) {
@@ -129,14 +142,16 @@ const MapComponent = () => {
       return;
     }
     if (!selectedUser || !map || !markers.length) {
-      toast.error("Não há rota disponível para este usuário.");
+      toast.error(
+        "Nenhuma rota está disponível para este supervisor na data selecionada."
+      );
       return;
     }
     const userMarkers = markers.filter(
       (marker) => marker.employeeId === selectedUser.employeeId
     );
     if (userMarkers.length === 0) {
-      toast.error("Não há rota disponível para este usuário.");
+      toast.error("Não há rota disponível para este supervisor.");
       return;
     }
     const waypoints = userMarkers.map((marker) => ({
@@ -187,14 +202,13 @@ const MapComponent = () => {
 
   function handleUpdateRoute() {
     if (!selectedUser) {
-      toast.error("Selecione um usuário.");
+      toast.error("Selecione um supervisor.");
       setStateButton(true);
       return;
     }
     // clearMarkers()
     clearRoute();
     fetchGeo(selectedUser.employeeId);
-
   }
   async function clearMarkers() {
     // Remove todos os marcadores do mapa
@@ -212,27 +226,28 @@ const MapComponent = () => {
         setUsersMap(response.data.data);
       }
     } catch (error) {
-      console.error("Erro ao buscar últimas localizações:", error.message);
+      console.error("Erro ao buscar as últimas localizações:", error.message);
     }
   }
 
-
   const openModalOnlineUsers = async () => {
-    navigate("/mapOnline")
-  }
-  const [searchTerm, setSearchTerm] = useState('');
-  const filteredUsers = users.filter(user =>
+    navigate("/mapOnline");
+  };
+  const [searchTerm, setSearchTerm] = useState("");
+  const filteredUsers = users.filter((user) =>
     user.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
-
     <div className="container4">
       <h1 style={{ textAlign: "center" }}>
         ROTA DOS SUPERVISORES <span className="badge badge-secondary"></span>
       </h1>
-      <div className="container-fluid"><Link to="/Home" className="p-1">Início </Link> / <span>Rotas</span>
-
+      <div className="container-fluid">
+        <Link to="/Home" className="p-1">
+          Início{" "}
+        </Link>{" "}
+        / <span>Rotas</span>
         <div className="container-fluid">
           <div className="row">
             <div className="col-md-4">
@@ -332,7 +347,9 @@ const MapComponent = () => {
           </div>
 
           <ToastContainer />
-        </div>  </div>  </div>
+        </div>{" "}
+      </div>{" "}
+    </div>
   );
 };
 

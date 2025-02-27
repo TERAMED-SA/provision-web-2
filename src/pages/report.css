@@ -1,0 +1,99 @@
+/* Estilos gerais */
+.stats-page-container {
+    padding: 2rem;
+    font-family: Arial, sans-serif;
+    background-color: #ffffff;
+    min-height: 100vh;
+  }
+  
+  .stats-error-message {
+    color: #ffffff;
+    text-align: center;
+    font-weight: bold;
+    font-size: 1.2rem;
+  }
+  
+  .stats-title {
+    color: #ffffff;
+    text-align: center;
+    margin-bottom: 2rem;
+    font-size: 2.5rem;
+    font-weight: bold;
+  }
+  
+  /* Estilos dos cards */
+  .stats-card {
+    background: linear-gradient(135deg, #ffffff, #f1f3f6);
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(194, 29, 29, 0.1);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .stats-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+  }
+  
+  /* Cores específicas para cada card */
+  .stats-metrics-card {
+    background: linear-gradient(135deg, #946b44, #2575fc);
+    color: white;
+  }
+  
+  .stats-site-card {
+    background: linear-gradient(135deg, #01addd, #0072ff);
+    color: white;
+  }
+  
+  .stats-supervisor-card {
+    background: linear-gradient(135deg, #7270fc, #1604dc);
+    color: white;
+  }
+  
+  .stats-equipment-card {
+    background: linear-gradient(135deg, #2ebf91, #8360c3);
+    color: white;
+  }
+  
+  /* Estilos para listas */
+  .stats-card ul {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  .stats-card ul li {
+    background-color: rgba(255, 255, 255, 0.1);
+    margin: 0.5rem 0;
+    padding: 0.75rem;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: white;
+  }
+  
+  /* Títulos dentro dos cards */
+  .stats-card h2 {
+    margin-bottom: 1.5rem;
+    font-size: 1.75rem;
+    font-weight: bold;
+  }
+  
+  /* Responsividade */
+  @media (max-width: 768px) {
+    .stats-page-container {
+      padding: 1rem;
+    }
+  
+    .stats-card {
+      padding: 1rem;
+    }
+  
+    .stats-title {
+      font-size: 2rem;
+    }
+  
+    .stats-card h2 {
+      font-size: 1.5rem;
+    }
+  }

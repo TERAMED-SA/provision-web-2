@@ -1,112 +1,168 @@
-import { Link } from "react-router-dom";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-
-import CircularProgress from "@mui/material/CircularProgress";
-import { DataGrid } from "@mui/x-data-grid";
+import { CircularProgress } from "@mui/material";
 import { format } from "date-fns";
+import "./report.css"; // Importando o arquivo CSS
 
-const Report = () => {
-    const [reports, setReports] = useState([]);
-    const [isLoading, setIsLoading] = useState(false);
-    const [searchTerm, setSearchTerm] = useState(""); // Termo de pesquisa
-    const [searchResults, setSearchResults] = useState([]); // Resultados da pesquisa
-    const [searchQuery, setSearchQuery] = useState("");
+const StatsPage = () => {
+  const [isLoading, setIsLoading] = useState(true);
+  const [metrics, setMetrics] = useState(null);
+  const [equipments, setEquipments] = useState([]);
+  const [supervisions, setSupervisions] = useState([]);
+  const [employees, setEmployees] = useState([]);
+  const [error, setError] = useState(null);
 
-    useEffect(() => {
-        fetchReports();
-    }, []);
-
-    async function fetchReports() {
-        try {
-            setIsLoading(true);
-            const response = await axios.get(
-                "https://provision-07c1.onrender.com/api/v1/reports"
-            );
-            const formattedReports = response.data.data.map((report) => ({
-                ...report,
-                date: format(new Date(report.date), "dd/MM/yyyy"),
-            }));
-            setReports(formattedReports);
-            setIsLoading(false);
-        } catch (error) {
-            console.error("Error fetching reports:", error.message);
-            setIsLoading(false);
-        }
+  // Fetch metrics data
+  const fetchMetrics = async () => {
+    try {
+      const response = await axios.get(
+        `https://provision-07c1.onrender.com/api/v1/admin/metrics?size=1000&page=1`
+      );
+      console.log("Metrics Response:", response.data);
+      setMetrics(response.data || null);
+    } catch (err) {
+      console.error("Error fetching metrics:", err);
+      setError("Erro ao carregar métricas.");
     }
+  };
 
+  // Fetch equipment data
+  const fetchEquipments = async () => {
+    try {
+      const response = await axios.get(
+        `https://provision-07c1.onrender.com/api/v1/admin/equipments?size=10&page=4`
+      );
+      console.log("Equipments Response:", response.data);
+      setEquipments(
+        Array.isArray(response.data?.data) ? response.data.data : []
+      );
+    } catch (err) {
+      console.error("Error fetching equipments:", err);
+      setError("Erro ao carregar equipamentos.");
+    }
+  };
 
-    return (
-        <div className="container4 mr-2" style={{ height: "89vh" }}>
-        <h1 style={{ textAlign: "center" }}>
-         RELATÓRIOS <span className="badge badge-secondary"></span>
-        </h1>
-            <div className="container-fluid"><Link to="/Home" className="p-1">Início </Link> / <span>Relatórios</span>
-            <br></br> <br></br> 
-            <div className="space">
-          <div style={{ position: "relative", display: "inline-block" }}>
-            <input
-              type="text"
-              className="form-control"
-              placeholder="Pesquisar..."
-              value={searchTerm}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              style={{ paddingLeft: "3rem" }} // espaço para o ícone
-            />
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="30"
-              height="20"
-              fill="currentColor"
-              className="bi bi-search"
-              viewBox="0 0 16 16"
-              style={{
-                position: "absolute",
-                left: "10px",
-                top: "25px",
-                transform: "translateY(-50%)",
-                pointerEvents: "none",
-                color: "#0d214f ", // Azul suave
-              }}
-            >
-              <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001l3.85 3.85a1 1 0 0 0 1.415-1.415l-3.85-3.85zm-5.598 0A5.5 5.5 0 1 1 10.5 5.5a5.5 5.5 0 0 1-4.356 4.844z" />
-            </svg>
+  // Fetch supervision data
+  const fetchSupervisions = async () => {
+    try {
+      const response = await axios.get(
+        `https://api.provision.support/admin/supervision?size=10&page=4`
+      );
+      console.log("Supervisions Response:", response.data);
+      setSupervisions(
+        Array.isArray(response.data?.data) ? response.data.data : []
+      );
+    } catch (err) {
+      console.error("Error fetching supervisions:", err);
+      setError("Erro ao carregar supervisões.");
+    }
+  };
+
+  // Fetch employee data
+  const fetchEmployees = async () => {
+    try {
+      const response = await axios.get(
+        `https://api.provision.support/admin/employees?size=10&page=4`
+      );
+      console.log("Employees Response:", response.data);
+      setEmployees(
+        Array.isArray(response.data?.data) ? response.data.data : []
+      );
+    } catch (err) {
+      console.error("Error fetching employees:", err);
+      setError("Erro ao carregar funcionários.");
+    }
+  };
+
+  useEffect(() => {
+    const loadAllData = async () => {
+      try {
+        await Promise.all([
+          fetchMetrics(),
+          fetchEquipments(),
+          fetchSupervisions(),
+          fetchEmployees(),
+        ]);
+      } catch (err) {
+        console.error("Error loading data:", err);
+        setError("Ocorreu um erro ao carregar os dados.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    loadAllData();
+  }, []);
+
+  const getTopSiteBySupervisions = () => {
+    if (!metrics?.data?.sites || metrics.data.sites.length === 0) return null;
+    const topSite = metrics.data.sites.reduce((prev, curr) =>
+      curr.totalSupervisions > prev.totalSupervisions ? curr : prev
+    );
+    return topSite.totalSupervisions > 0
+      ? { name: topSite.siteName, count: topSite.totalSupervisions }
+      : null;
+  };
+
+  const getTopSupervisorBySupervisions = () => {
+    if (!metrics?.data?.sites || metrics.data.sites.length === 0) return null;
+    const supervisorCounts = metrics.data.sites.reduce((acc, site) => {
+      if (site.supervisor?.name) {
+        acc[site.supervisor.name] =
+          (acc[site.supervisor.name] || 0) + site.totalSupervisions;
+      }
+      return acc;
+    }, {});
+    const topSupervisor = Object.keys(supervisorCounts).reduce((a, b) =>
+      supervisorCounts[a] > supervisorCounts[b] ? a : b
+    );
+    return supervisorCounts[topSupervisor]
+      ? { name: topSupervisor, count: supervisorCounts[topSupervisor] }
+      : null;
+  };
+
+  return (
+    <div className="stats-page-container">
+      {isLoading ? (
+        <CircularProgress />
+      ) : error ? (
+        <div className="stats-error-message">{error}</div>
+      ) : (
+        <div>
+          <h1 className="stats-title">Estatísticas</h1>
+          <div className="stats-card stats-metrics-card">
+            <h6>Geral</h6>
+            <ul>
+              <li>Total de Supervisões: {metrics?.data?.supervisions || 0}</li>
+              <li>Total de Equipamentos: {metrics?.data?.equipments || 0}</li>
+              <li>Total de Funcionários: {metrics?.data?.employees || 0}</li>
+            </ul>
+          </div>
+          <div className="stats-card stats-site-card">
+            <h2>Site com Mais Supervisões</h2>
+            {getTopSiteBySupervisions() ? (
+              <p>
+                Nome: {getTopSiteBySupervisions().name}, Total:{" "}
+                {getTopSiteBySupervisions().count}
+              </p>
+            ) : (
+              <p>Nenhum site disponível.</p>
+            )}
+          </div>
+          <div className="stats-card stats-supervisor-card">
+            <h2>Supervisor com Mais Supervisões</h2>
+            {getTopSupervisorBySupervisions() ? (
+              <p>
+                Nome: {getTopSupervisorBySupervisions().name}, Total:{" "}
+                {getTopSupervisorBySupervisions().count}
+              </p>
+            ) : (
+              <p>Nenhum supervisor disponível.</p>
+            )}
           </div>
         </div>
-                {isLoading ? (
-                    <div className="text-center mt-4">
-                        <CircularProgress size={80} thickness={5} />
-                    </div>
-                ) : reports.length === 0 ? (
-                    <div className="text-center text-black mt-4">
-                        Funcionalidade ainda não implementada
-                    </div>
-                ) : (
-                    <div style={{ overflow: "auto", maxHeight: "70vh" }}>
-                        <DataGrid
-                            rows={reports.map((report, index) => ({
-                                id: index,
-                                date: report.date,
-                                title: report.title,
-                                description: report.description,
-                                status: report.status ? "Aprovado" : "Pendente",
-                                creator: report.creator,
-                            }))}
-                            columns={[
-                                { field: "date", headerName: "Data", width: 150 },
-                                { field: "title", headerName: "Título", width: 300 },
-                                { field: "description", headerName: "Descrição", width: 500 },
-                                { field: "status", headerName: "Status", width: 150 },
-                                { field: "creator", headerName: "Criador", width: 200 },
-                            ]}
-                            pageSize={5}
-                            autoHeight
-                        />
-                    </div>
-                )}
-            </div>
-        </div>
-    );
+      )}
+    </div>
+  );
 };
 
-export default Report;
+export default StatsPage;

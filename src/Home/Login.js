@@ -9,6 +9,12 @@ function Login({ setIsAuthenticated }) {
   const [number, setNumber] = useState("");
   const [password, setPassword] = useState("");
   const [loginError, setLoginError] = useState("");
+  const [showModal, setShowModal] = useState(false); // Estado para controlar a exibição da modal
+  const [resetPhone, setResetPhone] = useState(""); // Estado para o telefone na modal
+  const [newPassword, setNewPassword] = useState(""); // Estado para a nova senha na modal
+  const [resetError, setResetError] = useState(""); // Estado para erros no reset de senha
+  const [resetSuccess, setResetSuccess] = useState(""); // Estado para sucesso no reset de senha
+
   const navigate = useNavigate();
 
   const handleLogin = async () => {
@@ -31,9 +37,6 @@ function Login({ setIsAuthenticated }) {
         localStorage.setItem("userId", response.data.data.data.employeeId);
         localStorage.setItem("userName", response.data.data.data.name);
         localStorage.setItem("userPhone", response.data.data.data.phoneNumber);
-        // localStorage.setItem("token", response.data.data.token);
-
-        //setIsAuthenticated(true);
 
         navigate("/home");
       } else {
@@ -44,23 +47,52 @@ function Login({ setIsAuthenticated }) {
       }
     } catch (error) {
       console.error("Erro no login:", error.message);
-      console.log(number, password);
       setLoginError("Credenciais inválidas. Por favor, tente novamente.");
     }
   };
 
+  const handlePasswordReset = async () => {
+    try {
+      if (!resetPhone || !newPassword) {
+        setResetError("Por favor, preencha todos os campos.");
+        return;
+      }
+
+      const response = await axios.post(
+        `${process.env.REACT_APP_API_URL}userAuth/resetPassword`,
+        {
+          phoneNumber: resetPhone,
+          newPassword,
+        }
+      );
+
+      if (response.data.status === 200) {
+        setResetSuccess("Senha redefinida com sucesso!");
+        setResetError("");
+        setResetPhone("");
+        setNewPassword("");
+        setTimeout(() => setShowModal(false), 3000); // Fecha a modal após 3 segundos
+      } else {
+        setResetError("Erro ao redefinir a senha. Por favor, tente novamente.");
+        setResetSuccess("");
+      }
+    } catch (error) {
+      console.error("Erro ao redefinir senha:", error.message);
+      setResetError("Erro ao redefinir a senha. Por favor, tente novamente.");
+      setResetSuccess("");
+    }
+  };
+
   const backgroundStyle = {
-    backgroundImage: `url(${backgroundImage})`, // Use a variável backgroundImage como a URL da imagem de fundo
+    backgroundImage: `url(${backgroundImage})`,
     backgroundSize: "cover",
     backgroundPosition: "center",
   };
 
   return (
     <div className="container2" style={backgroundStyle}>
-      {" "}
-      {/* Aplica o estilo inline com a imagem de fundo */}
       <div
-        className="container col-mb-3  "
+        className="container col-mb-3"
         style={{ border: "none", background: "#ffffffed", maxWidth: "600px" }}
       >
         <div className="d-flex flex-column justify-content-center align-items-center col-lg-12 col-md-12 col-sm-12 col-xs-12 mb-4">
@@ -81,7 +113,7 @@ function Login({ setIsAuthenticated }) {
                 type="tel"
                 name="number"
                 id="number"
-                placeholder="Ex: +1234567890"
+                placeholder="Ex: +244934567890"
                 value={number}
                 onChange={(e) => setNumber(e.target.value)}
               />
@@ -101,6 +133,7 @@ function Login({ setIsAuthenticated }) {
                 onChange={(e) => setPassword(e.target.value)}
               />
             </div>
+
             <div className="col-md-12 d-flex flex-column align-items-center justify-content-center">
               <button
                 className="btn btn-primary mb-3"
@@ -110,10 +143,63 @@ function Login({ setIsAuthenticated }) {
                 Entrar
               </button>
               {loginError && <div className="text-danger">{loginError}</div>}
+              {/*    <button
+                className="btn btn-link text-primary"
+                onClick={() => setShowModal(true)}
+                type="button"
+              >
+                Esqueci a senha
+              </button>Modal */}
             </div>
           </form>
         </div>
       </div>
+
+      {/* Modal */}
+      {showModal && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <h3 className="text-center">Redefinir Senha</h3>
+            <div className="form-group">
+              <label htmlFor="resetPhone">Número de Telefone</label>
+              <input
+                className="form-control"
+                type="tel"
+                id="resetPhone"
+                placeholder="Ex: +244934567890"
+                value={resetPhone}
+                onChange={(e) => setResetPhone(e.target.value)}
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="newPassword">Nova Palavra-passe</label>
+              <input
+                className="form-control"
+                type="password"
+                id="newPassword"
+                placeholder="******"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+              />
+            </div>
+            <div className="d-flex justify-content-between mt-4">
+              <button
+                className="btn btn-secondary"
+                onClick={() => setShowModal(false)}
+              >
+                Cancelar
+              </button>
+              <button className="btn btn-primary" onClick={handlePasswordReset}>
+                Redefinir
+              </button>
+            </div>
+            {resetError && <div className="text-danger mt-3">{resetError}</div>}
+            {resetSuccess && (
+              <div className="text-success mt-3">{resetSuccess}</div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

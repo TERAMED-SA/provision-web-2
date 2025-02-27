@@ -244,7 +244,7 @@ const Team = () => {
 
   return (
     <div className="container4">
-      <h1 style={{ textAlign: "center" }}>FUNCIONÁRIOS</h1>
+      <h1 style={{ textAlign: "center" }}>SUPERVISORES</h1>
       <div className="container-fluid">
         <Link to="/Home" className="p-1">
           Início{" "}

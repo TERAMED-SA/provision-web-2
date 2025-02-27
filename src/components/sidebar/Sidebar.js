@@ -1,17 +1,14 @@
-/* eslint-disable jsx-a11y/anchor-is-valid */
 import { Link, useNavigate } from "react-router-dom";
 import { FaHome } from "react-icons/fa";
-import { TiGroup } from "react-icons/ti";
-import { IoEyeSharp } from "react-icons/io5";
-import { IoLocation } from "react-icons/io5";
+import { AiOutlineTeam } from "react-icons/ai";
+import { TfiMapAlt } from "react-icons/tfi";
+import { FcBullish } from "react-icons/fc";
 import { IoMdLogOut } from "react-icons/io";
-import { IoMdChatboxes } from "react-icons/io";
-import { FaUser } from "react-icons/fa";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
-import { IoIosTime } from "react-icons/io";
-import { IoMdPersonAdd } from "react-icons/io";
 import "react-toastify/dist/ReactToastify.css";
+import { AiOutlineHistory } from "react-icons/ai";
+import { IoPersonCircleOutline } from "react-icons/io5";
 import "./Sidebar.css";
 import logo from "../../assets/logo.png";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -19,12 +16,8 @@ import { MdAccountCircle } from "react-icons/md";
 
 const Sidebar = ({ sidebarOpen, closeSidebar }) => {
   const [active, setActive] = useState(null);
-  const [notificationNumber, setNotificationNumber] = useState(0);
   const [occurrenceNumber, setOccurrenceNumber] = useState(0);
-  const [equipmentCount, setEquipmentCount] = useState(0);
-  const [userCount, setUserCount] = useState(0);
-  const [companyCount, setCompanyCount] = useState(0);
-
+  const [supervisionNumber, setSupervisionNumber] = useState(0);
   const navigate = useNavigate();
 
   // Recuperar o nome do usuário do localStorage
@@ -43,36 +36,56 @@ const Sidebar = ({ sidebarOpen, closeSidebar }) => {
     navigate("/login");
   };
 
-  const fetchNotificationData = async () => {
-    try {
-      const response = await axios.get(
-        `${process.env.REACT_APP_API_URL}notification/11835?size=500`
-      );
-      return response.data.data.length;
-    } catch (error) {
-      console.error("Error fetching notification data:", error.message);
-      return 0;
-    }
+  // Função para obter a data atual no formato YYYY-MM-DD
+  const getCurrentDate = () => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, "0");
+    const day = String(today.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
   };
 
+  // Fetching occurrences filtered by today's date
   const fetchOccurrenceData = async () => {
     try {
       const response = await axios.get(
         "https://provision-07c1.onrender.com/api/v1/occurrence?size=500"
       );
-      return response.data.data.length;
+      const currentDate = getCurrentDate();
+      const filteredOccurrences = response.data.data.filter(
+        (item) => item.date.split("T")[0] === currentDate
+      );
+      return filteredOccurrences.length;
     } catch (error) {
       console.error("Error fetching occurrence data:", error.message);
       return 0;
     }
   };
+  
+
+  // Fetching supervisions filtered by today's date
+  const fetchSupervisionData = async () => {
+    try {
+      const response = await axios.get(
+        "https://provision-07c1.onrender.com/api/v1/supervision?size=500"
+      );
+      const currentDate = getCurrentDate();
+      const filteredSupervisions = response.data.data.filter(
+        (item) => item.date.split("T")[0] === currentDate
+      );
+      return filteredSupervisions.length;
+    } catch (error) {
+      console.error("Error fetching supervision data:", error.message);
+      return 0;
+    }
+  };
 
   const updateNotificationAndOccurrence = async () => {
-    const notificationCount = await fetchNotificationData();
-    setNotificationNumber(notificationCount);
-
     const occurrenceCount = await fetchOccurrenceData();
     setOccurrenceNumber(occurrenceCount);
+
+    const supervisionCount = await fetchSupervisionData();
+    setSupervisionNumber(supervisionCount);
   };
 
   useEffect(() => {
@@ -80,36 +93,7 @@ const Sidebar = ({ sidebarOpen, closeSidebar }) => {
     const interval = setInterval(() => {
       updateNotificationAndOccurrence(); // Atualiza as notificações e ocorrências
     }, 10000); // Atualiza a cada 10 segundos
-
     return () => clearInterval(interval); // Limpa o intervalo quando o componente é desmontado
-  }, []);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        // Fetching equipment count
-        const equipmentResponse = await axios.get(
-          "https://provision-07c1.onrender.com/api/v1/occurrence?size=500"
-        );
-        setEquipmentCount(equipmentResponse.data.data.data.length);
-
-        // Fetching user count
-        const userResponse = await axios.get(
-          "https://provision-07c1.onrender.com/api/v1/supervision?size=500"
-        );
-        setUserCount(userResponse.data.data.data.length);
-
-        // Fetching company count
-        const companyResponse = await axios.get(
-          "https://provision-07c1.onrender.com/api/v1/company?size=100"
-        );
-        setCompanyCount(companyResponse.data.size);
-      } catch (error) {
-        console.error("Error fetching data:", error.message);
-      }
-    };
-
-    fetchData();
   }, []);
 
   return (
@@ -124,12 +108,10 @@ const Sidebar = ({ sidebarOpen, closeSidebar }) => {
     >
       <div>
         <a href="#" className="p-3 text-decoration-none">
-          <i className="bi bi-code-splash fs-4 me-4 mb-3"></i>
           <img src={logo} alt="Provision" width={125} />
         </a>
       </div>
       <ul className="nav nav-pills flex-column mt-3">
-        {" "}
         <span
           style={{
             fontWeight: "bold",
@@ -152,39 +134,29 @@ const Sidebar = ({ sidebarOpen, closeSidebar }) => {
             <i className="me-3 fs-5">
               <FaHome />
             </i>
-            <span className="fs-6">Dashboard</span>
-          </Link>
-        </li>
-        <li
-          className={active === 2 ? "active nav-item p-2" : "nav-item p-2"}
-          onClick={(e) => setActive(2)}
-        >
-          <Link to="/users" className="p-1">
-            <i className="me-3 fs-5">
-              <FaUser />
-            </i>
-            <span className="fs-6">Supervisores</span>
+            <span className="fs-6">Início</span>
           </Link>
         </li>
         <li
           className={active === 3 ? "active nav-item p-2" : "nav-item p-2"}
           onClick={(e) => setActive(3)}
         >
-          <Link to="/team" className="p-1">
+          <Link to="/users" className="p-1">
             <i className="me-3 fs-5">
-              <IoMdPersonAdd />
+              {" "}
+              <IoPersonCircleOutline />
             </i>
 
-            <span className="fs-6">Funcionários</span>
+            <span className="fs-6">Supervisores</span>
           </Link>
         </li>
         <li
           className={active === 4 ? "active nav-item p-2" : "nav-item p-2"}
           onClick={(e) => setActive(4)}
         >
-          <Link to="/Companies" className="p-8">
+          <Link to="/Companies" className="p-1">
             <i className="me-3 fs-5">
-              <TiGroup />
+              <AiOutlineTeam />
             </i>
             <span className="fs-8">Clientes</span>
           </Link>
@@ -195,12 +167,12 @@ const Sidebar = ({ sidebarOpen, closeSidebar }) => {
         >
           <Link to="/Map" className="p-1">
             <i className="me-3 fs-5">
-              <IoLocation />
+              <TfiMapAlt />
             </i>
             <span className="fs-6">Mapa</span>
           </Link>
         </li>
-        <li
+      {/*  <li
           className={active === 8 ? "active nav-item p-2" : "nav-item p-2"}
           onClick={(e) => setActive(8)}
         >
@@ -219,18 +191,18 @@ const Sidebar = ({ sidebarOpen, closeSidebar }) => {
                   marginLeft: "3px",
                 }}
               >
-                {equipmentCount}
+                {occurrenceNumber}
               </span>
             </span>
           </Link>
-        </li>
+        </li> */}
         <li
           className={active === 9 ? "active nav-item p-2" : "nav-item p-2"}
           onClick={(e) => setActive(9)}
         >
           <Link to="/newSupervision" className="p-1">
             <i className="me-3 fs-5">
-              <IoIosTime />
+              <AiOutlineHistory />
             </i>
             <span className="fs-7">
               Supervisão{" "}
@@ -243,20 +215,20 @@ const Sidebar = ({ sidebarOpen, closeSidebar }) => {
                   marginLeft: "3px",
                 }}
               >
-                {userCount}
+                {supervisionNumber}
               </span>
             </span>
           </Link>
         </li>
         <li
-          className={active === 10 ? "active nav-item p-2" : "nav-item p-2"}
-          onClick={(e) => setActive(10)}
+          className={active === 7 ? "active nav-item p-2" : "nav-item p-2"}
+          onClick={(e) => setActive(7)}
         >
-          <Link to="/Chat" className="p-1">
+          <Link to="/Report" className="p-1">
             <i className="me-3 fs-5">
-              <IoMdChatboxes />
+            <FcBullish />
             </i>
-            <span className="fs-7">Chat</span>
+            <span className="fs-6">Estatística</span>
           </Link>
         </li>
         <li className="nav-item p-2">

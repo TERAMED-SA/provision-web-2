@@ -1,136 +1,301 @@
+import { Link } from "react-router-dom";
 import React, { useState, useEffect } from "react";
-import { Button, Modal, Form, Pagination } from "react-bootstrap";
-import { DataGrid } from "@mui/x-data-grid";
 import axios from "axios";
+import CircularProgress from "@mui/material/CircularProgress";
+import { DataGrid } from "@mui/x-data-grid";
+import Modal from "react-bootstrap/Modal";
+import Button from "react-bootstrap/Button";
+import { format } from "date-fns";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
-import "./InventoryList.css";
-
-const InventoryList = () => {
-  const [occurrences, setOccurrences] = useState([]);
-  const [showModal, setShowModal] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
+const NotificationList = () => {
+  const [notifications, setNotifications] = useState([]);
+  const [selectedNotification, setSelectedNotification] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [modalShow, setModalShow] = useState(false);
+  const [searchInput, setSearchInput] = useState(""); // Inicializando com "Supervisão"
+  const [inputVisible, setInputVisible] = useState(false); // Inicializando como falso
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedClientCode, setSelectedClientCode] = useState("");
 
   useEffect(() => {
-    async function fetchOccurrences() {
-      try {
-        const response = await axios.get(
-          "https://provision-07c1.onrender.com/api/v1/occurrence/"
-        );
-        setOccurrences(response.data.data.data);
-      } catch (error) {
-        console.error("Erro ao buscar ocorrências:", error.message);
-      }
+    // Buscar o código do cliente no localStorage
+    const clientCode = localStorage.getItem("selectedCompany");
+
+    if (clientCode) {
+      setSelectedClientCode(clientCode);
     }
-    fetchOccurrences();
+    fetchNotifications();
   }, []);
 
-  const handleModalClose = () => setShowModal(false);
-  const handleModalShow = () => setShowModal(true);
+  async function fetchNotifications() {
+    try {
+      setIsLoading(true);
+      const user = localStorage.getItem("userId");
+      const response = await axios.get(
+        `${process.env.REACT_APP_API_URL}notification/${user}?size=500`
+      );
+      const formattedNotifications = response.data.data.map((notification) => ({
+        ...notification,
+        createdAt: format(new Date(notification.createdAt), "dd/MM/yyyy"),
+      }));
+      setNotifications(formattedNotifications);
+      setIsLoading(false);
+    } catch (error) {
+      console.error("Error fetching notifications:", error.message);
+      setIsLoading(false);
+    }
+  }
 
-  const requestItem = () => {
-    // Lógica para solicitar um item
-    // ...
+  const handleViewDetails = async (notification) => {
+    setSelectedNotification(notification);
+    const occorence = await getOcorrenceByIdNot(notification._id);
+    setSelectedNotification(occorence);
+
+    setModalShow(true);
   };
 
-  const itemsPerPage = 5;
+  async function getOcorrenceByIdNot(id) {
+    try {
+      const response = await axios.get(
+        `${process.env.REACT_APP_API_URL}occurrence/getOcorByNotification/${id}`
+      );
+      return response.data.data;
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  }
 
-  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+  const handleSearchInputChange = (event) => {
+    setSearchInput(event.target.value);
+  };
 
-  const columns = [
-    { field: "_id", headerName: "ID", width: 150 },
-    { field: "name", headerName: "Nome", width: 200 },
-    { field: "createdAt", headerName: "Data de Criação", width: 200 },
-    { field: "details", headerName: "Detalhes", width: 400 },
-  ];
+  // Filtro para mostrar apenas eventos de tipo "Ocorrência"
+  const filteredNotifications = notifications
+    .filter((notification) => notification.information === "Ocorrência") // Filtra para mostrar apenas eventos de tipo "Ocorrência"
+    .filter(
+      (notification) =>
+        notification.createdAt
+
+          .toLowerCase()
+          .includes(selectedClientCode.toLowerCase()) ||
+        notification.clientCode
+          .toLowerCase()
+          .includes(selectedClientCode.toLowerCase())
+    );
+
+  const approve = async (costCenter, idNot) => {
+    try {
+      const response = await axios.put(
+        `${process.env.REACT_APP_API_URL}supervision/validate/${costCenter}/${idNot}`
+      );
+      toast.success("Aprovado com sucesso");
+      setTimeout(() => {
+        window.location.reload();
+      }, 3000);
+    } catch (error) {
+      toast.error("Por favor tente novamente ou contacte um administrador");
+      console.log("Error:", error);
+    }
+  };
+
+  const generatePDF = async (id, name) => {
+    // Lógica para gerar PDF
+  };
+
+  const handleApproval = () => {
+    toast.warning(
+      "Ainda não foi realizado o tratamento adequado desta informação."
+    );
+  };
+
+  const handleRejection = () => {
+    // Lógica para reprovar a notificação
+    setModalShow(false);
+  };
 
   return (
-    <div className="container4">
+    <div className="container4 mr-2" style={{ height: "89vh" }}>
+      <h1 style={{ textAlign: "center" }}>
+        OCORRÊNCIAS <span className="badge badge-secondary"></span>
+      </h1>
       <div className="container-fluid">
-        <h2 style={{ fontSize: "45px" }}> Ocorrências </h2>
-      </div>
-      <div className="space">
-        <div className="col-12 d-flex justify-content-between align-items-center"></div>
-      </div>
-      <DataGrid
-        rows={occurrences}
-        columns={columns}
-        pageSize={itemsPerPage}
-        pagination
-        onPageChange={(params) => paginate(params.page)}
-        components={{
-          Pagination: CustomPagination,
-        }}
-        getRowId={(row) => row._id}
-      />
+        <Link to="/Home" className="p-1">
+          Início{" "}
+        </Link>{" "}
+        /{" "}
+        <Link to="/ManagementList" className="p-1">
+          Cliente{" "}
+        </Link>{" "}
+        /<span>Ocorrências</span>
+        <br />
+        <br />
+        <div className="container">
+          <div className="space">
+            <div className=""></div>
+            <div className="">
+              {inputVisible && ( // Renderiza o input apenas se inputVisible for true
+                <div className="input-group mb-3">
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Pesquisar"
+                    value={searchInput}
+                    onChange={handleSearchInputChange}
+                  />
+                </div>
+              )}
+            </div>
+          </div>
 
-      <Modal
-        show={showModal}
-        onHide={handleModalClose}
-        className="custom-modal"
-        style={{ backgroundColor: "transparent", border: "none" }}
-      >
-        <Modal.Header
-          closeButton
-          className="modal-header"
-          style={{
-            backgroundColor: "#1d09b2;",
-          }}
-        >
-          <Modal.Title className="modal-title">Solicitar Item</Modal.Title>
-        </Modal.Header>
-        <Modal.Body
-          className="modal-body"
-          style={{ backgroundColor: "transparent" }}
-        >
-          <Form>
-            <Form.Group controlId="formItemName">
-              <Form.Label style={{ color: "black" }}>Nome do Item</Form.Label>
-              <Form.Control type="text" placeholder="Digite o nome do item" />
-            </Form.Group>
-            <Form.Group controlId="formQuantity">
-              <Form.Label style={{ color: "black" }}>Quantidade</Form.Label>
-              <Form.Control
-                type="number"
-                placeholder="Digite a quantidade desejada"
+          {isLoading ? (
+            <div className="text-center mt-4">
+              <CircularProgress size={80} thickness={5} />
+            </div>
+          ) : filteredNotifications.length === 0 ? (
+            <div className="text-center text-black mt-4">
+              Nenhuma ocorrência encontrada
+            </div>
+          ) : (
+            <div style={{ overflow: "auto", maxHeight: "70vh" }}>
+              <DataGrid
+                rows={filteredNotifications
+                  .slice()
+                  .reverse()
+                  .map((notification, index) => ({
+                    id: index,
+                    _id: notification._id,
+                    data: notification.createdAt,
+                    evento: notification.information,
+                    supervisor: notification.supervisorName,
+                    costCenter: notification.costCenter,
+                    cliente: notification.clientCode,
+                    clienteName: notification.siteName,
+                    estado: notification.state ? "Validado" : "Pendente",
+                    link: notification.actionLocationId,
+                    siteName: notification.siteName,
+                  }))}
+                columns={[
+                  { field: "data", headerName: "Data", width: 150 },
+                  { field: "evento", headerName: "Evento", width: 150 },
+                  { field: "supervisor", headerName: "Supervisor", width: 300 },
+                  {
+                    field: "clienteName",
+                    headerName: "Centro de custo",
+                    width: 200,
+                  },
+                  { field: "estado", headerName: "Estado", width: 100 },
+                  {
+                    field: "link",
+                    headerName: "Ação",
+                    width: 250,
+                    renderCell: (params) => (
+                      <div className="d-flex justify-content-center">
+                        {params.row.evento !== "Ocorrência" && (
+                          <button
+                            className="btn btn-success btn-sm m-1"
+                            onClick={() =>
+                              approve(params.row.costCenter, params.row._id)
+                            }
+                          >
+                            Aprovar
+                          </button>
+                        )}
+                        {params.row.evento === "Supervisão" && (
+                          <button
+                            className="btn btn-warning btn-sm m-1"
+                            onClick={() =>
+                              generatePDF(params.row._id, params.row.supervisor)
+                            }
+                          >
+                            Gerar PDF
+                          </button>
+                        )}
+                        {params.row.evento === "Ocorrência" && (
+                          <button
+                            className="btn btn-primary btn-sm m-1"
+                            onClick={() => handleViewDetails(params.row)}
+                          >
+                            Mais Informações
+                          </button>
+                        )}
+                      </div>
+                    ),
+                  },
+                ]}
+                pageSize={10}
               />
-            </Form.Group>
-          </Form>
+            </div>
+          )}
 
-          <Button variant="primary" onClick={requestItem}>
-            Solicitar
-          </Button>
-          <Button variant="danger" onClick={handleModalClose}>
-            Fechar
-          </Button>
-        </Modal.Body>
-      </Modal>
+          <Modal show={modalShow} onHide={() => setModalShow(false)} size="lg">
+            <Modal.Header closeButton>
+              <Modal.Title>Detalhes da Ocorrência</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              <div>
+                <h5>Ocorrência:</h5>
+                <p>{selectedNotification?.name}</p>
+
+                <h5>Prioridade:</h5>
+                <p>
+                  {selectedNotification?.priority === 0
+                    ? "Máxima"
+                    : selectedNotification?.priority === 1
+                    ? "Mínima"
+                    : "Baixa"}
+                </p>
+                <h5>Detalhes:</h5>
+                <p>{selectedNotification?.details}</p>
+                {/* 
+<h5>Informações do Trabalhador:</h5>
+{selectedNotification?.workerInformation &&
+  selectedNotification.workerInformation.length > 0 ? (
+  
+  <ul>
+    {selectedNotification.workerInformation.map(
+      (worker, index) => (
+        <li key={index}>
+          {worker.nome} {worker.mec}
+        </li>
+      )
+    )}
+  </ul>
+) : (
+  <p>Nenhuma informação de trabalhador disponível.</p>
+)}
+*/}
+
+                <h5>Equipamentos:</h5>
+                {selectedNotification?.equipment &&
+                selectedNotification.equipment.length > 0 ? (
+                  <ul>
+                    {selectedNotification.equipment.map((equip, index) => (
+                      <li key={index}>
+                        {equip.name} {equip.serialNumber}
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p>Nenhum equipamento Mencionado.</p>
+                )}
+              </div>
+            </Modal.Body>
+            <Modal.Footer>
+              <Button variant="success" onClick={handleApproval}>
+                Aprovar
+              </Button>
+              <Button variant="danger" onClick={handleRejection}>
+                Fechar
+              </Button>
+            </Modal.Footer>
+          </Modal>
+        </div>
+        <ToastContainer />
+      </div>
     </div>
   );
 };
 
-const CustomPagination = (props) => {
-  return (
-    <Pagination className="justify-content-end">
-      <Pagination.Prev
-        onClick={() => props.onPageChange && props.onPageChange(props.page - 1)}
-      />
-      {Array.from({ length: Math.ceil(props.rowCount / props.pageSize) }).map(
-        (_, index) => (
-          <Pagination.Item
-            key={index + 1}
-            active={index + 1 === props.page}
-            onClick={() => props.onPageChange && props.onPageChange(index + 1)}
-            style={{ backgroundColor: "#602f81", color: "#ededed" }}
-          >
-            {index + 1}
-          </Pagination.Item>
-        )
-      )}
-      <Pagination.Next
-        onClick={() => props.onPageChange && props.onPageChange(props.page + 1)}
-      />
-    </Pagination>
-  );
-};
-
-export default InventoryList;
+export default NotificationList;
