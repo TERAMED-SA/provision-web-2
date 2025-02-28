@@ -30,13 +30,13 @@ const ManagementList = () => {
       icon: faBuildingUser,
       link: "/SiteList",
     },
-    {
-      id: 2,
-      title: "Agendamento",
-      content: "Agendar supervisão para um Supervisor.",
-      icon: faCalendar,
-      link: "/ScheduleList",
-    },
+    //{/*  {
+    //   id: 2,
+    //   title: "Agendamento",
+    //   content: "Agendar supervisão para um Supervisor.",
+    //   icon: faCalendar,
+    //   link: "/ScheduleList",
+    //  },*},
     {
       id: 3,
       title: "Ocorrência",

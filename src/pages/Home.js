@@ -165,9 +165,9 @@ const Home = () => {
 
   const columns = [
     { field: "createdAt", headerName: "Data", width: 150 },
-    { field: "name", headerName: "Nome", width: 300 },
+    { field: "name", headerName: "Nome", width: 350 },
     { field: "supervisorName", headerName: "Supervisor", width: 200 },
-    { field: "siteName", headerName: "Site", width: 200 },
+    { field: "siteName", headerName: "Site", width: 350 },
   ];
 
   return (

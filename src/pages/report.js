@@ -2,7 +2,17 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { CircularProgress } from "@mui/material";
 import { format } from "date-fns";
-import "./report.css"; // Importando o arquivo CSS
+import "./report.css";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from "recharts";
 
 const StatsPage = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -12,11 +22,11 @@ const StatsPage = () => {
   const [employees, setEmployees] = useState([]);
   const [error, setError] = useState(null);
 
-  // Fetch metrics data
+  // Busca os dados de métricas
   const fetchMetrics = async () => {
     try {
       const response = await axios.get(
-         `${process.env.REACT_APP_API_URL}admin/metrics?size=1000&page=1`
+        `${process.env.REACT_APP_API_URL}admin/metrics?size=1000&page=1`
       );
       console.log("Metrics Response:", response.data);
       setMetrics(response.data || null);
@@ -26,7 +36,7 @@ const StatsPage = () => {
     }
   };
 
-  // Fetch equipment data
+  // Busca os dados de equipamentos (não exibido na interface)
   const fetchEquipments = async () => {
     try {
       const response = await axios.get(
@@ -42,11 +52,11 @@ const StatsPage = () => {
     }
   };
 
-  // Fetch supervision data
+  // Busca os dados de supervisões
   const fetchSupervisions = async () => {
     try {
       const response = await axios.get(
-        `${process.env.REACT_APP_API_URL}admin/supervision`
+        `${process.env.REACT_APP_API_URL}admin/supervision?size=1000&page=1`
       );
       console.log("Supervisions Response:", response.data);
       setSupervisions(
@@ -58,7 +68,7 @@ const StatsPage = () => {
     }
   };
 
-  // Fetch employee data
+  // Busca os dados de funcionários
   const fetchEmployees = async () => {
     try {
       const response = await axios.get(
@@ -120,6 +130,14 @@ const StatsPage = () => {
       : null;
   };
 
+  // Dados para o gráfico de barras com as novas métricas
+  const chartData = [
+    { name: "Clientes", value: metrics?.data?.company || 0 },
+    { name: "Sites", value: metrics?.data?.totalSites || 0 },
+    { name: "Funcionários", value: metrics?.data?.users || 0 },
+    { name: "Ocorrências", value: metrics?.data?.occurrences || 0 },
+  ];
+
   return (
     <div className="stats-page-container">
       {isLoading ? (
@@ -129,14 +147,32 @@ const StatsPage = () => {
       ) : (
         <div>
           <h1 className="stats-title">Estatísticas</h1>
-          <div className="stats-card stats-metrics-card">
+
+         {/* <div className="stats-card stats-metrics-card">
             <h6>Geral</h6>
             <ul>
-              <li>Total de Supervisões: {metrics?.data?.supervisions || 0}</li>
-              <li>Total de Equipamentos: {metrics?.data?.equipments || 0}</li>
-              <li>Total de Funcionários: {metrics?.data?.employees || 0}</li>
+              <li>Total de Clientes: {metrics?.data?.company || 0}</li>
+              <li>Total de Sites: {metrics?.data?.totalSites || 0}</li>
+              <li>Total de Funcionários: {metrics?.data?.users || 0}</li>
+              <li>Total de Ocorrências: {metrics?.data?.occurrences || 0}</li>
             </ul>
           </div>
+
+           Gráfico com as métricas gerais */}
+          <div className="stats-card stats-chart-card">
+            <h2>Visão Geral (Gráfico)</h2>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={chartData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Bar dataKey="value" fill="#8884d8" />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+
           <div className="stats-card stats-site-card">
             <h2>Site com Mais Supervisões</h2>
             {getTopSiteBySupervisions() ? (
@@ -148,6 +184,7 @@ const StatsPage = () => {
               <p>Nenhum site disponível.</p>
             )}
           </div>
+
           <div className="stats-card stats-supervisor-card">
             <h2>Supervisor com Mais Supervisões</h2>
             {getTopSupervisorBySupervisions() ? (

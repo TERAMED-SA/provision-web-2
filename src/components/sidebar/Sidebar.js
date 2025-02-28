@@ -14,6 +14,7 @@ import "./Sidebar.css";
 import logo from "../../assets/logo.png";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { MdAccountCircle } from "react-icons/md";
+import { AiOutlineLineChart } from "react-icons/ai";
 
 const Sidebar = ({ sidebarOpen, closeSidebar }) => {
   const [active, setActive] = useState(null);
@@ -46,22 +47,26 @@ const Sidebar = ({ sidebarOpen, closeSidebar }) => {
     return `${year}-${month}-${day}`;
   };
 
-  // Fetching occurrences filtered by today's date
   const fetchOccurrenceData = async () => {
     try {
       const response = await axios.get(
         `${process.env.REACT_APP_API_URL}occurrence?size=500`
       );
       const currentDate = getCurrentDate();
-      const filteredOccurrences = response.data.data.filter(
-        (item) => item.date.split("T")[0] === currentDate
+      
+      const occurrences = response.data.data.data || [];
+      const filteredOccurrences = occurrences.filter(
+        (item) => item.createdAt.split("T")[0] === currentDate
       );
+      
       return filteredOccurrences.length;
     } catch (error) {
       console.error("Error fetching occurrence data:", error.message);
       return 0;
     }
   };
+  
+  
 
   const fetchSupervisionData = async () => {
     try {
@@ -69,22 +74,19 @@ const Sidebar = ({ sidebarOpen, closeSidebar }) => {
         `${process.env.REACT_APP_API_URL}supervision?size=100`
       );
       const currentDate = getCurrentDate();
-      
+
       // Access the nested data structure correctly
       const supervisions = response.data.data.data || [];
       const filteredSupervisions = supervisions.filter(
         (item) => item.createdAt.split("T")[0] === currentDate
       );
-      
+
       return filteredSupervisions.length;
     } catch (error) {
       console.error("Error fetching supervision data:", error.message);
       return 0;
     }
   };
-  
-  
-  
 
   const updateNotificationAndOccurrence = async () => {
     const occurrenceCount = await fetchOccurrenceData();
@@ -221,8 +223,10 @@ const Sidebar = ({ sidebarOpen, closeSidebar }) => {
                   padding: "5px",
                   marginLeft: "3px",
                 }}
-               
-              > {occurrenceNumber} </span>
+              >
+                {" "}
+                {occurrenceNumber}{" "}
+              </span>
             </span>
           </Link>
         </li>
@@ -256,7 +260,7 @@ const Sidebar = ({ sidebarOpen, closeSidebar }) => {
         >
           <Link to="/Report" className="p-1">
             <i className="me-3 fs-5">
-              <FcBullish />
+            <AiOutlineLineChart />
             </i>
             <span className="fs-6">Estatística</span>
           </Link>

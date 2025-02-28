@@ -211,7 +211,7 @@ const NotificationList = () => {
             rows={filteredRows}
             columns={[
               { field: "createdAt", headerName: "Data", width: 150 },
-              { field: "details", headerName: "Evento", width: 360 },
+              { field: "details", headerName: "Detalhes", width: 360 },
               { field: "name", headerName: "Site", width: 300 },
               {
                 field: "costCenter",
@@ -247,9 +247,7 @@ const NotificationList = () => {
         <div className="occurrence-details">
           <h4>Informações Gerais</h4>
           <div className="info-grid">
-            <p>
-              <strong>ID:</strong> {selectedNotification?._id}
-            </p>
+           
             <p>
               <strong>Local:</strong> {selectedNotification?.name}
             </p>
@@ -258,10 +256,7 @@ const NotificationList = () => {
               {selectedNotification?.costCenter}
             </p>
            
-            <p>
-              <strong>ID Notificação:</strong>{" "}
-              {selectedNotification?.idNotification}
-            </p>
+           
             <p>
               <strong>Prioridade:</strong>{" "}
               {getPriorityLabel(selectedNotification?.priority)}

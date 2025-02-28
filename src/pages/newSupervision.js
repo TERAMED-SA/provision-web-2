@@ -49,7 +49,7 @@ const NotificationList = () => {
     try {
       setIsLoading(true);
       const response = await axios.get(
-        `${process.env.REACT_APP_API_URL}supervision?size=50`
+        `${process.env.REACT_APP_API_URL}supervision?size=100`
       );
 
       const formattedNotifications = response.data.data.data.map(
@@ -59,11 +59,10 @@ const NotificationList = () => {
           createdAt: format(new Date(supervision.createdAt), "dd/MM/yyyy"),
           createdAtDate: new Date(supervision.createdAt),
           createdAtTime: format(new Date(supervision.createdAt), "HH:mm"),
-          supervisorName: "Carregando...",
-          siteName: "Carregando...",
+          supervisorName: supervision.supervisorName || "Carregando...",
+          siteName: supervision.siteName || "Carregando...",
         })
       );
-
       setNotifications(formattedNotifications);
     } catch (error) {
       console.error("Error fetching supervisions:", error.message);
@@ -96,6 +95,7 @@ const NotificationList = () => {
       );
       setMetricsData(response.data.data.sites);
       updateNotificationsWithMetrics(response.data.data.sites);
+      console.log(response.data.data.sites.map((site) => site.siteName));
     } catch (error) {
       console.error("Error fetching metrics:", error.message);
     }
@@ -375,21 +375,23 @@ const NotificationList = () => {
         <p>Carregando...</p>
       ) : (
         <DataGrid
-        rows={filteredNotifications.sort((a, b) => b.createdAtDate - a.createdAtDate)}
-        columns={columns}
-        pageSize={10}
-        autoHeight
-        initialState={{
-          pagination: {
-            paginationModel: { pageSize: 15, page: 0 },
-          },
-        }}
-        pageSizeOptions={[5, 10, 25, 50]}
-        paginationMode="client"
-        pagination
-        disableSelectionOnClick
-        getRowId={(row) => row.id}
-      />      
+          rows={filteredNotifications.sort(
+            (a, b) => b.createdAtDate - a.createdAtDate
+          )}
+          columns={columns}
+          pageSize={10}
+          autoHeight
+          initialState={{
+            pagination: {
+              paginationModel: { pageSize: 15, page: 0 },
+            },
+          }}
+          pageSizeOptions={[5, 10, 25, 50]}
+          paginationMode="client"
+          pagination
+          disableSelectionOnClick
+          getRowId={(row) => row.id}
+        />
       )}
       {modalInfo && (
         <Modal
