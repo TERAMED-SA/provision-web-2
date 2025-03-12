@@ -31,7 +31,7 @@ const Home = () => {
     try {
       setIsLoading(true);
       const response = await axios.get(
-        `${process.env.REACT_APP_API_URL}supervision?size=100`
+        `${process.env.REACT_APP_API_URL}supervision?size=1000`
       );
 
       const formattedNotifications = response.data.data.data.map(
@@ -62,7 +62,7 @@ const Home = () => {
   const fetchMetrics = async () => {
     try {
       const response = await axios.get(
-        `${process.env.REACT_APP_API_URL}admin/metrics?size=100&page=1`
+        `${process.env.REACT_APP_API_URL}admin/metrics?size=950&page=1`
       );
       setMetricsData(response.data.data.sites);
       updateNotificationsWithMetrics(response.data.data.sites);
@@ -81,26 +81,26 @@ const Home = () => {
 
         // Fetching user count
         const userResponse = await axios.get(
-          `${process.env.REACT_APP_API_URL}user?size=500`
+          `${process.env.REACT_APP_API_URL}user?size=1000`
         );
         setUserCount(userResponse.data.data.data.length);
 
         // Fetching company count
         const companyResponse = await axios.get(
-          `${process.env.REACT_APP_API_URL}company?size=500`
+          `${process.env.REACT_APP_API_URL}company?size=1000`
         );
         setCompanyCount(companyResponse.data.data.data.length);
 
         // Fetching notification count
         const notificationResponse = await axios.get(
-          `${process.env.REACT_APP_API_URL}notification/11835?size=100`
+          `${process.env.REACT_APP_API_URL}notification/11835?size=1000`
         );
         setNotificationCount(notificationResponse.data.data.length);
 
         // Fetching the last two occurrences
         const user = localStorage.getItem("userId");
         const response = await axios.get(
-          `${process.env.REACT_APP_API_URL}notification/${user}?size=500`
+          `${process.env.REACT_APP_API_URL}notification/${user}?size=1000`
         );
         const formattedNotifications = response.data.data.map(
           (notification) => ({
@@ -125,7 +125,7 @@ const Home = () => {
 
         // Fetch metrics data
         const metricsResponse = await axios.get(
-          `${process.env.REACT_APP_API_URL}admin/metrics?size=100&page=1`
+          `${process.env.REACT_APP_API_URL}admin/metrics?size=950&page=1`
         );
         setMetricsData(metricsResponse.data.data.sites);
         updateNotificationsWithMetrics(
@@ -183,7 +183,7 @@ const Home = () => {
         <div className="container-fluid">
           <div className="row">
             <div className="col-12 col-sm-6 col-md-4 col-lg-3 p-3">
-              <Link to="/team" className="card-link">
+              <Link to="/users" className="card-link">
                 <div className="d-flex rounded justify-content-between p-4 align-items-center bg-button text-white border border-secondary shadow-sm card-hover">
                   <i className="fs-1">
                     <i className="bi bi-person-check-fill"></i>
@@ -209,7 +209,7 @@ const Home = () => {
               </Link>
             </div>
             <div className="col-12 col-sm-6 col-md-4 col-lg-3 p-3">
-              <Link to="/statistic" className="card-link">
+              <Link to="/Report" className="card-link">
                 <div className="d-flex rounded justify-content-between p-4 align-items-center bg-button text-white border border-secondary shadow-sm card-hover">
                   <i className="fs-1">
                     <i className="bi bi-gear-wide-connected"></i>
@@ -242,22 +242,22 @@ const Home = () => {
                 <p>Carregando...</p>
               ) : (
                 <DataGrid
-                rows={[...notifications].sort((a, b) => b.createdAtDate - a.createdAtDate)}
-                columns={columns}
-                autoHeight
-                initialState={{
-                  pagination: {
-                    paginationModel: { pageSize: 10, page: 0 },
-                  },
-                }}
-                pageSizeOptions={[5, 10, 25, 50]}
-                paginationMode="client"
-                pagination
-                disableSelectionOnClick
-                getRowId={(row) => row.id}
-              />
-              
-
+                  rows={[...notifications].sort(
+                    (a, b) => b.createdAtDate - a.createdAtDate
+                  )}
+                  columns={columns}
+                  autoHeight
+                  initialState={{
+                    pagination: {
+                      paginationModel: { pageSize: 10, page: 0 },
+                    },
+                  }}
+                  pageSizeOptions={[5, 10, 25, 50]}
+                  paginationMode="client"
+                  pagination
+                  disableSelectionOnClick
+                  getRowId={(row) => row.id}
+                />
               )}
             </div>
           </div>

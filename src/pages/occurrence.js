@@ -28,7 +28,7 @@ const NotificationList = () => {
       setIsLoading(true);
       // const user = localStorage.getItem("userId");
       const response = await axios.get(
-        `${process.env.REACT_APP_API_URL}occurrence`
+        `${process.env.REACT_APP_API_URL}occurrence?size=1000`
       );
       const formattedNotifications = response.data.data.data.map(
         (notification) => ({
@@ -51,7 +51,6 @@ const NotificationList = () => {
     setSelectedNotification(occorence);
     setModalShow(true);
   };
-  
 
   async function getOcorrenceByIdNot(id) {
     try {
@@ -84,27 +83,31 @@ const NotificationList = () => {
 
   // Filtro principal
   const filteredRows = notifications
-  .filter((notification) => {
-    const notificationDate = notification.createdAt && isValidDate(notification.createdAt)
-      ? notification.createdAt 
-      : null;
+    .filter((notification) => {
+      const notificationDate =
+        notification.createdAt && isValidDate(notification.createdAt)
+          ? notification.createdAt
+          : null;
 
-    const searchDate = selectedDate
-      ? format(selectedDate, "dd/MM/yyyy")
-      : null;
+      const searchDate = selectedDate
+        ? format(selectedDate, "dd/MM/yyyy")
+        : null;
 
-    return (
-      (notification.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-       notification.costCenter?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-       notification.details?.toLowerCase().includes(searchQuery.toLowerCase())) &&
-      (!selectedDate || notificationDate === searchDate)
-    );
-  })
-  .map((notification, index) => ({
-    id: index,
-    ...notification,
-  }));
-
+      return (
+        (notification.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          notification.costCenter
+            ?.toLowerCase()
+            .includes(searchQuery.toLowerCase()) ||
+          notification.details
+            ?.toLowerCase()
+            .includes(searchQuery.toLowerCase())) &&
+        (!selectedDate || notificationDate === searchDate)
+      );
+    })
+    .map((notification, index) => ({
+      id: index,
+      ...notification,
+    }));
 
   const approve = async (costCenter, idNot) => {
     try {
@@ -243,91 +246,89 @@ const NotificationList = () => {
         <Modal.Header closeButton>
           <Modal.Title>Detalhes da Ocorrência</Modal.Title>
         </Modal.Header>
-      <Modal.Body>
-        <div className="occurrence-details">
-          <h4>Informações Gerais</h4>
-          <div className="info-grid">
-           
-            <p>
-              <strong>Local:</strong> {selectedNotification?.name}
-            </p>
-            <p>
-              <strong>Centro de Custo:</strong>{" "}
-              {selectedNotification?.costCenter}
-            </p>
-           
-           
-            <p>
-              <strong>Prioridade:</strong>{" "}
-              {getPriorityLabel(selectedNotification?.priority)}
-            </p>
-            <p>
-              <strong>Número de Trabalhadores:</strong>{" "}
-              {selectedNotification?.numberOfWorkers}
-            </p>
-            <p>
-              <strong>Detalhes:</strong> {selectedNotification?.details}
-            </p>
+        <Modal.Body>
+          <div className="occurrence-details">
+            <h4>Informações Gerais</h4>
+            <div className="info-grid">
+              <p>
+                <strong>Local:</strong> {selectedNotification?.name}
+              </p>
+              <p>
+                <strong>Centro de Custo:</strong>{" "}
+                {selectedNotification?.costCenter}
+              </p>
+
+              <p>
+                <strong>Prioridade:</strong>{" "}
+                {getPriorityLabel(selectedNotification?.priority)}
+              </p>
+              <p>
+                <strong>Número de Trabalhadores:</strong>{" "}
+                {selectedNotification?.numberOfWorkers}
+              </p>
+              <p>
+                <strong>Detalhes:</strong> {selectedNotification?.details}
+              </p>
+            </div>
+
+            <h4>Informações dos Trabalhadores</h4>
+            {selectedNotification?.workerInformation &&
+            selectedNotification.workerInformation.length > 0 ? (
+              <div className="worker-list">
+                {selectedNotification.workerInformation.map((worker, index) => (
+                  <div key={index} className="worker-item">
+                    <p>
+                      <strong>Nome:</strong> {worker.name}
+                    </p>
+                    <p>
+                      <strong>Número:</strong> {worker.employeeNumber}
+                    </p>
+                    <p>
+                      <strong>Estado:</strong> {worker.state}
+                    </p>
+                    {worker.obs && (
+                      <p>
+                        <strong>Observações:</strong> {worker.obs}
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p>Nenhuma informação de trabalhador disponível.</p>
+            )}
+
+            <h4>Equipamentos</h4>
+            {selectedNotification?.equipment &&
+            selectedNotification.equipment.length > 0 ? (
+              <div className="equipment-list">
+                {selectedNotification.equipment.map((equip, index) => (
+                  <div key={index} className="equipment-item">
+                    <p>
+                      <strong>Nome:</strong> {equip.name}
+                    </p>
+                    <p>
+                      <strong>Número de Série:</strong> {equip.serialNumber}
+                    </p>
+                    <p>
+                      <strong>Estado:</strong> {equip.state}
+                    </p>
+                    <p>
+                      <strong>Centro de Custo:</strong> {equip.costCenter}
+                    </p>
+                    {equip.obs && (
+                      <p>
+                        <strong>Observações:</strong> {equip.obs}
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p>Nenhum equipamento registrado.</p>
+            )}
           </div>
-
-          <h4>Informações dos Trabalhadores</h4>
-          {selectedNotification?.workerInformation &&
-          selectedNotification.workerInformation.length > 0 ? (
-            <div className="worker-list">
-              {selectedNotification.workerInformation.map((worker, index) => (
-                <div key={index} className="worker-item">
-                  <p>
-                    <strong>Nome:</strong> {worker.name}
-                  </p>
-                  <p>
-                    <strong>Número:</strong> {worker.employeeNumber}
-                  </p>
-                  <p>
-                    <strong>Estado:</strong> {worker.state}
-                  </p>
-                  {worker.obs && (
-                    <p>
-                      <strong>Observações:</strong> {worker.obs}
-                    </p>
-                  )}
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p>Nenhuma informação de trabalhador disponível.</p>
-          )}
-
-          <h4>Equipamentos</h4>
-          {selectedNotification?.equipment &&
-          selectedNotification.equipment.length > 0 ? (
-            <div className="equipment-list">
-              {selectedNotification.equipment.map((equip, index) => (
-                <div key={index} className="equipment-item">
-                  <p>
-                    <strong>Nome:</strong> {equip.name}
-                  </p>
-                  <p>
-                    <strong>Número de Série:</strong> {equip.serialNumber}
-                  </p>
-                  <p>
-                    <strong>Estado:</strong> {equip.state}
-                  </p>
-                  <p>
-                    <strong>Centro de Custo:</strong> {equip.costCenter}
-                  </p>
-                  {equip.obs && (
-                    <p>
-                      <strong>Observações:</strong> {equip.obs}
-                    </p>
-                  )}
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p>Nenhum equipamento registrado.</p>
-          )}
-        </div>
-      </Modal.Body>
+        </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={() => setModalShow(false)}>
             Fechar

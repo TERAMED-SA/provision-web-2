@@ -50,28 +50,26 @@ const Sidebar = ({ sidebarOpen, closeSidebar }) => {
   const fetchOccurrenceData = async () => {
     try {
       const response = await axios.get(
-        `${process.env.REACT_APP_API_URL}occurrence?size=500`
+        `${process.env.REACT_APP_API_URL}occurrence?size=1000`
       );
       const currentDate = getCurrentDate();
-      
+
       const occurrences = response.data.data.data || [];
       const filteredOccurrences = occurrences.filter(
         (item) => item.createdAt.split("T")[0] === currentDate
       );
-      
+
       return filteredOccurrences.length;
     } catch (error) {
       console.error("Error fetching occurrence data:", error.message);
       return 0;
     }
   };
-  
-  
 
   const fetchSupervisionData = async () => {
     try {
       const response = await axios.get(
-        `${process.env.REACT_APP_API_URL}supervision?size=100`
+        `${process.env.REACT_APP_API_URL}supervision?size=1000`
       );
       const currentDate = getCurrentDate();
 
@@ -260,7 +258,7 @@ const Sidebar = ({ sidebarOpen, closeSidebar }) => {
         >
           <Link to="/Report" className="p-1">
             <i className="me-3 fs-5">
-            <AiOutlineLineChart />
+              <AiOutlineLineChart />
             </i>
             <span className="fs-6">Estatística</span>
           </Link>

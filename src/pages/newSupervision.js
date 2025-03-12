@@ -49,7 +49,7 @@ const NotificationList = () => {
     try {
       setIsLoading(true);
       const response = await axios.get(
-        `${process.env.REACT_APP_API_URL}supervision?size=100`
+        `${process.env.REACT_APP_API_URL}supervision?size=1000`
       );
 
       const formattedNotifications = response.data.data.data.map(
@@ -91,7 +91,7 @@ const NotificationList = () => {
   const fetchMetrics = async () => {
     try {
       const response = await axios.get(
-        `${process.env.REACT_APP_API_URL}admin/metrics?size=100&page=1`
+        `${process.env.REACT_APP_API_URL}admin/metrics?size=950&page=1`
       );
       setMetricsData(response.data.data.sites);
       updateNotificationsWithMetrics(response.data.data.sites);
