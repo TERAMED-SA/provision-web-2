@@ -6,6 +6,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { DataGrid } from "@mui/x-data-grid";
 import { format } from "date-fns";
+import CircularProgress from "@mui/material/CircularProgress";
 
 const Home = () => {
   const [equipmentCount, setEquipmentCount] = useState(0);
@@ -239,7 +240,9 @@ const Home = () => {
             <h2>Últimas Atividades</h2>
             <div style={{ height: 100, width: "100%" }}>
               {isLoading ? (
-                <p>Carregando...</p>
+                <div className="text-center mt-4">
+                  <CircularProgress size={80} thickness={5} />
+                </div>
               ) : (
                 <DataGrid
                   rows={[...notifications].sort(

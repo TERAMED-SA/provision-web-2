@@ -10,6 +10,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import { useMemo } from "react";
 
 const NotificationList = () => {
   const [notifications, setNotifications] = useState([]);
@@ -137,7 +138,23 @@ const NotificationList = () => {
   const handleRejection = () => {
     setModalShow(false);
   };
+  const sortedRows = [...filteredRows]
+    .map((row) => {
+      let createdAtTimestamp = 0; // Valor padrão para datas inválidas
 
+      if (row.createdAt && isValidDate(row.createdAt)) {
+        const [day, month, year] = row.createdAt.split("/");
+        createdAtTimestamp = new Date(`${year}-${month}-${day}`).getTime();
+      }
+
+      return {
+        ...row,
+        createdAtTimestamp, // Adiciona o timestamp para ordenação
+      };
+    })
+    .sort((a, b) => b.createdAtTimestamp - a.createdAtTimestamp); // Ordena em ordem decrescente
+
+  console.log("Dados depois da ordenação:", sortedRows);
   return (
     <div className="container4 mr-2" style={{ height: "89vh" }}>
       <h1 style={{ textAlign: "center" }}>
@@ -204,24 +221,30 @@ const NotificationList = () => {
           {filteredRows.length}
         </div>
       </div>
-      <div className="container">
+     
         {isLoading ? (
-          <CircularProgress />
+          <div className="text-center mt-4">
+            <CircularProgress size={80} thickness={5} />
+          </div>
         ) : filteredRows.length === 0 ? (
           <p>Nenhuma ocorrência encontrada</p>
         ) : (
           <DataGrid
-            rows={filteredRows}
+            rows={sortedRows}
             columns={[
-              { field: "createdAt", headerName: "Data", width: 150 },
-              { field: "details", headerName: "Detalhes", width: 360 },
-              { field: "name", headerName: "Site", width: 300 },
+              {
+                field: "createdAt",
+                headerName: "Data",
+                width: 150,
+                disableColumnSorting: true,
+              },
+              { field: "details", headerName: "Detalhes", width: 390 },
+              { field: "name", headerName: "Site", width: 360 },
               {
                 field: "costCenter",
                 headerName: "Centro de custo",
                 width: 200,
               },
-
               {
                 field: "detalhes",
                 headerName: "Detalhes",
@@ -239,9 +262,19 @@ const NotificationList = () => {
             ]}
             pageSize={10}
             autoHeight
+            disableColumnSorting
+            initialState={{
+              pagination: {
+                paginationModel: { pageSize: 12, page: 0 },
+              },
+            }}
+            pageSizeOptions={[5, 10, 25, 50]}
+            pagination
+            disableSelectionOnClick
+            getRowId={(row) => row.id}
           />
         )}
-      </div>
+
       <Modal show={modalShow} onHide={() => setModalShow(false)} size="lg">
         <Modal.Header closeButton>
           <Modal.Title>Detalhes da Ocorrência</Modal.Title>

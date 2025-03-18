@@ -141,14 +141,16 @@ const StatsPage = () => {
   return (
     <div className="stats-page-container">
       {isLoading ? (
-        <CircularProgress />
+        <div className="text-center mt-4">
+          <CircularProgress size={80} thickness={5} />
+        </div>
       ) : error ? (
         <div className="stats-error-message">{error}</div>
       ) : (
         <div>
           <h1 className="stats-title">Estatísticas</h1>
 
-         {/* <div className="stats-card stats-metrics-card">
+          {/* <div className="stats-card stats-metrics-card">
             <h6>Geral</h6>
             <ul>
               <li>Total de Clientes: {metrics?.data?.company || 0}</li>

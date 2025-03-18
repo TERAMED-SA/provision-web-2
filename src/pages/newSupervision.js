@@ -9,7 +9,7 @@ import jsPDF from "jspdf";
 import pdfMake from "pdfmake/build/pdfmake";
 import pdfFonts from "pdfmake/build/vfs_fonts";
 import logo from "../assets/logo.png";
-
+import CircularProgress from "@mui/material/CircularProgress";
 const NotificationList = () => {
   const [notifications, setNotifications] = useState([]);
   const [metricsData, setMetricsData] = useState([]);
@@ -369,10 +369,17 @@ const NotificationList = () => {
             onChange={(e) => setEndDate(e.target.value)}
             style={{ padding: "5px" }}
           />
+          <div className="mt-3">
+            <strong>Total de supervisões realizadas:</strong>{" "}
+            {notifications.length}
+          </div>
         </div>{" "}
       </div>
+
       {isLoading ? (
-        <p>Carregando...</p>
+        <div className="text-center mt-4">
+          <CircularProgress size={80} thickness={5} />
+        </div>
       ) : (
         <DataGrid
           rows={filteredNotifications.sort(

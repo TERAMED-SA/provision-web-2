@@ -2,6 +2,9 @@ import React, { useEffect, useRef, useState } from "react";
 import "bootstrap/dist/css/bootstrap.css";
 import axios from "axios";
 import { Link } from "react-router-dom";
+import { FcApproval } from "react-icons/fc";
+import ReactDOMServer from "react-dom/server";
+import { FcSynchronize } from "react-icons/fc";
 
 const MapOnlineComponent = () => {
   const mapContainerRef = useRef(null);
@@ -80,18 +83,24 @@ const MapOnlineComponent = () => {
         // Cria um InfoWindow para cada marcador
         const infoWindow = new window.google.maps.InfoWindow();
         // Conteúdo do popup (nome e estado)
-        const popupContent = `
-          <div class="popup-content">
-            <div class="popup-text">
-              <h6>Nome: ${user.name} </h6>
-              <p> ${
-                isOnline
-                  ? "<h6>Online agora</h6>"
-                  : `<h6>Última atividade: ${formattedTime}</h6>`
-              } </p>
+        const popupContent = ReactDOMServer.renderToString(
+          <div className="popup-content">
+            <div className="popup-text">
+              <h6>Nome: {user.name}</h6>
+              {isOnline ? (
+                <h6>
+                  {" "}
+                  <FcApproval /> Online agora
+                </h6>
+              ) : (
+                <h6>
+                  {" "}
+                  <FcSynchronize /> Última atividade: {formattedTime}
+                </h6>
+              )}
             </div>
           </div>
-        `;
+        );
         // Abre o infoWindow automaticamente com o conteúdo (nome e estado)
         infoWindow.setContent(popupContent);
         infoWindow.open(map, marker);
