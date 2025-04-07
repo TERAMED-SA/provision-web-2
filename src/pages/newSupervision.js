@@ -49,7 +49,7 @@ const NotificationList = () => {
     try {
       setIsLoading(true);
       const response = await axios.get(
-        `${process.env.REACT_APP_API_URL}supervision?size=1000`
+        `${process.env.REACT_APP_API_URL}supervision?size=100000`
       );
 
       const formattedNotifications = response.data.data.data.map(

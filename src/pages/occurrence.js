@@ -29,7 +29,7 @@ const NotificationList = () => {
       setIsLoading(true);
       // const user = localStorage.getItem("userId");
       const response = await axios.get(
-        `${process.env.REACT_APP_API_URL}occurrence?size=1000`
+        `${process.env.REACT_APP_API_URL}occurrence?size=100000`
       );
       const formattedNotifications = response.data.data.data.map(
         (notification) => ({
@@ -221,59 +221,59 @@ const NotificationList = () => {
           {filteredRows.length}
         </div>
       </div>
-     
-        {isLoading ? (
-          <div className="text-center mt-4">
-            <CircularProgress size={80} thickness={5} />
-          </div>
-        ) : filteredRows.length === 0 ? (
-          <p>Nenhuma ocorrência encontrada</p>
-        ) : (
-          <DataGrid
-            rows={sortedRows}
-            columns={[
-              {
-                field: "createdAt",
-                headerName: "Data",
-                width: 150,
-                disableColumnSorting: true,
-              },
-              { field: "details", headerName: "Detalhes", width: 390 },
-              { field: "name", headerName: "Site", width: 360 },
-              {
-                field: "costCenter",
-                headerName: "Centro de custo",
-                width: 200,
-              },
-              {
-                field: "detalhes",
-                headerName: "Detalhes",
-                width: 130,
-                renderCell: (params) => (
-                  <Button
-                    variant="info"
-                    size="sm"
-                    onClick={() => handleViewDetails(params.row)}
-                  >
-                    Ver Detalhes
-                  </Button>
-                ),
-              },
-            ]}
-            pageSize={10}
-            autoHeight
-            disableColumnSorting
-            initialState={{
-              pagination: {
-                paginationModel: { pageSize: 12, page: 0 },
-              },
-            }}
-            pageSizeOptions={[5, 10, 25, 50]}
-            pagination
-            disableSelectionOnClick
-            getRowId={(row) => row.id}
-          />
-        )}
+
+      {isLoading ? (
+        <div className="text-center mt-4">
+          <CircularProgress size={80} thickness={5} />
+        </div>
+      ) : filteredRows.length === 0 ? (
+        <p>Nenhuma ocorrência encontrada</p>
+      ) : (
+        <DataGrid
+          rows={sortedRows}
+          columns={[
+            {
+              field: "createdAt",
+              headerName: "Data",
+              width: 150,
+              disableColumnSorting: true,
+            },
+            { field: "details", headerName: "Detalhes", width: 390 },
+            { field: "name", headerName: "Site", width: 360 },
+            {
+              field: "costCenter",
+              headerName: "Centro de custo",
+              width: 200,
+            },
+            {
+              field: "detalhes",
+              headerName: "Detalhes",
+              width: 130,
+              renderCell: (params) => (
+                <Button
+                  variant="info"
+                  size="sm"
+                  onClick={() => handleViewDetails(params.row)}
+                >
+                  Ver Detalhes
+                </Button>
+              ),
+            },
+          ]}
+          pageSize={10}
+          autoHeight
+          disableColumnSorting
+          initialState={{
+            pagination: {
+              paginationModel: { pageSize: 12, page: 0 },
+            },
+          }}
+          pageSizeOptions={[5, 10, 25, 50]}
+          pagination
+          disableSelectionOnClick
+          getRowId={(row) => row.id}
+        />
+      )}
 
       <Modal show={modalShow} onHide={() => setModalShow(false)} size="lg">
         <Modal.Header closeButton>

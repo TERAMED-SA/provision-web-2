@@ -50,7 +50,7 @@ const Sidebar = ({ sidebarOpen, closeSidebar }) => {
   const fetchOccurrenceData = async () => {
     try {
       const response = await axios.get(
-        `${process.env.REACT_APP_API_URL}occurrence?size=1000`
+        `${process.env.REACT_APP_API_URL}occurrence?size=100000`
       );
       const currentDate = getCurrentDate();
 
@@ -69,7 +69,7 @@ const Sidebar = ({ sidebarOpen, closeSidebar }) => {
   const fetchSupervisionData = async () => {
     try {
       const response = await axios.get(
-        `${process.env.REACT_APP_API_URL}supervision?size=1000`
+        `${process.env.REACT_APP_API_URL}supervision?size=100000`
       );
       const currentDate = getCurrentDate();
 

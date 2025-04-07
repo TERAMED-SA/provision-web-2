@@ -26,7 +26,7 @@ const StatsPage = () => {
   const fetchMetrics = async () => {
     try {
       const response = await axios.get(
-        `${process.env.REACT_APP_API_URL}admin/metrics?size=1000&page=1`
+        `${process.env.REACT_APP_API_URL}admin/metrics?size=10000&page=1`
       );
       console.log("Metrics Response:", response.data);
       setMetrics(response.data || null);
@@ -56,7 +56,7 @@ const StatsPage = () => {
   const fetchSupervisions = async () => {
     try {
       const response = await axios.get(
-        `${process.env.REACT_APP_API_URL}admin/supervision?size=1000&page=1`
+        `${process.env.REACT_APP_API_URL}admin/supervision?size=100000&page=1`
       );
       console.log("Supervisions Response:", response.data);
       setSupervisions(

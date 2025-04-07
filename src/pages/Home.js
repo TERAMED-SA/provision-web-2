@@ -32,7 +32,7 @@ const Home = () => {
     try {
       setIsLoading(true);
       const response = await axios.get(
-        `${process.env.REACT_APP_API_URL}supervision?size=1000`
+        `${process.env.REACT_APP_API_URL}supervision?size=1000000`
       );
 
       const formattedNotifications = response.data.data.data.map(
@@ -88,20 +88,20 @@ const Home = () => {
 
         // Fetching company count
         const companyResponse = await axios.get(
-          `${process.env.REACT_APP_API_URL}company?size=1000`
+          `${process.env.REACT_APP_API_URL}company?size=100000`
         );
         setCompanyCount(companyResponse.data.data.data.length);
 
         // Fetching notification count
         const notificationResponse = await axios.get(
-          `${process.env.REACT_APP_API_URL}notification/11835?size=1000`
+          `${process.env.REACT_APP_API_URL}notification/11835?size=10000`
         );
         setNotificationCount(notificationResponse.data.data.length);
 
         // Fetching the last two occurrences
         const user = localStorage.getItem("userId");
         const response = await axios.get(
-          `${process.env.REACT_APP_API_URL}notification/${user}?size=1000`
+          `${process.env.REACT_APP_API_URL}notification/${user}?size=100000`
         );
         const formattedNotifications = response.data.data.map(
           (notification) => ({
