@@ -399,7 +399,7 @@ const UserList = () => {
                     field: "actions",
                     headerName: "Ações",
                     flex: 1,
-                    cellClassName: "central",
+                  
                     renderCell: (params) => (
                       <div className="central mb-3">
                         <button
@@ -416,13 +416,7 @@ const UserList = () => {
                         >
                           <FontAwesomeIcon icon={faTrash} />
                         </button>
-                        <button
-                          className="btn btn-info"
-                          onClick={() => handleSiteUser(params.row.employeeId)}
-                          title="Ver sites"
-                        >
-                          <FontAwesomeIcon icon={faBuilding} />
-                        </button>
+                      
                       </div>
                     ),
                   },

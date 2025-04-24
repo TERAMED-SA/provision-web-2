@@ -8,6 +8,7 @@ import {
   faSave,
   faTimes,
   faMapMarkerAlt,
+  faBuilding,
 } from "@fortawesome/free-solid-svg-icons";
 import Modal from "react-modal";
 import Avatar from "react-avatar";
@@ -17,7 +18,7 @@ import { DataGrid } from "@mui/x-data-grid";
 import { Pagination } from "react-bootstrap";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { FcSearch } from "react-icons/fc";
+import Select from "react-select";
 
 const Team = () => {
   const [selectedUserId, setSelectedUserId] = useState(null);
@@ -30,6 +31,7 @@ const Team = () => {
   const [password, setPassword] = useState("");
   const [employeeId, setEmployeeId] = useState("");
   const [users, setUsers] = useState([]);
+  const [filteredUsers, setFilteredUsers] = useState([]);
   const [type, setType] = useState("");
   const [editingUserId, setEditingUserId] = useState(null);
   const [editedUser, setEditedUser] = useState({});
@@ -37,29 +39,131 @@ const Team = () => {
   const [pageNumber, setPageNumber] = useState(0);
   const [usersPerPage, setUsersPerPage] = useState(8);
   const [isLoading, setIsLoading] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
   const pagesVisited = pageNumber * usersPerPage;
-  const pageCount = Math.ceil(users.length / usersPerPage);
-
+  const pageCount = Math.ceil(filteredUsers.length / usersPerPage);
+  const [siteSearchTerm, setSiteSearchTerm] = useState("");
   const [isAssignSiteModalOpen, setIsAssignSiteModalOpen] = useState(false);
   const [sites, setSites] = useState([]);
   const [selectedSite, setSelectedSite] = useState("");
   const [userToAssignSite, setUserToAssignSite] = useState(null);
-  const [searchTerm, setSearchTerm] = useState(""); // Estado para o termo de pesquisa
+
+  const [isSiteModalOpen, setIsSiteModalOpen] = useState(false);
+  const [userSite, setUserSite] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 5;
+
+  // Estilos para a modal de sites
+  const modalStyles = {
+    overlay: {
+      backgroundColor: "rgba(0, 0, 0, 0.75)",
+    },
+    content: {
+      top: "50%",
+      left: "50%",
+      right: "auto",
+      bottom: "auto",
+      marginRight: "-50%",
+      transform: "translate(-50%, -50%)",
+      width: "60%",
+      backgroundColor: "#fff",
+      color: "#333",
+      border: "1px solid #ccc",
+      borderRadius: "10px",
+      padding: "30px",
+      boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+    },
+  };
+
+  const tableContainerStyles = {
+    width: "100%",
+    borderCollapse: "collapse",
+    marginBottom: "20px",
+  };
+
+  const tableHeaderStyles = {
+    backgroundColor: "#5c3aff",
+    color: "#fff",
+    textAlign: "center",
+    padding: "10px",
+  };
+
+  const tableRowStyles = {
+    textAlign: "center",
+    borderBottom: "1px solid #ddd",
+  };
+
+  const tableCellStyles = {
+    padding: "10px",
+  };
+
+  const buttonContainerStyles = {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginTop: "20px",
+  };
+
+  const buttonStyles = {
+    padding: "10px 20px",
+    fontSize: "14px",
+    borderRadius: "5px",
+    border: "none",
+    cursor: "pointer",
+    transition: "background-color 0.3s ease",
+  };
+
+  const prevButtonStyles = {
+    ...buttonStyles,
+    backgroundColor: "#6c757d",
+    color: "#fff",
+  };
+
+  const nextButtonStyles = {
+    ...buttonStyles,
+    backgroundColor: "#6c757d",
+    color: "#fff",
+  };
+
+  const closeButtonStyles = {
+    position: "absolute",
+    top: "-70px",
+    right: "-30px",
+    background: "transparent",
+    border: "none",
+    fontSize: "44px",
+    cursor: "pointer",
+    color: "#000",
+  };
 
   useEffect(() => {
     fetchUsers();
     fetchSites();
+    if (isSiteModalOpen) {
+      setCurrentPage(1);
+    }
   }, []);
+
+  useEffect(() => {
+    if (isSiteModalOpen) {
+      setCurrentPage(1);
+    }
+  }, [isSiteModalOpen, userSite]);
+
+  useEffect(() => {
+    const filtered = users.filter((user) =>
+      user.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    setFilteredUsers(filtered);
+  }, [searchTerm, users]);
 
   async function fetchUsers() {
     try {
-      const userCoord = localStorage.getItem("userId");
       setIsLoading(true);
-      const response = await axios.get(
-        `${process.env.REACT_APP_API_URL}user/findBelongsToMe/${userCoord}?size=50`
-      );
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}user`);
       if (response.data && Array.isArray(response.data.data.data)) {
         setUsers(response.data.data.data);
+        setFilteredUsers(response.data.data.data);
       }
       setIsLoading(false);
     } catch (error) {
@@ -71,7 +175,7 @@ const Team = () => {
   async function fetchSites() {
     try {
       const response = await axios.get(
-        "https://provision-07c1.onrender.com/api/v1/companySite?size=500"
+        `${process.env.REACT_APP_API_URL}companySite?size=500`
       );
       if (response.data && Array.isArray(response.data.data.data)) {
         setSites(response.data.data.data);
@@ -108,6 +212,10 @@ const Team = () => {
     setEmail("");
     setEmployeeId("");
     setType("");
+  };
+
+  const closeModalSite = () => {
+    setIsSiteModalOpen(false);
   };
 
   const handleAddUser = async (e) => {
@@ -151,6 +259,21 @@ const Team = () => {
     setEditedUser(data);
   }
 
+  async function handleSiteUser(employeeId) {
+    try {
+      setIsSiteModalOpen(true);
+      setUserSite([]);
+      const response = await axios.get(
+        `${process.env.REACT_APP_API_URL}companySite/getSuperivsorSites/${employeeId}?size=500`
+      );
+      if (response.data && Array.isArray(response.data.data.data)) {
+        setUserSite(response.data.data.data);
+      }
+    } catch (error) {
+      console.error("Erro:", error.message);
+    }
+  }
+
   async function updateUser(e) {
     e.preventDefault();
     try {
@@ -173,16 +296,6 @@ const Team = () => {
       console.error("Erro ao salvar usuário:", error.message);
     }
   }
-
-  const handleDeleteUser = async (userId) => {
-    try {
-      toast.warning(
-        " Você não tem autorização para eliminar usuários. Entre em contato com o administrador se precisar de mais assistência."
-      );
-    } catch (error) {
-      console.error("Erro ao excluir usuário:", error.message);
-    }
-  };
 
   const handleAssignSite = (userId) => {
     setUserToAssignSite(userId);
@@ -219,7 +332,7 @@ const Team = () => {
 
       // Chamada à API com employeeId e costCenter
       const response = await axios.put(
-        `https://provision-07c1.onrender.com/api/v1/companySite/assignSupervisor/${employeeId}/${costCenter}`
+        `${process.env.REACT_APP_API_URL}companySite/assignSupervisor/${employeeId}/${costCenter}`
       );
 
       if (response.data) {
@@ -234,22 +347,27 @@ const Team = () => {
     }
   };
 
-  const filteredUsers = useMemo(
-    () =>
-      users.filter((user) =>
-        user.name.toLowerCase().includes(searchTerm.toLowerCase())
-      ),
-    [users, searchTerm]
-  );
+  const totalPages = Math.ceil(userSite.length / ITEMS_PER_PAGE);
+
+  const handlePreviousPage = () => {
+    setCurrentPage((prev) => Math.max(prev - 1, 1));
+  };
+
+  const handleNextPage = () => {
+    setCurrentPage((prev) => Math.min(prev + 1, totalPages));
+  };
+
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const currentItems = userSite.slice(startIndex, startIndex + ITEMS_PER_PAGE);
 
   return (
     <div className="container4">
-      <h1 style={{ textAlign: "center" }}>SUPERVISORES</h1>
+      <h1 style={{ textAlign: "center" }}>VER E ATRIBUIR SITES</h1>
       <div className="container-fluid">
         <Link to="/Home" className="p-1">
           Início{" "}
         </Link>{" "}
-        / <span>Funcionários</span>
+        / <span>Ajustes</span>
         <br></br> <br></br>
         <div className="space">
           <div className="">
@@ -281,11 +399,6 @@ const Team = () => {
               </svg>
             </div>
           </div>
-          <div className="">
-            <button className="btn btn-primary mb-3" onClick={openModal}>
-              <FontAwesomeIcon icon={faPlus} /> Adicionar Funcionário
-            </button>
-          </div>
         </div>
         <div>
           {isLoading && (
@@ -294,46 +407,65 @@ const Team = () => {
             </div>
           )}
 
-          {!isLoading && users.length === 0 && (
-            <div className="text-center text-black mt-4">
-              Nenhum dado disponível
-            </div>
-          )}
-
-          {!isLoading && users.length > 0 && (
+          {!isLoading && filteredUsers.length > 0 && (
             <>
               <DataGrid
-                rows={filteredUsers.map((user) => ({
-                  id: user._id,
-                  name: user.name,
-                  phoneNumber: user.phoneNumber,
-                }))}
+                rows={
+                  Array.isArray(filteredUsers)
+                    ? filteredUsers
+                        .slice(pagesVisited, pagesVisited + usersPerPage)
+                        .map((user, index) => ({
+                          id: index,
+                          avatar: (
+                            <Avatar
+                              name={`${user.name}`}
+                              size="50"
+                              round={true}
+                            />
+                          ),
+                          name: user.name || "",
+                          phoneNumber: user.phoneNumber || "",
+                          idUser: user._id,
+                          employeeId: user.employeeId,
+                        }))
+                    : []
+                }
                 columns={[
-                  { field: "name", headerName: "Nome", flex: 1 },
-                  { field: "phoneNumber", headerName: "Telemóvel", flex: 1 },
+                  {
+                    field: "avatar",
+                    headerName: "Perfil",
+                    renderCell: (params) => params.value,
+                  },
+                  {
+                    field: "name",
+                    headerName: "Nome",
+                    flex: 1,
+                  },
+                  {
+                    field: "phoneNumber",
+                    headerName: "Telefone",
+                    flex: 1,
+                  },
                   {
                     field: "actions",
                     headerName: "Ações",
                     flex: 1,
                     renderCell: (params) => (
-                      <div>
+                      <div
+                        className="central"
+                        style={{ display: "flex", gap: "8px" }}
+                      >
                         <button
-                          className="btn btn-warning btn-sm mr-2"
-                          onClick={() => handleEditUser(params.row.id)}
-                          title="Editar"
+                          className="btn btn-info"
+                          onClick={() => handleSiteUser(params.row.employeeId)}
+                          title="Ver sites"
                         >
-                          <FontAwesomeIcon icon={faEdit} />
+                          <FontAwesomeIcon icon={faBuilding} />
                         </button>
+
                         <button
-                          className="btn btn-danger btn-sm mr-2"
-                          onClick={() => handleDeleteUser(params.row.id)}
-                          title="Eliminar"
-                        >
-                          <FontAwesomeIcon icon={faTrash} />
-                        </button>
-                        <button
-                          className="btn btn-info btn-sm"
-                          onClick={() => handleAssignSite(params.row.id)}
+                          className="btn btn-success"
+                          onClick={() => handleAssignSite(params.row.idUser)}
                           title="Atribuir Site"
                         >
                           <FontAwesomeIcon icon={faMapMarkerAlt} />
@@ -342,160 +474,37 @@ const Team = () => {
                     ),
                   },
                 ]}
+                checkboxSelection={false}
                 pageSize={usersPerPage}
+                pagination
                 onPageChange={handlePageChange}
-                paginationMode="server"
-                rowCount={users.length}
-                style={{ height: "580px" }}
+                rowCount={filteredUsers.length}
+                pageCount={pageCount}
+                style={{ height: "550px" }}
               />
+              <Pagination>
+                <Pagination.Prev
+                  onClick={() => handlePageChange({ selected: pageNumber - 1 })}
+                  disabled={pageNumber === 0}
+                />
+                {Array.from({ length: pageCount }).map((_, index) => (
+                  <Pagination.Item
+                    key={index}
+                    active={index === pageNumber}
+                    onClick={() => handlePageChange({ selected: index })}
+                  >
+                    {index + 1}
+                  </Pagination.Item>
+                ))}
+                <Pagination.Next
+                  onClick={() => handlePageChange({ selected: pageNumber + 1 })}
+                  disabled={pageNumber === pageCount - 1}
+                />
+              </Pagination>
             </>
           )}
         </div>
       </div>
-      <Modal
-        isOpen={isModalOpen}
-        onRequestClose={closeModal}
-        contentLabel="Adicionar Funcionário"
-        style={{
-          overlay: {
-            backgroundColor: "rgba(0, 0, 0, 0.5)",
-          },
-          content: {
-            top: "50%",
-            left: "50%",
-            right: "auto",
-            bottom: "auto",
-            marginRight: "-50%",
-            transform: "translate(-50%, -50%)",
-            width: "50%",
-          },
-        }}
-      >
-        <h2>Adicionar Funcionário</h2>
-        <form onSubmit={handleAddUser}>
-          <div className="form-group">
-            <label htmlFor="name">Nome</label>
-            <input
-              type="text"
-              className="form-control"
-              id="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="phoneNumber">Telemóvel</label>
-            <input
-              type="tel"
-              className="form-control"
-              id="phoneNumber"
-              value={phoneNumber}
-              onChange={(e) => setPhoneNumber(e.target.value)}
-              required
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="employeeId">ID do Funcionário</label>
-            <input
-              type="text"
-              className="form-control"
-              id="employeeId"
-              value={employeeId}
-              onChange={(e) => setEmployeeId(e.target.value)}
-              required
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="type">Tipo</label>
-            <select
-              className="form-control"
-              id="type"
-              value={type}
-              onChange={(e) => setType(e.target.value)}
-              required
-            >
-              <option value="">Selecione</option>
-              <option value="admin">Administrador</option>
-              <option value="user">Usuário</option>
-            </select>
-          </div>
-          <button type="submit" className="btn btn-primary">
-            <FontAwesomeIcon icon={faSave} /> Salvar
-          </button>
-          <button
-            type="button"
-            className="btn btn-secondary ml-2"
-            onClick={closeModal}
-          >
-            <FontAwesomeIcon icon={faTimes} /> Cancelar
-          </button>
-        </form>
-      </Modal>
-
-      <Modal
-        isOpen={isEditModalOpen}
-        onRequestClose={() => setIsEditModalOpen(false)}
-        contentLabel="Editar Funcionário"
-        style={{
-          overlay: {
-            backgroundColor: "rgba(0, 0, 0, 0.5)",
-          },
-          content: {
-            top: "50%",
-            left: "50%",
-            right: "auto",
-            bottom: "auto",
-            marginRight: "-50%",
-            transform: "translate(-50%, -50%)",
-            width: "50%",
-          },
-        }}
-      >
-        <h2>Editar Funcionário</h2>
-        <form onSubmit={updateUser}>
-          <div className="form-group">
-            <label htmlFor="editName">Nome</label>
-            <input
-              type="text"
-              className="form-control"
-              id="editName"
-              value={editedUser.name}
-              onChange={(e) =>
-                setEditedUser({ ...editedUser, name: e.target.value })
-              }
-              required
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="editPhoneNumber">Telemóvel</label>
-            <input
-              type="tel"
-              className="form-control"
-              id="editPhoneNumber"
-              value={editedUser.phoneNumber}
-              onChange={(e) =>
-                setEditedUser({ ...editedUser, phoneNumber: e.target.value })
-              }
-              required
-            />
-          </div>
-
-          <button type="submit" className="btn btn-primary">
-            <FontAwesomeIcon icon={faSave} /> Salvar
-          </button>
-          <button
-            type="button"
-            className="btn btn-secondary ml-2"
-            onClick={() => setIsEditModalOpen(false)}
-          >
-            <FontAwesomeIcon icon={faTimes} /> Cancelar
-          </button>
-        </form>
-      </Modal>
 
       <Modal
         isOpen={isAssignSiteModalOpen}
@@ -512,40 +521,218 @@ const Team = () => {
             bottom: "auto",
             marginRight: "-50%",
             transform: "translate(-50%, -50%)",
-            width: "50%",
+            width: "70%",
+            maxWidth: "800px",
+            maxHeight: "450px", // Aumentei a altura máxima para acomodar melhor os botões
+            padding: "30px",
+            borderRadius: "10px",
+            overflow: "visible",
           },
         }}
       >
-        <h2>Atribuir Site</h2>
+        <h2 style={{ textAlign: "center", marginBottom: "20px" }}>
+          Atribuir Site
+        </h2>
         <form onSubmit={handleAssignSiteToUser}>
           <div className="form-group">
-            <label htmlFor="site">Site</label>
-            <select
-              className="form-control"
-              id="site"
-              value={selectedSite}
-              onChange={(e) => setSelectedSite(e.target.value)}
-              required
+            <label
+              htmlFor="site"
+              style={{
+                marginBottom: "10px",
+                display: "block",
+                fontWeight: "bold",
+              }}
             >
-              <option value="">Selecione um site</option>
-              {sites.map((site) => (
-                <option key={site._id} value={site._id}>
-                  {site.name}
-                </option>
-              ))}
-            </select>
+              Selecione um site:
+            </label>
+
+            <div className="custom-select-container">
+              <input
+                type="text"
+                className="form-control"
+                placeholder="Digite para pesquisar um site..."
+                value={siteSearchTerm}
+                onChange={(e) => setSiteSearchTerm(e.target.value)}
+                style={{ marginBottom: "10px" }}
+              />
+
+              <div
+                style={{
+                  maxHeight: "150px",
+                  overflowY: "auto",
+                  border: "1px solid #ced4da",
+                  borderRadius: "4px",
+                  marginBottom: "30px", // Aumentei o espaço após a lista
+                }}
+              >
+                {sites
+                  .filter(
+                    (site) =>
+                      site.name
+                        .toLowerCase()
+                        .includes(siteSearchTerm.toLowerCase()) ||
+                      site.costCenter
+                        .toLowerCase()
+                        .includes(siteSearchTerm.toLowerCase())
+                  )
+                  .map((site) => (
+                    <div
+                      key={site._id}
+                      className={`site-option ${
+                        selectedSite === site._id ? "selected" : ""
+                      }`}
+                      onClick={() => setSelectedSite(site._id)}
+                      style={{
+                        padding: "10px 15px",
+                        cursor: "pointer",
+                        backgroundColor:
+                          selectedSite === site._id ? "#e6e6ff" : "white",
+                        borderBottom: "1px solid #eee",
+                        transition: "background-color 0.2s",
+                      }}
+                      onMouseOver={(e) =>
+                        (e.currentTarget.style.backgroundColor =
+                          selectedSite === site._id ? "#e6e6ff" : "#f8f9fa")
+                      }
+                      onMouseOut={(e) =>
+                        (e.currentTarget.style.backgroundColor =
+                          selectedSite === site._id ? "#e6e6ff" : "white")
+                      }
+                    >
+                      <div style={{ fontWeight: "bold" }}>{site.name}</div>
+                      <div style={{ fontSize: "0.9em", color: "#666" }}>
+                        Centro de custo: {site.costCenter}
+                      </div>
+                    </div>
+                  ))}
+
+                {sites.filter(
+                  (site) =>
+                    site.name
+                      .toLowerCase()
+                      .includes(siteSearchTerm.toLowerCase()) ||
+                    site.costCenter
+                      .toLowerCase()
+                      .includes(siteSearchTerm.toLowerCase())
+                ).length === 0 && (
+                  <div
+                    style={{
+                      padding: "15px",
+                      textAlign: "center",
+                      color: "#666",
+                    }}
+                  >
+                    Nenhum site encontrado
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
-          <button type="submit" className="btn btn-primary">
-            <FontAwesomeIcon icon={faSave} /> Atribuir
-          </button>
-          <button
-            type="button"
-            className="btn btn-secondary ml-2"
-            onClick={closeAssignSiteModal}
+
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              gap: "20px",
+              marginTop: "20px", // Aumentei a margem superior
+              marginBottom: "20px", // Adicionei margem inferior
+            }}
           >
-            <FontAwesomeIcon icon={faTimes} /> Cancelar
-          </button>
+            <button
+              type="submit"
+              className="btn btn-primary"
+              disabled={!selectedSite}
+              style={{
+                width: "auto",
+                padding: "8px 15px",
+                fontSize: "14px",
+              }}
+            >
+              <FontAwesomeIcon icon={faSave} /> Atribuir
+            </button>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={closeAssignSiteModal}
+              style={{
+                width: "auto",
+                padding: "8px 15px",
+                fontSize: "14px",
+              }}
+            >
+              <FontAwesomeIcon icon={faTimes} /> Cancelar
+            </button>
+          </div>
         </form>
+      </Modal>
+
+      <Modal
+        isOpen={isSiteModalOpen}
+        onRequestClose={closeModalSite}
+        style={modalStyles}
+        ariaHideApp={false}
+      >
+        <div style={{ position: "relative" }}>
+          <button
+            className="btn-close"
+            onClick={closeModalSite}
+            style={closeButtonStyles}
+            aria-label="Fechar"
+          >
+            &times;
+          </button>
+          <h1 style={{ textAlign: "center", marginBottom: "20px" }}>Sites</h1>
+          <table style={tableContainerStyles}>
+            <thead>
+              <tr>
+                <th style={tableHeaderStyles}>NOME</th>
+                <th style={tableHeaderStyles}>Centro de custo</th>
+              </tr>
+            </thead>
+            <tbody>
+              {currentItems.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan="2"
+                    style={{ textAlign: "center", padding: "20px" }}
+                  >
+                    Nenhum dado disponível
+                  </td>
+                </tr>
+              ) : (
+                currentItems.map((site, index) => (
+                  <tr key={index} style={tableRowStyles}>
+                    <td style={tableCellStyles}>{site.name}</td>
+                    <td style={tableCellStyles}>{site.costCenter}</td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+          {currentItems.length > 0 && (
+            <div style={buttonContainerStyles}>
+              <button
+                className="btn btn-secondary"
+                onClick={handlePreviousPage}
+                style={prevButtonStyles}
+                disabled={currentPage === 1}
+              >
+                Anterior
+              </button>
+              <span style={{ fontSize: "14px" }}>
+                Página {currentPage} de {totalPages}
+              </span>
+              <button
+                className="btn btn-secondary"
+                onClick={handleNextPage}
+                style={nextButtonStyles}
+                disabled={currentPage === totalPages}
+              >
+                Próxima
+              </button>
+            </div>
+          )}
+        </div>
       </Modal>
       <ToastContainer />
     </div>

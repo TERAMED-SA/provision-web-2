@@ -15,6 +15,7 @@ import logo from "../../assets/logo.png";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { MdAccountCircle } from "react-icons/md";
 import { AiOutlineLineChart } from "react-icons/ai";
+import { Si1001Tracklists } from "react-icons/si";
 
 const Sidebar = ({ sidebarOpen, closeSidebar }) => {
   const [active, setActive] = useState(null);
@@ -50,7 +51,7 @@ const Sidebar = ({ sidebarOpen, closeSidebar }) => {
   const fetchOccurrenceData = async () => {
     try {
       const response = await axios.get(
-        `${process.env.REACT_APP_API_URL}occurrence?size=100000`
+        `${process.env.REACT_APP_API_URL}occurrence?size=5000`
       );
       const currentDate = getCurrentDate();
 
@@ -69,7 +70,7 @@ const Sidebar = ({ sidebarOpen, closeSidebar }) => {
   const fetchSupervisionData = async () => {
     try {
       const response = await axios.get(
-        `${process.env.REACT_APP_API_URL}supervision?size=100000`
+        `${process.env.REACT_APP_API_URL}supervision?size=5000`
       );
       const currentDate = getCurrentDate();
 
@@ -178,30 +179,7 @@ const Sidebar = ({ sidebarOpen, closeSidebar }) => {
             <span className="fs-6">Mapa</span>
           </Link>
         </li>
-        {/*  <li
-          className={active === 8 ? "active nav-item p-2" : "nav-item p-2"}
-          onClick={(e) => setActive(8)}
-        >
-          <Link to="/Occurrence" className="p-1">
-            <i className="me-3 fs-5">
-              <IoEyeSharp />
-            </i>
-            <span className="fs-6">
-              Ocorrências{" "}
-              <span
-                style={{
-                  fontWeight: "bold",
-                  background: "red",
-                  borderRadius: "10px",
-                  padding: "5px",
-                  marginLeft: "3px",
-                }}
-              >
-                {occurrenceNumber}
-              </span>
-            </span>
-          </Link>
-        </li> */}
+
         <li
           className={active === 8 ? "active nav-item p-2" : "nav-item p-2"}
           onClick={(e) => setActive(8)}
@@ -261,6 +239,17 @@ const Sidebar = ({ sidebarOpen, closeSidebar }) => {
               <AiOutlineLineChart />
             </i>
             <span className="fs-6">Estatística</span>
+          </Link>
+        </li>
+        <li
+          className={active === 10 ? "active nav-item p-2" : "nav-item p-2"}
+          onClick={(e) => setActive(10)}
+        >
+          <Link to="/team" className="p-1">
+            <i className="me-3 fs-5">
+              <Si1001Tracklists />
+            </i>
+            <span className="fs-6">Ajustes </span>
           </Link>
         </li>
         <li className="nav-item p-2">

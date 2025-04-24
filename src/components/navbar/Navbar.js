@@ -21,7 +21,7 @@ const Navbar = ({ sidebarOpen, openSidebar }) => {
               {/*  <div style={{ display: 'flex', flexDirection: "row" }}>
               
                 <input placeholder="Pesquisar..." className="form-control" style={{ borderRadius: '40px' }} />
-              </div>*/}
+              </div>
               {/* lista com 3 topologias 
                                   depois de escolher a topologia  
                                                 vemos o numero de serie
