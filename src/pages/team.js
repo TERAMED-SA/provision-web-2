@@ -160,7 +160,9 @@ const Team = () => {
   async function fetchUsers() {
     try {
       setIsLoading(true);
-      const response = await axios.get(`${process.env.REACT_APP_API_URL}user`);
+      const response = await axios.get(
+        `${process.env.REACT_APP_API_URL}user?size=500`
+      );
       if (response.data && Array.isArray(response.data.data.data)) {
         setUsers(response.data.data.data);
         setFilteredUsers(response.data.data.data);
