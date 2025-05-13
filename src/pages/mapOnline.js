@@ -217,9 +217,9 @@ const MapOnlineComponent = () => {
         return ReactDOMServer.renderToString(
           <div
             className="popup-content"
-            style={{ padding: "2px", maxWidth: "140px", cursor: "pointer" }}
+            style={{ padding: "2px", maxWidth: "150px", cursor: "pointer" }}
           >
-            <div className="popup-text" style={{ fontSize: "11px" }}>
+            <div className="popup-text" style={{ fontSize: "16px" }}>
               <div
                 style={{
                   margin: "0",

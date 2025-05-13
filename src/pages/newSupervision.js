@@ -142,6 +142,7 @@ const NotificationList = () => {
   const generatePDF = async (id, supervisorName, costCenter) => {
     const createdAt = new Date(modalInfo.createdAt);
     const formattedDate = modalInfo.createdAt; // Since it's already formatted as dd/MM/yyyy in your data
+    const formattedTime = modalInfo.createdAtTime; // Hora da supervisão
     const imageDataUrl = await convertImageToDataURL(logo);
 
     const getBase64ImageFromURL = (url) => {
@@ -193,12 +194,14 @@ const NotificationList = () => {
         },
         { text: `Nome: ${modalInfo.supervisorName}` },
         { text: `Código do Supervisor: ${modalInfo.supervisorCode}` },
-        { text: `Feito em: ${formattedDate}` },
+        { text: `Data: ${formattedDate}` },
+        { text: `Hora: ${formattedTime}` },
         {
           text: `Duração da Supervisão: ${
             modalInfo.time ? modalInfo.time.split(".")[0] : "Não informado"
           }`,
         },
+        { text: `Trabalhadores Encontrados: ${modalInfo.workersFound || 0}` },
         { text: "" },
         { text: "Informação do Site", bold: true, margin: [20, 10, 0, 5] },
         { text: `Nome do site: ${modalInfo.siteName}` },
@@ -215,7 +218,7 @@ const NotificationList = () => {
           alignment: "center",
           margin: [0, 10, 0, 10],
         },
-        { text: `Trabalhadores Encontrados: ${modalInfo.workersFound}` },
+        { text: `Trabalhadores Encontrados: ${modalInfo.workersFound || 0}` },
         {
           text: `Faltou: ${
             modalInfo.workerInformation ? modalInfo.workerInformation.length : 0
@@ -292,6 +295,7 @@ const NotificationList = () => {
       .createPdf(documentDefinition)
       .download(`relatório_supervisão_${formattedDate}.pdf`);
   };
+
   const convertImageToDataURL = (imagePath) => {
     return new Promise((resolve, reject) => {
       const img = new Image();
@@ -326,8 +330,8 @@ const NotificationList = () => {
     },
     {
       field: "workersFound",
-      headerName: "Trabalhadores",
-      width: 150,
+      headerName: "Trabalhadores encontrados",
+      width: 250,
       renderCell: (params) => {
         return <span>{params.value || 0}</span>;
       },
@@ -433,6 +437,13 @@ const NotificationList = () => {
             <p>Nome do Supervisor: {modalInfo.supervisorName}</p>
             <p>Código do Supervisor: {modalInfo.supervisorCode}</p>
             <p>Centro de Custo: {modalInfo.costCenter}</p>
+            <p>Data da Supervisão: {modalInfo.createdAt}</p>
+            <p>Hora da Supervisão: {modalInfo.createdAtTime}</p>
+            <p>
+              Duração da Supervisão:{" "}
+              {modalInfo.time ? modalInfo.time.split(".")[0] : "Não informado"}
+            </p>
+            <p>Trabalhadores Encontrados: {modalInfo.workersFound || 0}</p>
             <p>Relatório: {modalInfo.report}</p>
             <h3>Equipamentos</h3>
             {modalInfo.equipment && modalInfo.equipment.length > 0 ? (
@@ -466,6 +477,7 @@ const NotificationList = () => {
             </h1>
             <p>{modalInfo.report}</p>
           </Modal.Body>
+
           <Modal.Footer>
             <Button
               variant="success"
