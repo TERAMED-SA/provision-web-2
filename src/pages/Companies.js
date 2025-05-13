@@ -108,22 +108,24 @@ const Companies = () => {
     toast.warning("Funcionalidade ainda não foi implementada");
   };
 
+  useEffect(() => {
+    setSearchResults(companyList);
+  }, [companyList]);
+
   // Função para lidar com a pesquisa de clientes
-  const handleSearch = async (e) => {
+  const handleSearch = (e) => {
     const value = e.target.value;
     setSearchTerm(value);
-    try {
-      let results = companyList;
-      if (value) {
-        results = companyList.filter(
-          (company) =>
-            company.name.toLowerCase().includes(value.toLowerCase()) ||
-            company.clientCode.toLowerCase().includes(value.toLowerCase())
-        );
-      }
+
+    if (value.trim() === "") {
+      setSearchResults(companyList);
+    } else {
+      const results = companyList.filter(
+        (company) =>
+          company.name.toLowerCase().includes(value.toLowerCase()) ||
+          company.clientCode.toLowerCase().includes(value.toLowerCase())
+      );
       setSearchResults(results);
-    } catch (error) {
-      console.error("Erro ao pesquisar clientes:", error.message);
     }
   };
 
@@ -193,22 +195,13 @@ const Companies = () => {
                   <i className="bi bi-eye"></i> &nbsp;
                   {viewMode === "list" ? "Mosaico" : "Lista"}
                 </button>
-                
-                 {/*  <button
+
+                <button
                   className="btn btn-primary ms-2"
                   onClick={handleAddCompanyClick}
                 >
-                  <FontAwesomeIcon icon={faUserPlus} />
                   &nbsp; Adicionar Cliente
                 </button>
-                 <button className="btn btn-success">
-                  <MdPeopleAlt />
-                  &nbsp;Ativo
-                </button>
-                <button className="btn btn-danger">
-                  <MdGroupOff />
-                  &nbsp;Inativos
-                </button>*/}
               </div>
 
               {/* Renderização condicional com base no modo de visualização */}
@@ -225,18 +218,7 @@ const Companies = () => {
                                 handleItemClick(company.clientCode)
                               }
                               style={{ cursor: "pointer" }}
-                            >
-                              <td className="company-name">
-                                {/* Utiliza o componente Avatar para mostrar as iniciais do nome da empresa */}
-                                <Avatar
-                                  className="justify-content-center align-items-center"
-                                  name={company.name}
-                                  size="50"
-                                  round={true}
-                                />
-                                {company.name}
-                              </td>
-                            </tr>
+                            ></tr>
                           ))}
                         </tbody>
                       </table>
@@ -248,18 +230,7 @@ const Companies = () => {
                             className="col"
                             onClick={() => handleItemClick(company.clientCode)}
                             style={{ cursor: "pointer" }}
-                          >
-                            <div className="cards h-100 bg-white text-center d-flex flex-column justify-content-center align-items-center">
-                              {/* Adiciona o avatar apenas no modo de mosaico */}
-                              <Avatar
-                                className="mb-3"
-                                name={company.name}
-                                size="100"
-                                round={true}
-                              />
-                              <h5 className="card-title">{company.name}</h5>
-                            </div>
-                          </div>
+                          ></div>
                         ))}
                       </div>
                     )}
@@ -278,16 +249,7 @@ const Companies = () => {
                               title="Informações do cliente"
                               style={{ cursor: "pointer" }}
                             >
-                              <td className="company-name">
-                                {/* Utiliza o componente Avatar para mostrar as iniciais do nome da empresa */}
-                                <Avatar
-                                  className="justify-content-center align-items-center"
-                                  name={company.name}
-                                  size="50"
-                                  round={true}
-                                />
-                                {company.name}
-                              </td>
+                              <td className="company-name">{company.name}</td>
                             </tr>
                           ))}
                         </tbody>
@@ -303,13 +265,6 @@ const Companies = () => {
                             style={{ cursor: "pointer" }}
                           >
                             <div className="cards h-100 bg-white text-center d-flex flex-column justify-content-center align-items-center">
-                              {/* Adiciona o avatar apenas no modo de mosaico */}
-                              <Avatar
-                                className="mb-3"
-                                name={company.name}
-                                size="100"
-                                round={true}
-                              />
                               <h5 className="card-title">{company.name}</h5>
                             </div>
                           </div>
@@ -329,17 +284,6 @@ const Companies = () => {
         </Modal.Header>
         <Modal.Body>
           <div className="form-group">
-            <label htmlFor="name">Nome:</label>
-            <input
-              type="text"
-              className="form-control"
-              id="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Nome do Cliente"
-            />
-          </div>
-          <div className="form-group">
             <label htmlFor="clientCode">Código do Cliente:</label>
             <input
               type="text"
@@ -348,6 +292,17 @@ const Companies = () => {
               value={clientCode}
               onChange={(e) => setclientCode(e.target.value)}
               placeholder="Código do Cliente"
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="name">Nome:</label>
+            <input
+              type="text"
+              className="form-control"
+              id="name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Nome do Cliente"
             />
           </div>
         </Modal.Body>

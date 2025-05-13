@@ -310,11 +310,28 @@ const NotificationList = () => {
     });
   };
   const columns = [
-    { field: "createdAt", headerName: "Data", width: 150 },
-    { field: "name", headerName: "Nome", width: 350 },
-    { field: "supervisorName", headerName: "Supervisor", width: 200 },
-    { field: "siteName", headerName: "Site", width: 350 },
-
+    { field: "createdAt", headerName: "Data", width: 120 },
+    { field: "createdAtTime", headerName: "Hora", width: 100 },
+    { field: "supervisorName", headerName: "Supervisor", width: 300 },
+    { field: "siteName", headerName: "Site", width: 550 },
+    {
+      field: "time",
+      headerName: "Duração",
+      width: 120,
+      renderCell: (params) => {
+        // Formatar o tempo para mostrar apenas horas, minutos e segundos
+        const time = params.value ? params.value.split(".")[0] : "N/A";
+        return <span>{time}</span>;
+      },
+    },
+    {
+      field: "workersFound",
+      headerName: "Trabalhadores",
+      width: 150,
+      renderCell: (params) => {
+        return <span>{params.value || 0}</span>;
+      },
+    },
     {
       field: "actions",
       headerName: "Ações",

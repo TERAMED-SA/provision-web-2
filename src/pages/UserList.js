@@ -155,7 +155,7 @@ const UserList = () => {
       const userCoord = localStorage.getItem("userId");
       setIsLoading(true);
       const response = await axios.get(
-        `${process.env.REACT_APP_API_URL}user`
+        `${process.env.REACT_APP_API_URL}user?size=100`
       );
       if (response.data && Array.isArray(response.data.data.data)) {
         setUsers(response.data.data.data);
@@ -279,7 +279,7 @@ const UserList = () => {
     }
   };
 
-  const ITEMS_PER_PAGE = 5; // Defina quantos itens você quer mostrar por página
+  const ITEMS_PER_PAGE = 100; // Defina quantos itens você quer mostrar por página
 
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -338,18 +338,17 @@ const UserList = () => {
             </div>
           </div>
           <div className="">
-          {/* <button className="btn btn-primary mb-3" onClick={openModal}>
+            <button className="btn btn-primary mb-3" onClick={openModal}>
               <FontAwesomeIcon icon={faPlus} /> Adicionar Usuário
-            </button>*/}
+            </button>
           </div>
         </div>
         <div>
           {isLoading && (
             <div className="text-center mt-4">
-              <CircularProgress size={80} thickness={5} />
+              <CircularProgress size={30} thickness={5} />
             </div>
           )}
-
           {!isLoading && filteredUsers.length === 0 && (
             <div className="text-center text-black mt-4">
               Nenhum dado disponível
@@ -357,34 +356,27 @@ const UserList = () => {
           )}
 
           {!isLoading && filteredUsers.length > 0 && (
-            <>
+            <div style={{ height: "900px", width: "100%" }}>
               <DataGrid
                 rows={
                   Array.isArray(filteredUsers)
-                    ? filteredUsers
-                        .slice(pagesVisited, pagesVisited + usersPerPage)
-                        .map((user, index) => ({
-                          id: index,
-                          avatar: (
-                            <Avatar
-                              name={`${user.name}`}
-                              size="50"
-                              round={true}
-                            />
-                          ),
-                          name: user.name || "",
-                          phoneNumber: user.phoneNumber || "",
-                          idUser: user._id,
-                          employeeId: user.employeeId,
-                        }))
+                    ? filteredUsers.map((user, index) => ({
+                        id: index,
+                        avatar: (
+                          <Avatar
+                            name={`${user.name}`}
+                            size="50"
+                            round={true}
+                          />
+                        ),
+                        name: user.name || "",
+                        phoneNumber: user.phoneNumber || "",
+                        idUser: user._id,
+                        employeeId: user.employeeId,
+                      }))
                     : []
                 }
                 columns={[
-                  {
-                    field: "avatar",
-                    headerName: "Perfil",
-                    renderCell: (params) => params.value,
-                  },
                   {
                     field: "name",
                     headerName: "Nome",
@@ -399,7 +391,7 @@ const UserList = () => {
                     field: "actions",
                     headerName: "Ações",
                     flex: 1,
-                  
+
                     renderCell: (params) => (
                       <div className="central mb-3">
                         <button
@@ -416,38 +408,25 @@ const UserList = () => {
                         >
                           <FontAwesomeIcon icon={faTrash} />
                         </button>
-                      
                       </div>
                     ),
                   },
                 ]}
                 checkboxSelection={false}
-                pageSize={usersPerPage}
-                pagination
-                onPageChange={handlePageChange}
-                rowCount={filteredUsers.length}
-                pageCount={pageCount}
+                pagination={false}
+                disableSelectionOnClick
+                pageSize={100}
+                rowsPerPageOptions={false}
+                sx={{
+                  "& .MuiDataGrid-main": {
+                    overflow: "auto",
+                  },
+                  "& .MuiDataGrid-virtualScroller": {
+                    overflow: "auto",
+                  },
+                }}
               />
-              <Pagination>
-                <Pagination.Prev
-                  onClick={() => handlePageChange({ selected: pageNumber - 1 })}
-                  disabled={pageNumber === 0}
-                />
-                {Array.from({ length: pageCount }).map((_, index) => (
-                  <Pagination.Item
-                    key={index}
-                    active={index === pageNumber}
-                    onClick={() => handlePageChange({ selected: index })}
-                  >
-                    {index + 1}
-                  </Pagination.Item>
-                ))}
-                <Pagination.Next
-                  onClick={() => handlePageChange({ selected: pageNumber + 1 })}
-                  disabled={pageNumber === pageCount - 1}
-                />
-              </Pagination>
-            </>
+            </div>
           )}
         </div>
       </div>
@@ -618,7 +597,7 @@ const UserList = () => {
           },
           content: {
             width: "80%",
-            maxWidth: "500px", // Defina o tamanho máximo desejado aqui
+            maxWidth: "500px", //  tamanho máximo desejado aqui
           },
         }}
         overlayClassName="custom-modal-overlay"

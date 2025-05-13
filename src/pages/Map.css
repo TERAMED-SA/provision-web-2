@@ -1,16 +1,10 @@
 .popup-content {
   display: flex;
   align-items: center;
-  padding: 10px;
+  padding: 7px;
 }
 
-.popup-content img {
-  max-width: 100px;
-  height: auto;
-  border-radius: 50%;
-  margin-right: 10px;
-  /* Adiciona espaço entre a imagem e o texto */
-}
+
 
 .popup-text {
   display: flex;
@@ -27,9 +21,9 @@
 }
 
 .status .status-indicator {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
+  width: 5px;
+  height: 5px;
+  border-radius: 5%;
   margin-right: 5px;
 }
 
