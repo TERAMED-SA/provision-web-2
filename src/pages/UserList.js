@@ -339,7 +339,7 @@ const UserList = () => {
           </div>
           <div className="">
             <button className="btn btn-primary mb-3" onClick={openModal}>
-              <FontAwesomeIcon icon={faPlus} /> Adicionar Usuário
+              <FontAwesomeIcon icon={faPlus} /> Adicionar Supervisor
             </button>
           </div>
         </div>

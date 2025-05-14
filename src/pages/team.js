@@ -36,11 +36,11 @@ const Team = () => {
   const [editingUserId, setEditingUserId] = useState(null);
   const [editedUser, setEditedUser] = useState({});
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [pageNumber, setPageNumber] = useState(0);
+
   const [usersPerPage, setUsersPerPage] = useState(8);
   const [isLoading, setIsLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const pagesVisited = pageNumber * usersPerPage;
+
   const pageCount = Math.ceil(filteredUsers.length / usersPerPage);
   const [siteSearchTerm, setSiteSearchTerm] = useState("");
   const [isAssignSiteModalOpen, setIsAssignSiteModalOpen] = useState(false);
@@ -52,6 +52,7 @@ const Team = () => {
   const [userSite, setUserSite] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 5;
+  const safeSites = Array.isArray(sites) ? sites : [];
 
   // Estilos para a modal de sites
   const modalStyles = {
@@ -183,21 +184,13 @@ const Team = () => {
         setSites(response.data.data.data);
       } else {
         console.error("A resposta da API não contém um array de sites.");
+        setSites([]); // Garante que sites seja um array vazio em caso de erro
       }
     } catch (error) {
       console.error("Erro ao buscar sites:", error.message);
+      setSites([]); // Garante que sites seja um array vazio em caso de erro
     }
   }
-
-  const handlePageChange = ({ selected }) => {
-    setPageNumber(selected);
-  };
-
-  const handleUsersPerPageChange = (e) => {
-    const selectedUsersPerPage = parseInt(e.target.value, 10);
-    setUsersPerPage(selectedUsersPerPage);
-    setPageNumber(0);
-  };
 
   Modal.setAppElement("#root");
 
@@ -414,30 +407,18 @@ const Team = () => {
               <DataGrid
                 rows={
                   Array.isArray(filteredUsers)
-                    ? filteredUsers
-                        .slice(pagesVisited, pagesVisited + usersPerPage)
-                        .map((user, index) => ({
-                          id: index,
-                          avatar: (
-                            <Avatar
-                              name={`${user.name}`}
-                              size="50"
-                              round={true}
-                            />
-                          ),
-                          name: user.name || "",
-                          phoneNumber: user.phoneNumber || "",
-                          idUser: user._id,
-                          employeeId: user.employeeId,
-                        }))
+                    ? filteredUsers.map((user, index) => ({
+                        // Remover o slice para mostrar todos os usuários
+                        id: index,
+
+                        name: user.name || "",
+                        phoneNumber: user.phoneNumber || "",
+                        idUser: user._id,
+                        employeeId: user.employeeId,
+                      }))
                     : []
                 }
                 columns={[
-                  {
-                    field: "avatar",
-                    headerName: "Perfil",
-                    renderCell: (params) => params.value,
-                  },
                   {
                     field: "name",
                     headerName: "Nome",
@@ -477,32 +458,16 @@ const Team = () => {
                   },
                 ]}
                 checkboxSelection={false}
-                pageSize={usersPerPage}
-                pagination
-                onPageChange={handlePageChange}
-                rowCount={filteredUsers.length}
-                pageCount={pageCount}
-                style={{ height: "550px" }}
+                disableColumnFilter
+                disableColumnMenu
+                disableDensitySelector
+                disableColumnSelector
+                disableSelectionOnClick
+                disableVirtualization={false}
+                hideFooter={true} // Oculta a paginação
+                autoHeight={false}
+                style={{ height: "850px" }} // Mantém a altura fixa para permitir scroll
               />
-              <Pagination>
-                <Pagination.Prev
-                  onClick={() => handlePageChange({ selected: pageNumber - 1 })}
-                  disabled={pageNumber === 0}
-                />
-                {Array.from({ length: pageCount }).map((_, index) => (
-                  <Pagination.Item
-                    key={index}
-                    active={index === pageNumber}
-                    onClick={() => handlePageChange({ selected: index })}
-                  >
-                    {index + 1}
-                  </Pagination.Item>
-                ))}
-                <Pagination.Next
-                  onClick={() => handlePageChange({ selected: pageNumber + 1 })}
-                  disabled={pageNumber === pageCount - 1}
-                />
-              </Pagination>
             </>
           )}
         </div>
@@ -567,19 +532,33 @@ const Team = () => {
                   marginBottom: "30px", // Aumentei o espaço após a lista
                 }}
               >
-                {sites
-                  .filter(
-                    (site) =>
-                      site.name
-                        .toLowerCase()
-                        .includes(siteSearchTerm.toLowerCase()) ||
-                      site.costCenter
-                        .toLowerCase()
-                        .includes(siteSearchTerm.toLowerCase())
-                  )
+                {safeSites
+                  .filter((site) => {
+                    // Verificar se o site existe
+                    if (!site) return false;
+
+                    // Verificar se o termo de pesquisa existe
+                    const searchTerm = siteSearchTerm
+                      ? siteSearchTerm.toLowerCase()
+                      : "";
+
+                    // Verificar name de forma segura
+                    const siteName = site.name ? site.name.toLowerCase() : "";
+
+                    // Verificar costCenter de forma segura
+                    const siteCostCenter = site.costCenter
+                      ? site.costCenter.toLowerCase()
+                      : "";
+
+                    // Retornar resultado da pesquisa
+                    return (
+                      siteName.includes(searchTerm) ||
+                      siteCostCenter.includes(searchTerm)
+                    );
+                  })
                   .map((site) => (
                     <div
-                      key={site._id}
+                      key={site._id || Math.random().toString()}
                       className={`site-option ${
                         selectedSite === site._id ? "selected" : ""
                       }`}
@@ -601,22 +580,29 @@ const Team = () => {
                           selectedSite === site._id ? "#e6e6ff" : "white")
                       }
                     >
-                      <div style={{ fontWeight: "bold" }}>{site.name}</div>
+                      <div style={{ fontWeight: "bold" }}>
+                        {site.name || "Sem nome"}
+                      </div>
                       <div style={{ fontSize: "0.9em", color: "#666" }}>
-                        Centro de custo: {site.costCenter}
+                        Centro de custo: {site.costCenter || "N/A"}
                       </div>
                     </div>
                   ))}
 
-                {sites.filter(
-                  (site) =>
-                    site.name
-                      .toLowerCase()
-                      .includes(siteSearchTerm.toLowerCase()) ||
-                    site.costCenter
-                      .toLowerCase()
-                      .includes(siteSearchTerm.toLowerCase())
-                ).length === 0 && (
+                {safeSites.filter((site) => {
+                  if (!site) return false;
+                  const searchTerm = siteSearchTerm
+                    ? siteSearchTerm.toLowerCase()
+                    : "";
+                  const siteName = site.name ? site.name.toLowerCase() : "";
+                  const siteCostCenter = site.costCenter
+                    ? site.costCenter.toLowerCase()
+                    : "";
+                  return (
+                    siteName.includes(searchTerm) ||
+                    siteCostCenter.includes(searchTerm)
+                  );
+                }).length === 0 && (
                   <div
                     style={{
                       padding: "15px",
@@ -653,16 +639,11 @@ const Team = () => {
               <FontAwesomeIcon icon={faSave} /> Atribuir
             </button>
             <button
-              type="button"
+              type="submit"
               className="btn btn-secondary"
               onClick={closeAssignSiteModal}
-              style={{
-                width: "auto",
-                padding: "8px 15px",
-                fontSize: "14px",
-              }}
             >
-              <FontAwesomeIcon icon={faTimes} /> Cancelar
+              Cancelar
             </button>
           </div>
         </form>

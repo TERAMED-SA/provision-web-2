@@ -11,23 +11,245 @@ import "react-toastify/dist/ReactToastify.css";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { useMemo } from "react";
+import logo from "../assets/logo.png";
+import { jsPDF } from "jspdf";
+import "jspdf-autotable";
+
+// Estilos para a modal de detalhes
+const customModalStyles = `
+  .custom-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+  }
+  
+  .custom-modal {
+    background: white;
+    width: 90%;
+    max-width: 1200px;
+    max-height: 90vh;
+    border-radius: 8px;
+    padding: 0;
+    overflow-y: auto;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  }
+  
+  .custom-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+  }
+  
+  .custom-modal-close {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #555;
+  }
+  
+  .custom-modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 15px 20px;
+    background-color: #f8f9fa;
+    border-top: 1px solid #dee2e6;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+  }
+  
+  .btn-custom {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.2s;
+  }
+  
+  .btn-success {
+    background-color: #28a745;
+    color: white;
+  }
+  
+  .btn-success:hover {
+    background-color: #218838;
+  }
+  
+  .btn-info {
+    background-color: #17a2b8;
+    color: white;
+  }
+  
+  .btn-info:hover {
+    background-color: #138496;
+  }
+  
+  .btn-secondary {
+    background-color: #6c757d;
+    color: white;
+  }
+  
+  .btn-secondary:hover {
+    background-color: #5a6268;
+  }
+  
+  .custom-modal-body {
+    padding: 20px 40px;
+    font-family: 'Roboto', Arial, sans-serif;
+  }
+  
+  .logo-container {
+    text-align: center;
+    margin-bottom: 20px;
+    padding-top: 20px;
+  }
+  
+  .logo-container img {
+    max-width: 150px;
+    height: auto;
+  }
+  
+  .report-title {
+    font-size: 22px;
+    font-weight: bold;
+    text-align: center;
+    margin: 30px 0 20px;
+    color: #333;
+  }
+  
+  .section-title {
+    font-size: 18px;
+    font-weight: bold;
+    text-align: center;
+    margin: 20px 0 15px;
+    color: #333;
+    background-color: #f5f5f5;
+    padding: 8px;
+    border-radius: 4px;
+  }
+  
+  .subsection-title {
+    font-size: 16px;
+    font-weight: bold;
+    margin: 15px 0 10px;
+    color: #444;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 5px;
+  }
+  
+  .info-row {
+    margin-bottom: 8px;
+    display: flex;
+  }
+  
+  .info-label {
+    font-weight: bold;
+    min-width: 200px;
+  }
+  
+  .info-value {
+    flex: 1;
+  }
+  
+  .divider {
+    height: 1px;
+    background-color: #ddd;
+    margin: 20px 0;
+  }
+  
+  .worker-section, .equipment-section {
+    margin-top: 15px;
+    padding: 15px;
+    border: 1px solid #eee;
+    border-radius: 5px;
+    background-color: #fafafa;
+  }
+  
+  .item-card {
+    background-color: white;
+    border: 1px solid #eee;
+    border-radius: 4px;
+    padding: 10px 15px;
+    margin-bottom: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  }
+  
+  .footer-note {
+    text-align: center;
+    font-size: 12px;
+    color: #777;
+    margin-top: 30px;
+    font-style: italic;
+  }
+  
+  .priority-badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-weight: bold;
+    color: white;
+  }
+  
+  .priority-high {
+    background-color: #dc3545;
+  }
+  
+  .priority-medium {
+    background-color: #ffc107;
+    color: #212529;
+  }
+  
+  .priority-low {
+    background-color: #28a745;
+  }
+`;
 
 const NotificationList = () => {
   const [notifications, setNotifications] = useState([]);
+  const [metricsData, setMetricsData] = useState([]);
   const [selectedNotification, setSelectedNotification] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [modalShow, setModalShow] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedDate, setSelectedDate] = useState(null);
 
+  // Adicionar estilos personalizados
+  useEffect(() => {
+    const styleElement = document.createElement("style");
+    styleElement.innerHTML = customModalStyles;
+    document.head.appendChild(styleElement);
+    return () => {
+      document.head.removeChild(styleElement);
+    };
+  }, []);
+
   useEffect(() => {
     fetchNotifications();
   }, []);
 
+  useEffect(() => {
+    if (notifications.length > 0) {
+      fetchMetrics();
+    }
+  }, [notifications]);
+
   async function fetchNotifications() {
     try {
       setIsLoading(true);
-      // const user = localStorage.getItem("userId");
       const response = await axios.get(
         `${process.env.REACT_APP_API_URL}occurrence?size=100000`
       );
@@ -35,22 +257,76 @@ const NotificationList = () => {
         (notification) => ({
           ...notification,
           createdAt: format(new Date(notification.createdAt), "dd/MM/yyyy"),
+          createdAtTime: format(new Date(notification.createdAt), "HH:mm"),
+          createdAtDate: new Date(notification.createdAt),
+          supervisorName: notification.supervisorName || "Carregando...",
+          siteName: notification.name || "Carregando...",
         })
       );
       console.log(formattedNotifications);
       setNotifications(formattedNotifications);
-      setIsLoading(false);
     } catch (error) {
       console.error("Error fetching notifications:", error.message);
+      toast.error("Erro ao carregar ocorrências");
+    } finally {
       setIsLoading(false);
     }
   }
 
+  const fetchMetrics = async () => {
+    try {
+      const response = await axios.get(
+        `${process.env.REACT_APP_API_URL}admin/metrics?size=950&page=1`
+      );
+      setMetricsData(response.data.data.sites);
+      updateNotificationsWithMetrics(response.data.data.sites);
+      console.log(
+        "Métricas carregadas:",
+        response.data.data.sites.map((site) => site.siteName)
+      );
+    } catch (error) {
+      console.error("Error fetching metrics:", error.message);
+      toast.error("Erro ao carregar métricas");
+    }
+  };
+
+  const updateNotificationsWithMetrics = (metrics) => {
+    const updatedNotifications = notifications.map((notification) => {
+      const metricSite = metrics.find(
+        (site) => site.siteCostcenter === notification.costCenter
+      );
+      if (metricSite) {
+        // Simplesmente use o nome do supervisor do site, sem verificação adicional
+        const supervisorName = metricSite.supervisor
+          ? metricSite.supervisor.name
+          : "Não encontrado";
+
+        return {
+          ...notification,
+          supervisorName: supervisorName,
+          siteName: metricSite.siteName || notification.name || "Sem site",
+        };
+      }
+      return notification;
+    });
+    setNotifications(updatedNotifications);
+  };
+
   const handleViewDetails = async (notification) => {
-    // Caso queira mesclar os dados, pode combinar o notification original com o retorno da API
-    const occorence = await getOcorrenceByIdNot(notification.idNotification);
-    setSelectedNotification(occorence);
-    setModalShow(true);
+    try {
+      const occorence = await getOcorrenceByIdNot(notification.idNotification);
+      // Combinar os dados da ocorrência com os dados da notificação
+      setSelectedNotification({
+        ...occorence,
+        ...notification,
+        createdAt: notification.createdAt,
+        createdAtTime: notification.createdAtTime,
+      });
+      setModalShow(true);
+    } catch (error) {
+      console.error("Erro ao buscar detalhes da ocorrência:", error);
+      toast.error("Erro ao carregar detalhes da ocorrência");
+    }
   };
 
   async function getOcorrenceByIdNot(id) {
@@ -61,6 +337,7 @@ const NotificationList = () => {
       return response.data.data;
     } catch (error) {
       console.error("Erro:", error);
+      throw error;
     }
   }
 
@@ -68,12 +345,10 @@ const NotificationList = () => {
   const isValidDate = (dateString) => {
     const regex = /^(\d{2})\/(\d{2})\/(\d{4})$/;
     if (!regex.test(dateString)) return false;
-
     const parts = dateString.split("/");
     const day = parseInt(parts[0], 10);
     const month = parseInt(parts[1], 10) - 1; // Months are zero-based
     const year = parseInt(parts[2], 10);
-
     const date = new Date(year, month, day);
     return (
       date.getFullYear() === year &&
@@ -89,17 +364,18 @@ const NotificationList = () => {
         notification.createdAt && isValidDate(notification.createdAt)
           ? notification.createdAt
           : null;
-
       const searchDate = selectedDate
         ? format(selectedDate, "dd/MM/yyyy")
         : null;
-
       return (
         (notification.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
           notification.costCenter
             ?.toLowerCase()
             .includes(searchQuery.toLowerCase()) ||
           notification.details
+            ?.toLowerCase()
+            .includes(searchQuery.toLowerCase()) ||
+          notification.supervisorName
             ?.toLowerCase()
             .includes(searchQuery.toLowerCase())) &&
         (!selectedDate || notificationDate === searchDate)
@@ -110,23 +386,306 @@ const NotificationList = () => {
       ...notification,
     }));
 
-  const approve = async (costCenter, idNot) => {
+  const generatePDF = async () => {
     try {
-      const response = await axios.put(
-        `${process.env.REACT_APP_API_URL}supervision/validate/${costCenter}/${idNot}`
-      );
-      toast.success("Aprovado com sucesso");
-      setTimeout(() => {
-        window.location.reload();
-      }, 3000);
-    } catch (error) {
-      toast.error("Por favor tente novamente ou contacte um administrador");
-      console.log("Error:", error);
-    }
-  };
+      if (!selectedNotification) {
+        toast.error("Nenhuma ocorrência selecionada");
+        return;
+      }
 
-  const generatePDF = async (id, name) => {
-    // Lógica para gerar PDF
+      // Criar novo documento PDF
+      const doc = new jsPDF();
+
+      // Definir margens e posição inicial
+      const margin = 20;
+      let yPos = 20;
+
+      // Adicionar logo
+      try {
+        // Usar um tamanho fixo para o logo para evitar problemas
+        doc.addImage(logo, "PNG", 80, yPos, 50, 25);
+        yPos += 35;
+      } catch (logoError) {
+        console.error("Erro ao adicionar logo:", logoError);
+        // Continuar mesmo se o logo falhar
+        yPos += 10;
+      }
+
+      // Título
+      doc.setFontSize(18);
+      doc.setFont("helvetica", "bold");
+      doc.text("RELATÓRIO DE OCORRÊNCIA", 105, yPos, { align: "center" });
+      yPos += 10;
+
+      // Linha divisória
+      doc.setDrawColor(200, 200, 200);
+      doc.setLineWidth(0.5);
+      doc.line(margin, yPos, 210 - margin, yPos);
+      yPos += 10;
+
+      // Seção de informações gerais
+      doc.setFontSize(14);
+      doc.setFont("helvetica", "bold");
+      doc.text("INFORMAÇÕES GERAIS", 105, yPos, { align: "center" });
+      yPos += 10;
+
+      // Informações gerais em formato de texto
+      doc.setFontSize(11);
+      doc.setFont("helvetica", "bold");
+      doc.text("Local:", margin, yPos);
+      doc.setFont("helvetica", "normal");
+      doc.text(selectedNotification.siteName || "N/A", margin + 60, yPos);
+      yPos += 7;
+
+      doc.setFont("helvetica", "bold");
+      doc.text("Centro de Custo:", margin, yPos);
+      doc.setFont("helvetica", "normal");
+      doc.text(selectedNotification.costCenter || "N/A", margin + 60, yPos);
+      yPos += 7;
+
+      doc.setFont("helvetica", "bold");
+      doc.text("Supervisor:", margin, yPos);
+      doc.setFont("helvetica", "normal");
+      doc.text(
+        selectedNotification.supervisorName || "Não informado",
+        margin + 60,
+        yPos
+      );
+      yPos += 7;
+
+      doc.setFont("helvetica", "bold");
+      doc.text("Data:", margin, yPos);
+      doc.setFont("helvetica", "normal");
+      doc.text(selectedNotification.createdAt || "N/A", margin + 60, yPos);
+      yPos += 7;
+
+      doc.setFont("helvetica", "bold");
+      doc.text("Hora:", margin, yPos);
+      doc.setFont("helvetica", "normal");
+      doc.text(selectedNotification.createdAtTime || "N/A", margin + 60, yPos);
+      yPos += 7;
+
+      doc.setFont("helvetica", "bold");
+      doc.text("Prioridade:", margin, yPos);
+      doc.setFont("helvetica", "normal");
+      doc.text(
+        getPriorityLabel(selectedNotification.priority) || "N/A",
+        margin + 60,
+        yPos
+      );
+      yPos += 7;
+
+      doc.setFont("helvetica", "bold");
+      doc.text("Número de Trabalhadores:", margin, yPos);
+      doc.setFont("helvetica", "normal");
+      doc.text(
+        String(selectedNotification.numberOfWorkers || 0),
+        margin + 60,
+        yPos
+      );
+      yPos += 15;
+
+      // Linha divisória
+      doc.setDrawColor(200, 200, 200);
+      doc.setLineWidth(0.5);
+      doc.line(margin, yPos - 5, 210 - margin, yPos - 5);
+
+      // Detalhes da ocorrência
+      doc.setFontSize(14);
+      doc.setFont("helvetica", "bold");
+      doc.text("DETALHES DA OCORRÊNCIA", 105, yPos, { align: "center" });
+      yPos += 10;
+
+      // Texto dos detalhes
+      doc.setFontSize(11);
+      doc.setFont("helvetica", "normal");
+
+      // Quebrar texto longo em múltiplas linhas
+      const detailsText =
+        selectedNotification.details || "Sem detalhes disponíveis.";
+      const splitDetails = doc.splitTextToSize(detailsText, 170);
+
+      // Verificar se precisa de nova página
+      if (yPos + splitDetails.length * 7 > 280) {
+        doc.addPage();
+        yPos = 20;
+      }
+
+      doc.text(splitDetails, margin, yPos);
+      yPos += splitDetails.length * 7 + 15;
+
+      // Linha divisória
+      doc.setDrawColor(200, 200, 200);
+      doc.setLineWidth(0.5);
+      doc.line(margin, yPos - 5, 210 - margin, yPos - 5);
+
+      // Informações dos trabalhadores
+      doc.setFontSize(14);
+      doc.setFont("helvetica", "bold");
+      doc.text("INFORMAÇÃO DOS TRABALHADORES", 105, yPos, { align: "center" });
+      yPos += 10;
+
+      // Verificar se há trabalhadores
+      if (
+        selectedNotification.workerInformation &&
+        selectedNotification.workerInformation.length > 0
+      ) {
+        doc.setFontSize(11);
+
+        selectedNotification.workerInformation.forEach((worker, index) => {
+          // Verificar se precisa de nova página
+          if (yPos > 250) {
+            doc.addPage();
+            yPos = 20;
+          }
+
+          // Adicionar retângulo de fundo
+          doc.setFillColor(245, 245, 245);
+          doc.rect(margin, yPos - 3, 170, 30, "F");
+
+          doc.setFont("helvetica", "bold");
+          doc.text(`Trabalhador ${index + 1}:`, margin + 2, yPos);
+          yPos += 7;
+
+          doc.setFont("helvetica", "bold");
+          doc.text("Nome:", margin + 5, yPos);
+          doc.setFont("helvetica", "normal");
+          doc.text(worker.name || "N/A", margin + 40, yPos);
+
+          doc.setFont("helvetica", "bold");
+          doc.text("Número:", margin + 90, yPos);
+          doc.setFont("helvetica", "normal");
+          doc.text(worker.employeeNumber || "N/A", margin + 125, yPos);
+          yPos += 7;
+
+          doc.setFont("helvetica", "bold");
+          doc.text("Estado:", margin + 5, yPos);
+          doc.setFont("helvetica", "normal");
+          doc.text(worker.state || "N/A", margin + 40, yPos);
+
+          doc.setFont("helvetica", "bold");
+          doc.text("Obs:", margin + 90, yPos);
+          doc.setFont("helvetica", "normal");
+          doc.text(worker.obs || "N/A", margin + 125, yPos);
+          yPos += 12;
+        });
+      } else {
+        doc.setFontSize(11);
+        doc.setFont("helvetica", "normal");
+        doc.text("Nenhuma informação de trabalhador disponível.", margin, yPos);
+        yPos += 10;
+      }
+
+      yPos += 5;
+
+      // Linha divisória
+      doc.setDrawColor(200, 200, 200);
+      doc.setLineWidth(0.5);
+      doc.line(margin, yPos - 5, 210 - margin, yPos - 5);
+
+      // Equipamentos
+      // Verificar se precisa de nova página
+      if (yPos > 250) {
+        doc.addPage();
+        yPos = 20;
+      }
+
+      doc.setFontSize(14);
+      doc.setFont("helvetica", "bold");
+      doc.text("EQUIPAMENTOS", 105, yPos, { align: "center" });
+      yPos += 10;
+
+      // Verificar se há equipamentos
+      if (
+        selectedNotification.equipment &&
+        selectedNotification.equipment.length > 0
+      ) {
+        doc.setFontSize(11);
+
+        selectedNotification.equipment.forEach((equip, index) => {
+          // Verificar se precisa de nova página
+          if (yPos > 250) {
+            doc.addPage();
+            yPos = 20;
+          }
+
+          // Adicionar retângulo de fundo
+          doc.setFillColor(245, 245, 245);
+          doc.rect(margin, yPos - 3, 170, 30, "F");
+
+          doc.setFont("helvetica", "bold");
+          doc.text(`Equipamento ${index + 1}:`, margin + 2, yPos);
+          yPos += 7;
+
+          doc.setFont("helvetica", "bold");
+          doc.text("Nome:", margin + 5, yPos);
+          doc.setFont("helvetica", "normal");
+          doc.text(equip.name || "N/A", margin + 40, yPos);
+
+          doc.setFont("helvetica", "bold");
+          doc.text("Número de Série:", margin + 90, yPos);
+          doc.setFont("helvetica", "normal");
+          doc.text(equip.serialNumber || "N/A", margin + 150, yPos);
+          yPos += 7;
+
+          doc.setFont("helvetica", "bold");
+          doc.text("Estado:", margin + 5, yPos);
+          doc.setFont("helvetica", "normal");
+          doc.text(equip.state || "N/A", margin + 40, yPos);
+
+          doc.setFont("helvetica", "bold");
+          doc.text("Centro de Custo:", margin + 90, yPos);
+          doc.setFont("helvetica", "normal");
+          doc.text(equip.costCenter || "N/A", margin + 150, yPos);
+          yPos += 12;
+
+          if (equip.obs) {
+            doc.setFont("helvetica", "bold");
+            doc.text("Observações:", margin + 5, yPos);
+            doc.setFont("helvetica", "normal");
+
+            const obsLines = doc.splitTextToSize(equip.obs, 160);
+            doc.text(obsLines, margin + 40, yPos);
+            yPos += obsLines.length * 7 + 5;
+          }
+        });
+      } else {
+        doc.setFontSize(11);
+        doc.setFont("helvetica", "normal");
+        doc.text("Nenhum equipamento registrado.", margin, yPos);
+        yPos += 10;
+      }
+
+      // Rodapé
+      const pageCount = doc.internal.getNumberOfPages();
+      for (let i = 1; i <= pageCount; i++) {
+        doc.setPage(i);
+        doc.setFontSize(9);
+        doc.setTextColor(100);
+        doc.text(
+          `Página ${i} de ${pageCount} - Gerado pelo sistema em ${format(
+            new Date(),
+            "dd/MM/yyyy HH:mm"
+          )}`,
+          105,
+          285,
+          { align: "center" }
+        );
+      }
+
+      // Salvar o PDF
+      doc.save(
+        `Ocorrencia_${selectedNotification.costCenter}_${format(
+          new Date(),
+          "ddMMyyyy_HHmm"
+        )}.pdf`
+      );
+
+      toast.success("PDF gerado com sucesso!");
+    } catch (error) {
+      console.error("Erro ao gerar PDF:", error);
+      toast.error(`Erro ao gerar o PDF: ${error.message}`);
+    }
   };
 
   const handleApproval = () => {
@@ -135,18 +694,12 @@ const NotificationList = () => {
     );
   };
 
-  const handleRejection = () => {
-    setModalShow(false);
-  };
   const sortedRows = [...filteredRows]
     .map((row) => {
       let createdAtTimestamp = 0; // Valor padrão para datas inválidas
-
-      if (row.createdAt && isValidDate(row.createdAt)) {
-        const [day, month, year] = row.createdAt.split("/");
-        createdAtTimestamp = new Date(`${year}-${month}-${day}`).getTime();
+      if (row.createdAtDate) {
+        createdAtTimestamp = row.createdAtDate.getTime();
       }
-
       return {
         ...row,
         createdAtTimestamp, // Adiciona o timestamp para ordenação
@@ -155,6 +708,33 @@ const NotificationList = () => {
     .sort((a, b) => b.createdAtTimestamp - a.createdAtTimestamp); // Ordena em ordem decrescente
 
   console.log("Dados depois da ordenação:", sortedRows);
+
+  function getPriorityLabel(priority) {
+    switch (priority) {
+      case 0:
+        return "Máxima";
+      case 1:
+        return "Média";
+      case 2:
+        return "Mínima";
+      default:
+        return "Baixa";
+    }
+  }
+
+  function getPriorityClass(priority) {
+    switch (priority) {
+      case 0:
+        return "priority-high";
+      case 1:
+        return "priority-medium";
+      case 2:
+        return "priority-low";
+      default:
+        return "priority-low";
+    }
+  }
+
   return (
     <div className="container4 mr-2" style={{ height: "89vh" }}>
       <h1 style={{ textAlign: "center" }}>
@@ -164,7 +744,7 @@ const NotificationList = () => {
         <Link to="/Home" className="p-1">
           Início{" "}
         </Link>{" "}
-        / <span>Supervisão</span>
+        / <span>Ocorrências</span>
         <br></br> <br></br>
         <div
           style={{
@@ -182,30 +762,11 @@ const NotificationList = () => {
           >
             <input
               type="text"
-              className="form-control"
-              placeholder="Pesquisar..."
+              placeholder="Pesquisar por site, supervisor ou detalhes..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              style={{ paddingLeft: "3rem" }}
+              style={{ padding: "5px", width: "300px" }}
             />
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="30"
-              height="20"
-              fill="currentColor"
-              className="bi bi-search"
-              viewBox="0 0 16 16"
-              style={{
-                position: "absolute",
-                left: "10px",
-                top: "25px",
-                transform: "translateY(-50%)",
-                pointerEvents: "none",
-                color: "#0d214f ",
-              }}
-            >
-              <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001l3.85 3.85a1 1 0 0 0 1.415-1.415l-3.85-3.85zm-5.598 0A5.5 5.5 0 1 1 10.5 5.5a5.5 5.5 0 0 1-4.356 4.844z" />
-            </svg>
           </div>
           <DatePicker
             selected={selectedDate}
@@ -221,7 +782,6 @@ const NotificationList = () => {
           {filteredRows.length}
         </div>
       </div>
-
       {isLoading ? (
         <div className="text-center mt-4">
           <CircularProgress size={80} thickness={5} />
@@ -229,158 +789,290 @@ const NotificationList = () => {
       ) : filteredRows.length === 0 ? (
         <p>Nenhuma ocorrência encontrada</p>
       ) : (
-        <DataGrid
-          rows={sortedRows}
-          columns={[
-            {
-              field: "createdAt",
-              headerName: "Data",
-              width: 150,
-              disableColumnSorting: true,
-            },
-            { field: "details", headerName: "Detalhes", width: 390 },
-            { field: "name", headerName: "Site", width: 360 },
-            {
-              field: "costCenter",
-              headerName: "Centro de custo",
-              width: 200,
-            },
-            {
-              field: "detalhes",
-              headerName: "Detalhes",
-              width: 130,
-              renderCell: (params) => (
-                <Button
-                  variant="info"
-                  size="sm"
-                  onClick={() => handleViewDetails(params.row)}
-                >
-                  Ver Detalhes
-                </Button>
-              ),
-            },
-          ]}
-          pageSize={10}
-          autoHeight
-          disableColumnSorting
-          initialState={{
-            pagination: {
-              paginationModel: { pageSize: 12, page: 0 },
-            },
-          }}
-          pageSizeOptions={[5, 10, 25, 50]}
-          pagination
-          disableSelectionOnClick
-          getRowId={(row) => row.id}
-        />
+        <div style={{ height: "70vh", width: "100%" }}>
+          <DataGrid
+            rows={sortedRows}
+            columns={[
+              {
+                field: "createdAtTime",
+                headerName: "Hora",
+                width: 90,
+                disableColumnSorting: true,
+              },
+              {
+                field: "createdAt",
+                headerName: "Data",
+                width: 100,
+                disableColumnSorting: true,
+              },
+              {
+                field: "siteName",
+                headerName: "Site",
+                width: 450,
+              },
+              {
+                field: "supervisorName",
+                headerName: "Supervisor",
+                width: 200,
+                valueGetter: (params) =>
+                  params.row.supervisorName || "Não informado",
+              },
+              {
+                field: "details",
+                headerName: "Detalhes",
+                width: 500,
+                renderCell: (params) => {
+                  // Limitar o texto a dois parágrafos ou aproximadamente 150 caracteres
+                  const fullText = params.value || "";
+                  let limitedText = fullText;
+
+                  // Verificar se há parágrafos
+                  const paragraphs = fullText.split(/\n+/);
+                  if (paragraphs.length > 2) {
+                    limitedText = paragraphs.slice(0, 2).join("\n") + "...";
+                  } else if (fullText.length > 50) {
+                    // Se não houver parágrafos claros, limitar por caracteres
+                    limitedText = fullText.substring(0, 50) + "...";
+                  }
+
+                  return (
+                    <div style={{ whiteSpace: "normal", lineHeight: "50" }}>
+                      {limitedText}
+                    </div>
+                  );
+                },
+              },
+              {
+                field: "priority",
+                headerName: "Prioridade",
+                width: 120,
+                renderCell: (params) => (
+                  <div
+                    className={`priority-badge ${getPriorityClass(
+                      params.value
+                    )}`}
+                  >
+                    {getPriorityLabel(params.value)}
+                  </div>
+                ),
+              },
+              {
+                field: "actions",
+                headerName: "Ações",
+                width: 130,
+                renderCell: (params) => (
+                  <Button
+                    variant="info"
+                    size="sm"
+                    onClick={() => handleViewDetails(params.row)}
+                  >
+                    Ver Mais
+                  </Button>
+                ),
+              },
+            ]}
+            disableColumnSorting
+            disableSelectionOnClick
+            getRowId={(row) => row.id}
+            hideFooter={true}
+            rowCount={sortedRows.length}
+            disableColumnFilter
+            disableDensitySelector
+            disableColumnMenu
+            disableColumnSelector
+            disableVirtualization={false}
+            rowsPerPageOptions={[]}
+            pagination={false}
+          />
+        </div>
       )}
 
-      <Modal show={modalShow} onHide={() => setModalShow(false)} size="lg">
-        <Modal.Header closeButton>
-          <Modal.Title>Detalhes da Ocorrência</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <div className="occurrence-details">
-            <h4>Informações Gerais</h4>
-            <div className="info-grid">
-              <p>
-                <strong>Local:</strong> {selectedNotification?.name}
-              </p>
-              <p>
-                <strong>Centro de Custo:</strong>{" "}
-                {selectedNotification?.costCenter}
-              </p>
-
-              <p>
-                <strong>Prioridade:</strong>{" "}
-                {getPriorityLabel(selectedNotification?.priority)}
-              </p>
-              <p>
-                <strong>Número de Trabalhadores:</strong>{" "}
-                {selectedNotification?.numberOfWorkers}
-              </p>
-              <p>
-                <strong>Detalhes:</strong> {selectedNotification?.details}
-              </p>
+      {/* Modal de detalhes personalizada */}
+      {modalShow && selectedNotification && (
+        <div className="custom-modal-overlay">
+          <div className="custom-modal">
+            <div className="custom-modal-header">
+              <h2>Detalhes da Ocorrência</h2>
+              <button
+                className="custom-modal-close"
+                onClick={() => setModalShow(false)}
+              >
+                ×
+              </button>
             </div>
-
-            <h4>Informações dos Trabalhadores</h4>
-            {selectedNotification?.workerInformation &&
-            selectedNotification.workerInformation.length > 0 ? (
-              <div className="worker-list">
-                {selectedNotification.workerInformation.map((worker, index) => (
-                  <div key={index} className="worker-item">
-                    <p>
-                      <strong>Nome:</strong> {worker.name}
-                    </p>
-                    <p>
-                      <strong>Número:</strong> {worker.employeeNumber}
-                    </p>
-                    <p>
-                      <strong>Estado:</strong> {worker.state}
-                    </p>
-                    {worker.obs && (
-                      <p>
-                        <strong>Observações:</strong> {worker.obs}
-                      </p>
-                    )}
-                  </div>
-                ))}
+            <div className="custom-modal-body">
+              <div className="logo-container">
+                <img src={logo} alt="Logo" />
               </div>
-            ) : (
-              <p>Nenhuma informação de trabalhador disponível.</p>
-            )}
 
-            <h4>Equipamentos</h4>
-            {selectedNotification?.equipment &&
-            selectedNotification.equipment.length > 0 ? (
-              <div className="equipment-list">
-                {selectedNotification.equipment.map((equip, index) => (
-                  <div key={index} className="equipment-item">
-                    <p>
-                      <strong>Nome:</strong> {equip.name}
-                    </p>
-                    <p>
-                      <strong>Número de Série:</strong> {equip.serialNumber}
-                    </p>
-                    <p>
-                      <strong>Estado:</strong> {equip.state}
-                    </p>
-                    <p>
-                      <strong>Centro de Custo:</strong> {equip.costCenter}
-                    </p>
-                    {equip.obs && (
-                      <p>
-                        <strong>Observações:</strong> {equip.obs}
-                      </p>
-                    )}
-                  </div>
-                ))}
+              <div className="report-title">RELATÓRIO DE OCORRÊNCIA</div>
+
+              <div className="section-title">INFORMAÇÕES GERAIS</div>
+
+              <div className="info-row">
+                <div className="info-label">Local:</div>
+                <div className="info-value">
+                  {selectedNotification.siteName}
+                </div>
               </div>
-            ) : (
-              <p>Nenhum equipamento registrado.</p>
-            )}
+              <div className="info-row">
+                <div className="info-label">Centro de Custo:</div>
+                <div className="info-value">
+                  {selectedNotification.costCenter}
+                </div>
+              </div>
+              <div className="info-row">
+                <div className="info-label">Supervisor:</div>
+                <div className="info-value">
+                  {selectedNotification.supervisorName || "Não informado"}
+                </div>
+              </div>
+              <div className="info-row">
+                <div className="info-label">Data:</div>
+                <div className="info-value">
+                  {selectedNotification.createdAt}
+                </div>
+              </div>
+              <div className="info-row">
+                <div className="info-label">Hora:</div>
+                <div className="info-value">
+                  {selectedNotification.createdAtTime}
+                </div>
+              </div>
+              <div className="info-row">
+                <div className="info-label">Prioridade:</div>
+                <div className="info-value">
+                  <span
+                    className={`priority-badge ${getPriorityClass(
+                      selectedNotification.priority
+                    )}`}
+                  >
+                    {getPriorityLabel(selectedNotification.priority)}
+                  </span>
+                </div>
+              </div>
+              <div className="info-row">
+                <div className="info-label">Número de Trabalhadores:</div>
+                <div className="info-value">
+                  {selectedNotification.numberOfWorkers || 0}
+                </div>
+              </div>
+
+              <div className="divider"></div>
+
+              <div className="section-title">DETALHES DA OCORRÊNCIA</div>
+              <div
+                style={{
+                  padding: "15px",
+                  backgroundColor: "#f9f9f9",
+                  borderRadius: "4px",
+                  marginBottom: "20px",
+                }}
+              >
+                {selectedNotification.details || "Sem detalhes disponíveis."}
+              </div>
+
+              <div className="section-title">INFORMAÇÃO DOS TRABALHADORES</div>
+              <div className="worker-section">
+                {selectedNotification.workerInformation &&
+                selectedNotification.workerInformation.length > 0 ? (
+                  selectedNotification.workerInformation.map(
+                    (worker, index) => (
+                      <div key={index} className="item-card">
+                        <div className="info-row">
+                          <div className="info-label">Nome:</div>
+                          <div className="info-value">{worker.name}</div>
+                        </div>
+                        <div className="info-row">
+                          <div className="info-label">Número de Empregado:</div>
+                          <div className="info-value">
+                            {worker.employeeNumber}
+                          </div>
+                        </div>
+                        <div className="info-row">
+                          <div className="info-label">Estado:</div>
+                          <div className="info-value">{worker.state}</div>
+                        </div>
+                        {worker.obs && (
+                          <div className="info-row">
+                            <div className="info-label">Observações:</div>
+                            <div className="info-value">{worker.obs}</div>
+                          </div>
+                        )}
+                      </div>
+                    )
+                  )
+                ) : (
+                  <p>Nenhuma informação de trabalhador disponível.</p>
+                )}
+              </div>
+
+              <div className="divider"></div>
+
+              <div className="section-title">EQUIPAMENTOS</div>
+              <div className="equipment-section">
+                {selectedNotification.equipment &&
+                selectedNotification.equipment.length > 0 ? (
+                  selectedNotification.equipment.map((equip, index) => (
+                    <div key={index} className="item-card">
+                      <div className="info-row">
+                        <div className="info-label">Nome:</div>
+                        <div className="info-value">{equip.name}</div>
+                      </div>
+                      <div className="info-row">
+                        <div className="info-label">Número de Série:</div>
+                        <div className="info-value">{equip.serialNumber}</div>
+                      </div>
+                      <div className="info-row">
+                        <div className="info-label">Estado:</div>
+                        <div className="info-value">{equip.state}</div>
+                      </div>
+                      <div className="info-row">
+                        <div className="info-label">Centro de Custo:</div>
+                        <div className="info-value">{equip.costCenter}</div>
+                      </div>
+                      {equip.obs && (
+                        <div className="info-row">
+                          <div className="info-label">Observações:</div>
+                          <div className="info-value">{equip.obs}</div>
+                        </div>
+                      )}
+                    </div>
+                  ))
+                ) : (
+                  <p>Nenhum equipamento registrado.</p>
+                )}
+              </div>
+
+              <div className="footer-note">
+                Gerado pelo sistema - Visualização da ocorrência
+              </div>
+            </div>
+            <div className="custom-modal-footer">
+              <button
+                className="btn-custom btn-info"
+                onClick={() =>
+                  generatePDF(
+                    selectedNotification._id,
+                    selectedNotification.name
+                  )
+                }
+              >
+                Gerar PDF
+              </button>
+              <button
+                className="btn-custom btn-secondary"
+                onClick={() => setModalShow(false)}
+              >
+                Fechar
+              </button>
+            </div>
           </div>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setModalShow(false)}>
-            Fechar
-          </Button>
-        </Modal.Footer>
-      </Modal>
+        </div>
+      )}
+      <ToastContainer />
     </div>
   );
-
-  function getPriorityLabel(priority) {
-    switch (priority) {
-      case 0:
-        return "Máxima";
-      case 1:
-        return "Mínima";
-      default:
-        return "Baixa";
-    }
-  }
 };
 
 export default NotificationList;
