@@ -11,6 +11,8 @@ import "./Supervision.css";
 import pdfFonts from "pdfmake/build/vfs_fonts";
 import logo from "../assets/logo.png";
 import CircularProgress from "@mui/material/CircularProgress";
+import * as XLSX from "xlsx";
+
 const NotificationList = () => {
   const [notifications, setNotifications] = useState([]);
   const [metricsData, setMetricsData] = useState([]);
@@ -138,6 +140,52 @@ const NotificationList = () => {
   const openModal = (info) => {
     setModalInfo(info);
     setVerificationModal(true);
+  };
+
+  // Função para exportar para Excel
+  const exportToExcel = () => {
+    // Preparar os dados para exportação
+    const dataToExport = filteredNotifications.map((notification) => {
+      return {
+        Data: notification.createdAt,
+        Hora: notification.createdAtTime,
+        Supervisor: notification.supervisorName,
+        Site: notification.siteName,
+        "Centro de Custo": notification.costCenter,
+        Duração: notification.time ? notification.time.split(".")[0] : "N/A",
+        "Trabalhadores Encontrados": notification.workersFound || 0,
+        "Trabalhadores Ausentes": notification.workerInformation
+          ? notification.workerInformation.length
+          : 0,
+        Equipamentos: notification.equipment
+          ? notification.equipment.length
+          : 0,
+      };
+    });
+
+    // Criar uma planilha
+    const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Supervisões");
+
+    // Ajustar largura das colunas
+    const columnsWidth = [
+      { wch: 12 }, // Data
+      { wch: 10 }, // Hora
+      { wch: 30 }, // Supervisor
+      { wch: 40 }, // Site
+      { wch: 15 }, // Centro de Custo
+      { wch: 15 }, // Duração
+      { wch: 25 }, // Trabalhadores Encontrados
+      { wch: 25 }, // Trabalhadores Ausentes
+      { wch: 15 }, // Equipamentos
+    ];
+    worksheet["!cols"] = columnsWidth;
+
+    // Gerar arquivo Excel e fazer download
+    const currentDate = format(new Date(), "dd-MM-yyyy");
+    XLSX.writeFile(workbook, `Supervisoes_${currentDate}.xlsx`);
+    toast.success("Exportação para Excel concluída com sucesso!");
   };
 
   const generatePDF = async (id, supervisorName, costCenter) => {
@@ -311,8 +359,8 @@ const NotificationList = () => {
     });
   };
   const columns = [
-    { field: "createdAt", headerName: "Data", width: 120 },
     { field: "createdAtTime", headerName: "Hora", width: 100 },
+    { field: "createdAt", headerName: "Data", width: 120 },
     { field: "supervisorName", headerName: "Supervisor", width: 300 },
     { field: "siteName", headerName: "Site", width: 550 },
     {
@@ -387,6 +435,14 @@ const NotificationList = () => {
             onChange={(e) => setEndDate(e.target.value)}
             style={{ padding: "5px" }}
           />
+          {/* Botão para exportar para Excel */}
+          <Button
+            variant="success"
+            onClick={exportToExcel}
+            style={{ marginLeft: "15px", padding: "5px 15px" }}
+          >
+            Expor Para Exel
+          </Button>
           <div className="mt-3">
             <strong>Total de supervisões realizadas:</strong>{" "}
             {notifications.length}
@@ -418,185 +474,267 @@ const NotificationList = () => {
           getRowId={(row) => row.id}
         />
       )}
-     {verificationModal && modalInfo && (
-  <div className="custom-modal-overlay">
-    <div className="custom-modal">
-      <div className="custom-modal-header">
-        <h2>Visualização do Relatório</h2>
-        <button 
-          className="custom-modal-close" 
-          onClick={() => setVerificationModal(false)}
-        >
-          ×
-        </button>
-      </div>
-      <div className="custom-modal-body">
-        <div className="logo-container">
-          <img src={logo} alt="Logo" />
-        </div>
-        
-        <div className="report-title">RELATÓRIO DA SUPERVISÃO</div>
-        
-        <div className="section-title">IDENTIFICAÇÃO</div>
-        
-        <div className="subsection-title">Informação do Supervisor</div>
-        <div className="info-row">
-          <div className="info-label">Nome:</div>
-          <div className="info-value">{modalInfo.supervisorName}</div>
-        </div>
-        <div className="info-row">
-          <div className="info-label">Código do Supervisor:</div>
-          <div className="info-value">{modalInfo.supervisorCode}</div>
-        </div>
-        <div className="info-row">
-          <div className="info-label">Data:</div>
-          <div className="info-value">{modalInfo.createdAt}</div>
-        </div>
-        <div className="info-row">
-          <div className="info-label">Hora:</div>
-          <div className="info-value">{modalInfo.createdAtTime}</div>
-        </div>
-        <div className="info-row">
-          <div className="info-label">Duração da Supervisão:</div>
-          <div className="info-value">
-            {modalInfo.time ? modalInfo.time.split(".")[0] : "Não informado"}
-          </div>
-        </div>
-        <div className="info-row">
-          <div className="info-label">Trabalhadores Encontrados:</div>
-          <div className="info-value">{modalInfo.workersFound || 0}</div>
-        </div>
-        
-        <div className="subsection-title">Informação do Site</div>
-        <div className="info-row">
-          <div className="info-label">Nome do site:</div>
-          <div className="info-value">{modalInfo.siteName}</div>
-        </div>
-        <div className="info-row">
-          <div className="info-label">Centro de custo:</div>
-          <div className="info-value">{modalInfo.costCenter}</div>
-        </div>
-        
-        <div className="divider"></div>
-        
-        <div className="section-title">INFORMAÇÃO DOS TRABALHADORES</div>
-        <div className="info-row">
-          <div className="info-label">Trabalhadores Encontrados:</div>
-          <div className="info-value">{modalInfo.workersFound || 0}</div>
-        </div>
-        <div className="info-row">
-          <div className="info-label">Faltou:</div>
-          <div className="info-value">
-            {modalInfo.workerInformation ? modalInfo.workerInformation.length : 0}
-          </div>
-        </div>
-        
-        <div className="subsection-title">Lista dos trabalhadores ausentes:</div>
-        <div className="worker-section">
-          {modalInfo.workerInformation &&
-          modalInfo.workerInformation.length > 0 ? (
-            modalInfo.workerInformation.map((worker, index) => (
-              <div key={index} className="item-card">
-                <div className="info-row">
-                  <div className="info-label">Nome:</div>
-                  <div className="info-value">{worker.name}</div>
-                </div>
-                <div className="info-row">
-                  <div className="info-label">Número de Empregado:</div>
-                  <div className="info-value">{worker.employeeNumber}</div>
-                </div>
-                <div className="info-row">
-                  <div className="info-label">Estado:</div>
-                  <div className="info-value">{worker.state}</div>
-                </div>
-                <div className="info-row">
-                  <div className="info-label">Observação:</div>
-                  <div className="info-value">{worker.obs}</div>
+      {verificationModal && modalInfo && (
+        <div className="custom-modal-overlay">
+          <div className="custom-modal">
+            <div className="custom-modal-header">
+              <h2>Visualização do Relatório</h2>
+              <button
+                className="custom-modal-close"
+                onClick={() => setVerificationModal(false)}
+              >
+                ×
+              </button>
+            </div>
+            <div className="custom-modal-body">
+              <div className="logo-container">
+                <img src={logo} alt="Logo" />
+              </div>
+
+              <div className="report-title">RELATÓRIO DA SUPERVISÃO</div>
+
+              <div className="section-title">IDENTIFICAÇÃO</div>
+
+              <div className="subsection-title">Informação do Supervisor</div>
+              <div className="info-row">
+                <div className="info-label">Nome:</div>
+                <div className="info-value">{modalInfo.supervisorName}</div>
+              </div>
+              <div className="info-row">
+                <div className="info-label">Código do Supervisor:</div>
+                <div className="info-value">{modalInfo.supervisorCode}</div>
+              </div>
+              <div className="info-row">
+                <div className="info-label">Data:</div>
+                <div className="info-value">{modalInfo.createdAt}</div>
+              </div>
+              <div className="info-row">
+                <div className="info-label">Hora:</div>
+                <div className="info-value">{modalInfo.createdAtTime}</div>
+              </div>
+              <div className="info-row">
+                <div className="info-label">Duração da Supervisão:</div>
+                <div className="info-value">
+                  {modalInfo.time
+                    ? modalInfo.time.split(".")[0]
+                    : "Não informado"}
                 </div>
               </div>
-            ))
-          ) : (
-            <p>Nenhum trabalhador ausente registrado.</p>
-          )}
-        </div>
-        
-        <div className="divider"></div>
-        
-        <div className="section-title">EQUIPAMENTOS</div>
-        <div className="info-row">
-          <div className="info-label">Quantidade de equipamentos:</div>
-          <div className="info-value">
-            {modalInfo.equipment ? modalInfo.equipment.length : 0}
-          </div>
-        </div>
-        
-        <div className="subsection-title">Lista dos equipamentos encontrados:</div>
-        <div className="equipment-section">
-          {modalInfo.equipment && modalInfo.equipment.length > 0 ? (
-            modalInfo.equipment.map((equip, index) => (
-              <div key={index} className="item-card">
-                <div className="info-row">
-                  <div className="info-label">Nome:</div>
-                  <div className="info-value">{equip.name}</div>
-                </div>
-                <div className="info-row">
-                  <div className="info-label">Número de Série:</div>
-                  <div className="info-value">{equip.serialNumber}</div>
-                </div>
-                <div className="info-row">
-                  <div className="info-label">Estado:</div>
-                  <div className="info-value">{equip.state}</div>
-                </div>
-                <div className="info-row">
-                  <div className="info-label">Observação:</div>
-                  <div className="info-value">{equip.obs}</div>
+              <div className="info-row">
+                <div className="info-label">Trabalhadores Encontrados:</div>
+                <div className="info-value">{modalInfo.workersFound || 0}</div>
+              </div>
+
+              <div className="subsection-title">Informação do Site</div>
+              <div className="info-row">
+                <div className="info-label">Nome do site:</div>
+                <div className="info-value">{modalInfo.siteName}</div>
+              </div>
+              <div className="info-row">
+                <div className="info-label">Centro de custo:</div>
+                <div className="info-value">{modalInfo.costCenter}</div>
+              </div>
+
+              <div className="divider"></div>
+
+              <div className="section-title">INFORMAÇÃO DOS TRABALHADORES</div>
+              <div className="info-row">
+                <div className="info-label">Trabalhadores Encontrados:</div>
+                <div className="info-value">{modalInfo.workersFound || 0}</div>
+              </div>
+              <div className="info-row">
+                <div className="info-label">Faltou:</div>
+                <div className="info-value">
+                  {modalInfo.workerInformation
+                    ? modalInfo.workerInformation.length
+                    : 0}
                 </div>
               </div>
-            ))
-          ) : (
-            <p>Nenhum equipamento registrado.</p>
-          )}
+
+              <div className="subsection-title">
+                Lista dos trabalhadores ausentes:
+              </div>
+              <div className="worker-section">
+                {modalInfo.workerInformation &&
+                modalInfo.workerInformation.length > 0 ? (
+                  modalInfo.workerInformation.map((worker, index) => (
+                    <div key={index} className="item-card">
+                      <div className="info-row">
+                        <div className="info-label">Nome:</div>
+                        <div className="info-value">{worker.name}</div>
+                      </div>
+                      <div className="info-row">
+                        <div className="info-label">Número de Empregado:</div>
+                        <div className="info-value">
+                          {worker.employeeNumber}
+                        </div>
+                      </div>
+                      <div className="info-row">
+                        <div className="info-label">Estado:</div>
+                        <div className="info-value">{worker.state}</div>
+                      </div>
+                      <div className="info-row">
+                        <div className="info-label">Observação:</div>
+                        <div className="info-value">{worker.obs}</div>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <p>Nenhum trabalhador ausente registrado.</p>
+                )}
+              </div>
+
+              <div className="divider"></div>
+
+              <div className="section-title">EQUIPAMENTOS</div>
+              <div className="info-row">
+                <div className="info-label">Quantidade de equipamentos:</div>
+                <div className="info-value">
+                  {modalInfo.equipment ? modalInfo.equipment.length : 0}
+                </div>
+              </div>
+
+              <div className="subsection-title">
+                Lista dos equipamentos encontrados:
+              </div>
+              <div className="equipment-section">
+                {modalInfo.equipment && modalInfo.equipment.length > 0 ? (
+                  modalInfo.equipment.map((equip, index) => (
+                    <div key={index} className="item-card">
+                      <div className="info-row">
+                        <div className="info-label">Nome:</div>
+                        <div className="info-value">{equip.name}</div>
+                      </div>
+                      <div className="info-row">
+                        <div className="info-label">Número de Série:</div>
+                        <div className="info-value">{equip.serialNumber}</div>
+                      </div>
+                      <div className="info-row">
+                        <div className="info-label">Estado:</div>
+                        <div className="info-value">{equip.state}</div>
+                      </div>
+                      <div className="info-row">
+                        <div className="info-label">Observação:</div>
+                        <div className="info-value">{equip.obs}</div>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <p>Nenhum equipamento registrado.</p>
+                )}
+              </div>
+
+              <div className="divider"></div>
+
+              <div className="section-title">
+                INFORMAÇÃO EXTRAS DA SUPERVISÃO
+              </div>
+              <div
+                style={{
+                  padding: "10px 15px",
+                  backgroundColor: "#f9f9f9",
+                  borderRadius: "4px",
+                }}
+              >
+                {modalInfo.report || "Sem informações adicionais."}
+              </div>
+
+              <div className="footer-note">
+                Gerado pelo sistema - Visualização do relatório
+              </div>
+            </div>
+            <div className="custom-modal-footer">
+              <button
+                className="btn-custom btn-success"
+                onClick={() =>
+                  approve(
+                    localStorage.getItem("supervisionCostCenter"),
+                    localStorage.getItem("supervisionId")
+                  )
+                }
+              >
+                Aprovar
+              </button>
+              <button
+                className="btn-custom btn-info"
+                onClick={() =>
+                  generatePDF(
+                    localStorage.getItem("supervisionId"),
+                    localStorage.getItem("supervisorName"),
+                    localStorage.getItem("supervisionCostCenter")
+                  )
+                }
+              >
+                Gerar PDF
+              </button>
+              {/* Adicionando botão para exportar o relatório atual para Excel */}
+              <button
+                className="btn-custom btn-primary"
+                onClick={() => {
+                  // Preparar dados do relatório atual para Excel
+                  const singleReportData = [
+                    {
+                      Supervisor: modalInfo.supervisorName,
+                      Código: modalInfo.supervisorCode,
+                      Data: modalInfo.createdAt,
+                      Hora: modalInfo.createdAtTime,
+                      Duração: modalInfo.time
+                        ? modalInfo.time.split(".")[0]
+                        : "Não informado",
+                      Site: modalInfo.siteName,
+                      "Centro de Custo": modalInfo.costCenter,
+                      "Trabalhadores Encontrados": modalInfo.workersFound || 0,
+                      "Trabalhadores Ausentes": modalInfo.workerInformation
+                        ? modalInfo.workerInformation.length
+                        : 0,
+                      Equipamentos: modalInfo.equipment
+                        ? modalInfo.equipment.length
+                        : 0,
+                      Observações:
+                        modalInfo.report || "Sem informações adicionais",
+                    },
+                  ];
+
+                  // Criar planilha
+                  const worksheet = XLSX.utils.json_to_sheet(singleReportData);
+                  const workbook = XLSX.utils.book_new();
+                  XLSX.utils.book_append_sheet(
+                    workbook,
+                    worksheet,
+                    "Relatório"
+                  );
+
+                  // Ajustar largura das colunas
+                  const columnsWidth = [
+                    { wch: 30 }, // Supervisor
+                    { wch: 15 }, // Código
+                    { wch: 12 }, // Data
+                    { wch: 10 }, // Hora
+                    { wch: 15 }, // Duração
+                    { wch: 40 }, // Site
+                    { wch: 15 }, // Centro de Custo
+                    { wch: 25 }, // Trabalhadores Encontrados
+                    { wch: 25 }, // Trabalhadores Ausentes
+                    { wch: 15 }, // Equipamentos
+                    { wch: 50 }, // Observações
+                  ];
+                  worksheet["!cols"] = columnsWidth;
+
+                  // Gerar arquivo Excel
+                  XLSX.writeFile(
+                    workbook,
+                    `Relatório_${modalInfo.supervisorName}_${modalInfo.createdAt}.xlsx`
+                  );
+                  toast.success("Relatório exportado para Excel com sucesso!");
+                }}
+              >
+                Exportar para Excel
+              </button>
+            </div>
+          </div>
         </div>
-        
-        <div className="divider"></div>
-        
-        <div className="section-title">INFORMAÇÃO EXTRAS DA SUPERVISÃO</div>
-        <div style={{ padding: "10px 15px", backgroundColor: "#f9f9f9", borderRadius: "4px" }}>
-          {modalInfo.report || "Sem informações adicionais."}
-        </div>
-        
-        <div className="footer-note">
-          Gerado pelo sistema - Visualização do relatório
-        </div>
-      </div>
-      <div className="custom-modal-footer">
-        <button 
-          className="btn-custom btn-success" 
-          onClick={() =>
-            approve(
-              localStorage.getItem("supervisionCostCenter"),
-              localStorage.getItem("supervisionId")
-            )
-          }
-        >
-          Aprovar
-        </button>
-        <button
-          className="btn-custom btn-info"
-          onClick={() =>
-            generatePDF(
-              localStorage.getItem("supervisionId"),
-              localStorage.getItem("supervisorName"),
-              localStorage.getItem("supervisionCostCenter")
-            )
-          }
-        >
-          Gerar PDF
-        </button>
-      </div>
-    </div>
-  </div>
-)}
+      )}
+      <ToastContainer />
     </div>
   );
 };

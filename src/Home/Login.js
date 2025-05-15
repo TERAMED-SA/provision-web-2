@@ -33,7 +33,7 @@ function Login({ setIsAuthenticated }) {
       );
 
       if (response.data.data.status === 200) {
-        // Armazene as informações do usuário no localStorage
+       
         localStorage.setItem("userId", response.data.data.data.employeeId);
         localStorage.setItem("userName", response.data.data.data.name);
         localStorage.setItem("userPhone", response.data.data.data.phoneNumber);

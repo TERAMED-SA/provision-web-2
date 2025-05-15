@@ -36,7 +36,7 @@ const Companies = () => {
     async function fetchCompanies() {
       try {
         const response = await axios.get(
-          `${process.env.REACT_APP_API_URL}company?size=100`
+          `${process.env.REACT_APP_API_URL}company?size=900`
         );
         let sortedCompanies = response.data.data.data.sort((a, b) =>
           a.name.localeCompare(b.name)
@@ -189,52 +189,72 @@ const Companies = () => {
                   onClick={toggleSortOrder}
                 >
                   <i className="bi bi-arrow-repeat"></i>
-                  &nbsp; Inverter Ordem
+                  Inverter Ordem
                 </button>
                 <button className="btn btn-info" onClick={toggleViewMode}>
-                  <i className="bi bi-eye"></i> &nbsp;
+                  <i className="bi bi-eye"></i>
                   {viewMode === "list" ? "Mosaico" : "Lista"}
                 </button>
 
                 <button
-                  className="btn btn-primary ms-2"
+                  className="btn btn-primary m-2"
                   onClick={handleAddCompanyClick}
                 >
-                  &nbsp; Adicionar Cliente
+                  Adicionar Cliente
                 </button>
               </div>
 
               {/* Renderização condicional com base no modo de visualização */}
               <div style={{ overflowY: "auto", height: "calc(89vh - 150px)" }}>
-                {searchTerm && searchResults.length > 0 ? (
-                  <div>
-                    {viewMode === "list" ? (
-                      <table>
-                        <tbody>
+                {searchTerm ? (
+                  searchResults.length > 0 ? (
+                    <div>
+                      {viewMode === "list" ? (
+                        <table>
+                          <tbody>
+                            {searchResults.map((company, index) => (
+                              <tr
+                                key={index}
+                                onClick={() =>
+                                  handleItemClick(company.clientCode)
+                                }
+                                style={{ cursor: "pointer" }}
+                              >
+                                <td className="company-name">{company.name}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      ) : (
+                        <div className="row row-cols-1 row-cols-md-4 g-4">
                           {searchResults.map((company, index) => (
-                            <tr
+                            <div
                               key={index}
+                              className="col"
                               onClick={() =>
                                 handleItemClick(company.clientCode)
                               }
                               style={{ cursor: "pointer" }}
-                            ></tr>
+                            >
+                              <div className="cards h-100 bg-white text-center d-flex flex-column justify-content-center align-items-center">
+                                <h5 className="card-title">{company.name}</h5>
+                              </div>
+                            </div>
                           ))}
-                        </tbody>
-                      </table>
-                    ) : (
-                      <div className="row row-cols-1 row-cols-md-4 g-4">
-                        {searchResults.map((company, index) => (
-                          <div
-                            key={index}
-                            className="col"
-                            onClick={() => handleItemClick(company.clientCode)}
-                            style={{ cursor: "pointer" }}
-                          ></div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    // Mensagem quando não há resultados para o termo pesquisado
+                    <div
+                      className="alert alert-warning text-center"
+                      role="alert"
+                    >
+                      <i className="bi bi-exclamation-triangle-fill me-2"></i>
+                      Cliente não encontrado. Verifique o termo de pesquisa e
+                      tente novamente.
+                    </div>
+                  )
                 ) : (
                   <div>
                     {viewMode === "list" ? (
